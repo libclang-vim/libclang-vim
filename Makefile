@@ -1,5 +1,9 @@
 ifeq ($(shell which llvm-config-3.4),)
+ifeq ($(shell which llvm-config-3.5))
 LLVMCONFIG=llvm-config
+else
+LLVMCONFIG=llvm-config-3.5
+endif
 else
 LLVMCONFIG=llvm-config-3.4
 endif
