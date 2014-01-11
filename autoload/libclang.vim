@@ -5,14 +5,18 @@ if ! filereadable(s:libclang)
     finish
 endif
 
-function! clang#version()
+function! libclang#version()
     return libcall(s:libclang, 'vim_clang_version', '')
 endfunction
 
-function! clang#path_to_libclang_vim()
+function! libclang#path_to_libclang_vim()
     return s:libclang
 endfunction
 
-function! clang#tokens(filename)
+function! libclang#tokens(filename)
+    if ! filereadable(a:filename)
+        echoerr "libclang: File not found: " . a:filename
+        return {}
+    endif
     return eval(libcall(s:libclang, 'vim_clang_tokens', a:filename))
 endfunction
