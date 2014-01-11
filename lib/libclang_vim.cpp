@@ -132,13 +132,6 @@ class clang_vimson_AST_builder;
 
 namespace detail {
 
-CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
-{
-    auto *this_ = reinterpret_cast<clang_vimson_AST_builder *>(data);
-    clang_visitChildren(cursor, visit_AST, this_);
-    return CXChildVisit_Continue;
-}
-
 } // namespace detail
 
 class clang_vimson_AST_builder {
@@ -149,6 +142,20 @@ public:
     clang_vimson_AST_builder(char const* file_name)
         : translation_unit(), file_name(file_name), vimson_result()
     {}
+
+private:
+    static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
+    {
+        auto *this_ = reinterpret_cast<clang_vimson_AST_builder *>(data);
+
+        // TODO
+
+        clang_visitChildren(cursor, visit_AST, this_);
+
+        // TODO
+
+        return CXChildVisit_Continue;
+    }
 
 public:
     std::string build_as_vimson(int const argc, char const* argv[])
@@ -162,7 +169,7 @@ public:
         }
 
         auto cursor = clang_getTranslationUnitCursor(translation_unit);
-        clang_visitChildren(cursor, detail::visit_AST, this);
+        clang_visitChildren(cursor, visit_AST, this);
 
         clang_disposeTranslationUnit(translation_unit);
         clang_disposeIndex(index);
