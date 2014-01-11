@@ -1,10 +1,17 @@
+ifeq ($(shell which llvm-config-3.4),)
+LLVMCONFIG=llvm-config
+else
+LLVMCONFIG=llvm-config-3.4
+endif
+
 TARGET=lib/libclang-vim.so
 SRC=lib/libclang_vim.cpp
-CXXFLAGS=$(shell llvm-config-3.4 --cxxflags --ldflags) -Wall -Wextra -std=c++11 -pedantic -shared -fPIC -lclang
-CXXFLAGS+=-lclang -fPIC
+CXXFLAGS=$(shell $(LLVMCONFIG) --cxxflags --ldflags) -Wall -Wextra -std=c++11 -pedantic -shared -fPIC -lclang
+
+# For LLVM installed by Homebrew
 UNAME := $(shell uname -s)
 ifeq ($(UNAME),Darwin)
-	LDFLAGS+=-rpath $(shell llvm-config-3.4 --libdir)
+LDFLAGS+=-rpath $(shell $(LLVMCONFIG) --libdir)
 endif
 
 all: $(TARGET)
