@@ -8,8 +8,6 @@
 
 using std::size_t;
 
-#include <iostream>
-
 // Note: boost::filesystem
 inline size_t get_file_size(char const* filename)
 {
@@ -54,7 +52,7 @@ inline char const* get_kind_spelling(Kind const kind)
         case CXToken_Identifier:  return "identifier";
         case CXToken_Literal:     return "literal";
         case CXToken_Comment:     return "comment";
-        default:             return "unknown";
+        default:                  return "unknown";
     }
 }
 
