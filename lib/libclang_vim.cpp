@@ -55,13 +55,13 @@ inline std::string operator""_str(char const* s, size_t const)
 // }}}
 
 // Tokenizer {{{
-class clang_vimson_tokenizer {
+class tokenizer {
 private:
     CXTranslationUnit translation_unit;
     char const* file_name;
 
 public:
-    clang_vimson_tokenizer(char const* file_name)
+    tokenizer(char const* file_name)
         : translation_unit(), file_name(file_name)
     {}
 
@@ -282,12 +282,12 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
 // }}}
 
 // AST builder {{{
-class clang_vimson_AST_builder {
+class AST_builder {
     char const* file_name;
     std::string vimson_result;
 
 public:
-    clang_vimson_AST_builder(char const* file_name)
+    AST_builder(char const* file_name)
         : file_name(file_name), vimson_result()
     {}
 
@@ -295,7 +295,7 @@ private:
 
     static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
     {
-        auto *this_ = reinterpret_cast<clang_vimson_AST_builder *>(data);
+        auto *this_ = reinterpret_cast<AST_builder *>(data);
 
         this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
 
@@ -332,20 +332,20 @@ public:
 
 // TODO: :%s/clang_vimson//g
 template<class Predicate>
-class clang_vimson_kind_extracter {
+class kind_extracter {
     char const* file_name;
     Predicate predicate;
     std::string vimson_result;
 
 public:
-    clang_vimson_kind_extracter(char const* file_name, Predicate const& predicate)
+    kind_extracter(char const* file_name, Predicate const& predicate)
         : file_name(file_name), predicate(predicate), vimson_result()
     {}
 
 private:
     static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
     {
-        auto *this_ = reinterpret_cast<clang_vimson_kind_extracter *>(data);
+        auto *this_ = reinterpret_cast<kind_extracter *>(data);
 
         if (!this_->predicate(clang_getCursorKind(cursor))) {
             return CXChildVisit_Continue;
@@ -381,8 +381,8 @@ public:
 };
 
 template<class Predicate>
-inline auto make_clang_vimson_kind_extracter(char const* file_name, Predicate const& predicate)
-    -> clang_vimson_kind_extracter<std::function<Predicate>>
+inline auto make_kind_extracter(char const* file_name, Predicate const& predicate)
+    -> kind_extracter<std::function<Predicate>>
 {
     return {file_name, std::function<Predicate>{predicate}};
 }
@@ -391,7 +391,7 @@ inline auto make_clang_vimson_kind_extracter(char const* file_name, Predicate co
 
 int main()
 {
-    auto extracter = libclang_vim::make_clang_vimson_kind_extracter("tmp.cpp", clang_isDeclaration);
+    auto extracter = libclang_vim::make_kind_extracter("tmp.cpp", clang_isDeclaration);
     std::cout << extracter.extract_as_vimson(0, {});
 
     return 0;
@@ -407,21 +407,21 @@ char const* vim_clang_version()
 
 char const* vim_clang_tokens(char const* file_name)
 {
-    libclang_vim::clang_vimson_tokenizer tokenizer(file_name);
+    libclang_vim::tokenizer tokenizer(file_name);
     static auto const vimson = tokenizer.tokenize_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_build_AST(char const* file_name)
 {
-    libclang_vim::clang_vimson_AST_builder builder(file_name);
+    libclang_vim::AST_builder builder(file_name);
     static auto const vimson = builder.build_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_declarations(char const* file_name)
 {
-    auto extracter = libclang_vim::make_clang_vimson_kind_extracter(file_name, clang_isDeclaration);
+    auto extracter = libclang_vim::make_kind_extracter(file_name, clang_isDeclaration);
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
