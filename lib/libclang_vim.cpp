@@ -332,9 +332,7 @@ int main()
     return 0;
 }
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 char const* vim_clang_version()
 {
@@ -356,6 +354,4 @@ char const* vim_clang_build_AST(char const* file_name)
     return vimson == "" ? NULL : vimson.c_str();
 }
 
-#ifdef __cplusplus
 } // extern "C"
-#endif
