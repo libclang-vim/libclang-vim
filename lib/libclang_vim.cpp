@@ -572,6 +572,34 @@ char const* vim_clang_extract_translation_units(char const* file_name)
     return vimson == "" ? NULL : vimson.c_str();
 }
 
+char const* vim_clang_extract_definitions(char const* file_name)
+{
+    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isCursorDefinition(c); });
+    static auto const vimson = extracter.extract_as_vimson(0, {});
+    return vimson == "" ? NULL : vimson.c_str();
+}
+
+char const* vim_clang_extract_virtual_member_functions(char const* file_name)
+{
+    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_CXXMethod_isVirtual(c); });
+    static auto const vimson = extracter.extract_as_vimson(0, {});
+    return vimson == "" ? NULL : vimson.c_str();
+}
+
+char const* vim_clang_extract_pure_virtual_member_functions(char const* file_name)
+{
+    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_CXXMethod_isPureVirtual(c); });
+    static auto const vimson = extracter.extract_as_vimson(0, {});
+    return vimson == "" ? NULL : vimson.c_str();
+}
+
+char const* vim_clang_extract_static_member_functions(char const* file_name)
+{
+    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_CXXMethod_isStatic(c); });
+    static auto const vimson = extracter.extract_as_vimson(0, {});
+    return vimson == "" ? NULL : vimson.c_str();
+}
+
 } // extern "C"
 // }}}
 
