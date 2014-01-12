@@ -161,13 +161,36 @@ inline std::string stringize_spell(CXCursor const& cursor)
     return "'spell':'"_str + to_c_str(spell) + "',";
 }
 
+inline std::string stringize_extra_type_info(CXType const& type)
+{
+    std::string result = "";
+
+    if (clang_isConstQualifiedType(type)) {
+        result += "'is_const_qualified' : 1,";
+    }
+    if (clang_isVolatileQualifiedType(type)) {
+        result += "'is_volatile_qualified' : 1,";
+    }
+    if (clang_isRestrictQualifiedType(type)) {
+        result += "'is_restrict_qualified' : 1,";
+    }
+    if (clang_isPODType(type)) {
+        result += "'is_POD_type' : 1,";
+    }
+
+    return result;
+}
+
 inline std::string stringize_type(CXCursor const& cursor)
 {
     CXType const type = clang_getCursorType(cursor);
     CXTypeKind const type_kind = type.kind;
     auto const type_name = owned(clang_getTypeSpelling(type));
     auto const type_kind_name = owned(clang_getTypeKindSpelling(type_kind));
-    return "'type':'"_str + to_c_str(type_name) + "','type_kind':'" + to_c_str(type_kind_name) + "',";
+    return "'type':'"_str + to_c_str(type_name)
+         + "','type_kind':'"
+         + to_c_str(type_kind_name)
+         + "'," + stringize_extra_type_info(type);
 }
 
 inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
