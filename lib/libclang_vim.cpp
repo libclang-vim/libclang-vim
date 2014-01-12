@@ -1,5 +1,5 @@
 #include <cstddef>
-#include <cstdlib>
+#include <cstring>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -52,6 +52,21 @@ inline std::string operator""_str(char const* s, size_t const)
 {
     return {s};
 }
+
+inline bool is_empty(cxstring_ptr const& p)
+{
+    return std::strcmp(clang_getCString(*p), "") == 0;
+}
+
+inline std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
+{
+    if (is_empty(p)) {
+        return "";
+    } else {
+        return "'" + std::string{key_name} + "':'" + to_c_str(p) + "',";
+    }
+}
+
 // }}}
 
 // Tokenizer {{{
@@ -158,7 +173,7 @@ public:
 inline std::string stringize_spell(CXCursor const& cursor)
 {
     auto const spell = owned(clang_getCursorSpelling(cursor));
-    return "'spell':'"_str + to_c_str(spell) + "',";
+    return stringize_key_value("spell", spell);
 }
 
 inline std::string stringize_extra_type_info(CXType const& type)
@@ -187,16 +202,15 @@ inline std::string stringize_type(CXCursor const& cursor)
     CXTypeKind const type_kind = type.kind;
     auto const type_name = owned(clang_getTypeSpelling(type));
     auto const type_kind_name = owned(clang_getTypeKindSpelling(type_kind));
-    return "'type':'"_str + to_c_str(type_name)
-         + "','type_kind':'"
-         + to_c_str(type_kind_name)
-         + "'," + stringize_extra_type_info(type);
+    return stringize_key_value("type", type_name)
+         + stringize_key_value("type_kind", type_kind_name)
+         + stringize_extra_type_info(type);
 }
 
 inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
 {
     switch (linkage) {
-    case CXLinkage_Invalid: return "Invalid";
+    case CXLinkage_Invalid: return "";
     case CXLinkage_NoLinkage: return "Nolinkage";
     case CXLinkage_Internal: return "Internal";
     case CXLinkage_UniqueExternal: return "UniqueExternal";
@@ -218,10 +232,9 @@ inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& pare
     auto const semantic_parent_name = owned(clang_getCursorSpelling(semantic_parent));
     auto const lexical_parent_name = owned(clang_getCursorSpelling(lexical_parent));
 
-    return "'parent':'"_str + to_c_str(parent_name)
-        + "','semantic_parent':'" + to_c_str(semantic_parent_name)
-        + "','lexical_parent':'" + to_c_str(lexical_parent_name)
-        + "',";
+    return stringize_key_value("parent", parent_name)
+         + stringize_key_value("semantic_parent", semantic_parent_name)
+         + stringize_key_value("lexical_parent", lexical_parent_name);
 }
 
 inline std::string stringize_location(CXSourceLocation const& location)
@@ -247,7 +260,7 @@ inline std::string stringize_cursor_location(CXCursor const& cursor)
 inline std::string stringize_USR(CXCursor const& cursor)
 {
     auto USR = owned(clang_getCursorUSR(cursor));
-    return "'USR':'"_str + to_c_str(USR) + "',";
+    return stringize_key_value("USR", USR);
 }
 
 inline char const* stringize_cursor_kind_type(CXCursorKind const& kind)
@@ -258,8 +271,6 @@ inline char const* stringize_cursor_kind_type(CXCursorKind const& kind)
         return "Declaration";
     } else if (clang_isExpression(kind)) {
         return "Expression";
-    } else if (clang_isInvalid(kind)) {
-        return "Invalid";
     } else if (clang_isPreprocessing(kind)) {
         return "Preprocessing";
     } else if (clang_isReference(kind)) {
@@ -270,6 +281,8 @@ inline char const* stringize_cursor_kind_type(CXCursorKind const& kind)
         return "TranslationUnit";
     } else if (clang_isUnexposed(kind)) {
         return "Unexposed";
+    } else if (clang_isInvalid(kind)) {
+        return "";
     } else {
         return "Unknown";
     }
@@ -301,10 +314,11 @@ inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
 inline std::string stringize_cursor_kind(CXCursor const& cursor)
 {
     CXCursorKind const kind = clang_getCursorKind(cursor);
-    auto kind_name = owned(clang_getCursorKindSpelling(kind));
+    auto const kind_name = owned(clang_getCursorKindSpelling(kind));
+    auto const kind_type_name = stringize_cursor_kind_type(kind);
 
-    return "'kind':'"_str + to_c_str(kind_name)
-         + "','kind_type':'" + stringize_cursor_kind_type(kind)
+    return stringize_key_value("kind", kind_name)
+         + kind_type_name.empty() ? "" : ("','kind_type':'" + stringize_cursor_kind_type(kind))
          + "'," + stringize_cursor_extra_info(cursor);
 }
 
@@ -312,7 +326,7 @@ inline std::string stringize_included_file(CXCursor const& cursor)
 {
     CXFile const included_file = clang_getIncludedFile(cursor);
     if (included_file == NULL) {
-        return "'included_file':'',";
+        return "";
     }
 
     auto included_file_name = owned(clang_getFileName(included_file));
