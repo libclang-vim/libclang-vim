@@ -282,14 +282,14 @@ private:
         auto *this_ = reinterpret_cast<clang_vimson_AST_builder *>(data);
 
         this_->vimson_result += "{"_str
-                                // + stringize_spell(cursor)
-                                // + stringize_type(cursor)
-                                // + stringize_linkage(cursor)
-                                // + stringize_parent(cursor, parent)
-                                // + stringize_location(cursor)
-                                // + stringize_USR(cursor)
-                                // + stringize_cursor_kind(cursor)
-                                // + stringize_included_file(cursor)
+                                + stringize_spell(cursor)
+                                + stringize_type(cursor)
+                                + stringize_linkage(cursor)
+                                + stringize_parent(cursor, parent)
+                                + stringize_location(cursor)
+                                + stringize_USR(cursor)
+                                + stringize_cursor_kind(cursor)
+                                + stringize_included_file(cursor)
                                 + "'children':[";
 
         clang_visitChildren(cursor, visit_AST, this_);
@@ -316,7 +316,7 @@ public:
         clang_disposeTranslationUnit(translation_unit);
         clang_disposeIndex(index);
 
-        vimson_result = "{'AST':" + vimson_result + "}";
+        vimson_result = "{'AST':[" + vimson_result + "]}";
 
         return vimson_result;
     }
