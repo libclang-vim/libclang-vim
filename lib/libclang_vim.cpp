@@ -5,7 +5,6 @@
 #include <vector>
 #include <numeric>
 #include <memory>
-#include <iostream>
 #include <functional>
 #include <utility>
 
@@ -491,14 +490,6 @@ inline auto make_AST_extracter(char const* file_name, Predicate const& predicate
 // }}}
 
 } // namespace libclang_vim
-
-int main()
-{
-    auto extracter = libclang_vim::make_AST_extracter("tmp.cpp", [](CXCursor const& c){ return clang_isDeclaration(clang_getCursorKind(c)); });
-    std::cout << extracter.extract_as_vimson(0, {});
-
-    return 0;
-}
 
 // C APIs {{{
 extern "C" {
