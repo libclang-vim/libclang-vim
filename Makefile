@@ -9,7 +9,7 @@ LLVMCONFIG=llvm-config-3.4
 endif
 
 TARGET=lib/libclang-vim.so
-SRC=lib/libclang_vim.cpp
+SRC=lib/clang_vim.cpp
 CXXFLAGS=$(shell $(LLVMCONFIG) --cxxflags --ldflags) -Wall -Wextra -std=c++11 -pedantic -shared -fPIC -lclang
 
 # For LLVM installed by Homebrew
