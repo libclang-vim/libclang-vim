@@ -153,6 +153,7 @@ public:
 };
 // }}}
 
+// AST builder {{{
 inline std::string stringize_spell(CXCursor const& cursor)
 {
     auto const spell = owned(clang_getCursorSpelling(cursor));
@@ -321,6 +322,7 @@ public:
         return vimson_result;
     }
 };
+// }}}
 
 } // namespace libclang_vim
 
