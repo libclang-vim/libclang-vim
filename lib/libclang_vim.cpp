@@ -67,6 +67,15 @@ inline std::string stringize_key_value(char const* key_name, cxstring_ptr const&
     }
 }
 
+inline std::string stringize_key_value(char const* key_name, std::string const& s)
+{
+    if (s.empty()) {
+        return "";
+    } else {
+        return ("'" + (key_name + ("':'" + s + "',")));
+    }
+}
+
 // }}}
 
 // Tokenizer {{{
@@ -237,11 +246,7 @@ inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
 inline std::string stringize_linkage(CXCursor const& cursor)
 {
     auto const linkage_kind_name = stringize_linkage_kind(clang_getCursorLinkage(cursor));
-    if (linkage_kind_name.empty()) {
-        return "";
-    } else {
-        return "'linkage':'" + linkage_kind_name + "',";
-    }
+    return stringize_key_value("linkage", linkage_kind_name);
 }
 
 inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
@@ -264,11 +269,10 @@ inline std::string stringize_location(CXSourceLocation const& location)
     clang_getSpellingLocation(location, &file, &line, &column, &offset);
     auto const file_name = owned(clang_getFileName(file));
 
-    return "'line':'" + std::to_string(line)
-         + "','column':'" + std::to_string(column)
-         + "','offset':'" + std::to_string(offset)
-         + "','file':'" + to_c_str(file_name)
-         + "',";
+    return stringize_key_value("line", std::to_string(line))
+         + stringize_key_value("column", std::to_string(column))
+         + stringize_key_value("offset", std::to_string(offset))
+         + stringize_key_value("file", file_name);
 }
 
 inline std::string stringize_cursor_location(CXCursor const& cursor)
