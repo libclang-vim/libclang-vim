@@ -476,7 +476,7 @@ public:
         clang_disposeTranslationUnit(translation_unit);
         clang_disposeIndex(index);
 
-        vimson_result = "{'declarations':[" + vimson_result + "]}";
+        vimson_result = "[" + vimson_result + "]";
         return vimson_result;
     }
 };
