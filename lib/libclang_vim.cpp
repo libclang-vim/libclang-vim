@@ -236,7 +236,12 @@ inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
 
 inline std::string stringize_linkage(CXCursor const& cursor)
 {
-    return "'linkage':'" + stringize_linkage_kind(clang_getCursorLinkage(cursor)) + "',";
+    auto const linkage_kind_name = stringize_linkage_kind(clang_getCursorLinkage(cursor));
+    if (linkage_kind_name.empty()) {
+        return "";
+    } else {
+        return "'linkage':'" + linkage_kind_name + "',";
+    }
 }
 
 inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
@@ -278,7 +283,7 @@ inline std::string stringize_USR(CXCursor const& cursor)
     return stringize_key_value("USR", USR);
 }
 
-inline char const* stringize_cursor_kind_type(CXCursorKind const& kind)
+inline std::string stringize_cursor_kind_type(CXCursorKind const& kind)
 {
     if (clang_isAttribute(kind)) {
         return "Attribute";
@@ -333,8 +338,8 @@ inline std::string stringize_cursor_kind(CXCursor const& cursor)
     auto const kind_type_name = stringize_cursor_kind_type(kind);
 
     return stringize_key_value("kind", kind_name)
-         + kind_type_name.empty() ? "" : ("','kind_type':'" + stringize_cursor_kind_type(kind))
-         + "'," + stringize_cursor_extra_info(cursor);
+         + (kind_type_name.empty() ? std::string{} : ("','kind_type':'" + kind_type_name + "',"))
+         + stringize_cursor_extra_info(cursor);
 }
 
 inline std::string stringize_included_file(CXCursor const& cursor)
