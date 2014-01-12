@@ -267,6 +267,18 @@ inline std::string stringize_included_file(CXCursor const& cursor)
     return "'included_file':'"_str + to_c_str(included_file_name) + "',";
 }
 
+inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& parent)
+{
+    return stringize_spell(cursor)
+        + stringize_type(cursor)
+        + stringize_linkage(cursor)
+        + stringize_parent(cursor, parent)
+        + stringize_location(cursor)
+        + stringize_USR(cursor)
+        + stringize_cursor_kind(cursor)
+        + stringize_included_file(cursor);
+}
+
 class clang_vimson_AST_builder {
     CXTranslationUnit translation_unit;
     char const* file_name;
@@ -282,16 +294,7 @@ private:
     {
         auto *this_ = reinterpret_cast<clang_vimson_AST_builder *>(data);
 
-        this_->vimson_result += "{"_str
-                                + stringize_spell(cursor)
-                                + stringize_type(cursor)
-                                + stringize_linkage(cursor)
-                                + stringize_parent(cursor, parent)
-                                + stringize_location(cursor)
-                                + stringize_USR(cursor)
-                                + stringize_cursor_kind(cursor)
-                                + stringize_included_file(cursor)
-                                + "'children':[";
+        this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
 
         clang_visitChildren(cursor, visit_AST, this_);
 
