@@ -5,7 +5,11 @@
 #include <vector>
 #include <numeric>
 #include <memory>
+#include <iostream>
+
 #include <clang-c/Index.h>
+
+namespace libclang_vim {
 
 using std::size_t;
 
@@ -36,6 +40,16 @@ typedef std::shared_ptr<CXString> cxstring_ptr;
 inline cxstring_ptr owned(CXString const& str)
 {
     return {new CXString(str), cxstring_deleter{}};
+}
+
+inline char const* to_c_str(cxstring_ptr const& p)
+{
+    return clang_getCString(*p);
+}
+
+inline std::string operator""_str(char const* s, size_t const)
+{
+    return {s};
 }
 // }}}
 
@@ -139,13 +153,118 @@ public:
 };
 // }}}
 
-#include <iostream>
+inline std::string stringize_spell(CXCursor const& cursor)
+{
+    auto const spell = owned(clang_getCursorSpelling(cursor));
+    return "'spell':'"_str + to_c_str(spell) + "',";
+}
 
-class clang_vimson_AST_builder;
+inline std::string stringize_type(CXCursor const& cursor)
+{
+    CXType const type = clang_getCursorType(cursor);
+    CXTypeKind const type_kind = type.kind;
+    auto const type_name = owned(clang_getTypeSpelling(type));
+    auto const type_kind_name = owned(clang_getTypeKindSpelling(type_kind));
+    return "'type':'"_str + to_c_str(type_name) + "','type_kind':'" + to_c_str(type_kind_name) + "',";
+}
 
-namespace detail {
+inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
+{
+    switch (linkage) {
+    case CXLinkage_Invalid: return "Invalid";
+    case CXLinkage_NoLinkage: return "Nolinkage";
+    case CXLinkage_Internal: return "Internal";
+    case CXLinkage_UniqueExternal: return "UniqueExternal";
+    case CXLinkage_External: return "External";
+    default:                 return "Unknown";
+    }
+}
 
-} // namespace detail
+inline std::string stringize_linkage(CXCursor const& cursor)
+{
+    return "'linkage':'" + stringize_linkage_kind(clang_getCursorLinkage(cursor)) + "',";
+}
+
+inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
+{
+    auto semantic_parent = clang_getCursorSemanticParent(cursor);
+    auto lexical_parent = clang_getCursorLexicalParent(cursor);
+    auto parent_name = owned(clang_getCursorSpelling(parent));
+    auto semantic_parent_name = owned(clang_getCursorSpelling(semantic_parent));
+    auto lexical_parent_name = owned(clang_getCursorSpelling(lexical_parent));
+
+    return "'parent':'"_str + to_c_str(parent_name)
+        + "','semantic_parent':'" + to_c_str(semantic_parent_name)
+        + "','lexical_parent':'" + to_c_str(lexical_parent_name)
+        + "',";
+}
+
+inline std::string stringize_location(CXCursor const& cursor)
+{
+    CXSourceLocation const location = clang_getCursorLocation(cursor);
+    CXFile file;
+    unsigned int line, column, offset;
+    clang_getSpellingLocation(location, &file, &line, &column, &offset);
+    auto const file_name = owned(clang_getFileName(file));
+
+    return "'line':'" + std::to_string(line)
+         + "','column':'" + std::to_string(column)
+         + "','offset':'" + std::to_string(offset)
+         + "','file':'" + to_c_str(file_name)
+         + "',";
+}
+
+inline std::string stringize_USR(CXCursor const& cursor)
+{
+    auto USR = owned(clang_getCursorUSR(cursor));
+    return "'USR':'"_str + to_c_str(USR) + "',";
+}
+
+inline char const* stringize_cursor_kind_type(CXCursorKind const& kind)
+{
+    if (clang_isAttribute(kind)) {
+        return "Attribute";
+    } else if (clang_isDeclaration(kind)) {
+        return "Declaration";
+    } else if (clang_isExpression(kind)) {
+        return "Expression";
+    } else if (clang_isInvalid(kind)) {
+        return "Invalid";
+    } else if (clang_isPreprocessing(kind)) {
+        return "Preprocessing";
+    } else if (clang_isReference(kind)) {
+        return "Reference";
+    } else if (clang_isStatement(kind)) {
+        return "Statement";
+    } else if (clang_isTranslationUnit(kind)) {
+        return "TranslationUnit";
+    } else if (clang_isUnexposed(kind)) {
+        return "Unexposed";
+    } else {
+        return "Unknown";
+    }
+}
+
+inline std::string stringize_cursor_kind(CXCursor const& cursor)
+{
+    CXCursorKind const kind = clang_getCursorKind(cursor);
+    auto kind_name = owned(clang_getCursorKindSpelling(kind));
+
+    return "'kind':'"_str + to_c_str(kind_name)
+         + "','kind_type':'" + stringize_cursor_kind_type(kind)
+         + "',";
+}
+
+inline std::string stringize_included_file(CXCursor const& cursor)
+{
+    CXFile const included_file = clang_getIncludedFile(cursor);
+    if (included_file == NULL) {
+        return "'included_file':'',";
+    }
+
+    auto included_file_name = owned(clang_getFileName(included_file));
+    return "'included_file':'"_str + to_c_str(included_file_name) + "',";
+}
 
 class clang_vimson_AST_builder {
     CXTranslationUnit translation_unit;
@@ -157,15 +276,25 @@ public:
     {}
 
 private:
+
     static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
     {
         auto *this_ = reinterpret_cast<clang_vimson_AST_builder *>(data);
 
-        // TODO
+        this_->vimson_result += "{"_str
+                                // + stringize_spell(cursor)
+                                // + stringize_type(cursor)
+                                // + stringize_linkage(cursor)
+                                // + stringize_parent(cursor, parent)
+                                // + stringize_location(cursor)
+                                // + stringize_USR(cursor)
+                                // + stringize_cursor_kind(cursor)
+                                // + stringize_included_file(cursor)
+                                + "'children':[";
 
         clang_visitChildren(cursor, visit_AST, this_);
 
-        // TODO
+        this_->vimson_result += "]},";
 
         return CXChildVisit_Continue;
     }
@@ -187,13 +316,17 @@ public:
         clang_disposeTranslationUnit(translation_unit);
         clang_disposeIndex(index);
 
+        vimson_result = "{'AST':" + vimson_result + "}";
+
         return vimson_result;
     }
 };
 
+} // namespace libclang_vim
+
 int main()
 {
-    clang_vimson_AST_builder builder("tmp.cpp");
+    libclang_vim::clang_vimson_AST_builder builder("tmp.cpp");
     std::cout << builder.build_as_vimson(0, {});
 
     return 0;
@@ -205,14 +338,21 @@ extern "C" {
 
 char const* vim_clang_version()
 {
-    auto version = owned(clang_getClangVersion());
+    auto version = libclang_vim::owned(clang_getClangVersion());
     return clang_getCString(*version);
 }
 
 char const* vim_clang_tokens(char const* file_name)
 {
-    clang_vimson_tokenizer tokenizer(file_name);
+    libclang_vim::clang_vimson_tokenizer tokenizer(file_name);
     static auto const vimson = tokenizer.tokenize_as_vimson(0, {});
+    return vimson == "" ? NULL : vimson.c_str();
+}
+
+char const* vim_clang_build_AST(char const* file_name)
+{
+    libclang_vim::clang_vimson_AST_builder builder(file_name);
+    static auto const vimson = builder.build_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
