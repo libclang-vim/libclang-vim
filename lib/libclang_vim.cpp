@@ -347,7 +347,7 @@ inline std::string stringize_cursor_kind(CXCursor const& cursor)
     auto const kind_type_name = stringize_cursor_kind_type(kind);
 
     return stringize_key_value("kind", kind_name)
-         + (kind_type_name.empty() ? std::string{} : ("','kind_type':'" + kind_type_name + "',"))
+         + (kind_type_name.empty() ? std::string{} : ("'kind_type':'" + kind_type_name + "',"))
          + stringize_cursor_extra_info(cursor);
 }
 
@@ -492,6 +492,7 @@ int main()
     return 0;
 }
 
+// C APIs {{{
 extern "C" {
 
 char const* vim_clang_version()
@@ -564,3 +565,4 @@ char const* vim_clang_extract_translation_units(char const* file_name)
 }
 
 } // extern "C"
+// }}}
