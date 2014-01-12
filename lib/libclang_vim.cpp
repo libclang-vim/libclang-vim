@@ -247,6 +247,29 @@ inline char const* stringize_cursor_kind_type(CXCursorKind const& kind)
     }
 }
 
+inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
+{
+    std::string result = "";
+
+    if (clang_isCursorDefinition(cursor)) {
+        result += "'is_definition':1,";
+    }
+    if (clang_Cursor_isDynamicCall(cursor)) {
+        result += "'is_dynamic_call':1,";
+    }
+    if (clang_Cursor_isVariadic(cursor)) {
+        result += "'is_variadic':1,";
+    }
+    if (clang_CXXMethod_isVirtual(cursor)) {
+        result += "'is_virtual_member_function':1,";
+    }
+    if (clang_CXXMethod_isStatic(cursor)) {
+        result += "'is_static_member_function':1,";
+    }
+
+    return result;
+}
+
 inline std::string stringize_cursor_kind(CXCursor const& cursor)
 {
     CXCursorKind const kind = clang_getCursorKind(cursor);
@@ -254,7 +277,7 @@ inline std::string stringize_cursor_kind(CXCursor const& cursor)
 
     return "'kind':'"_str + to_c_str(kind_name)
          + "','kind_type':'" + stringize_cursor_kind_type(kind)
-         + "',";
+         + "'," + stringize_cursor_extra_info(cursor);
 }
 
 inline std::string stringize_included_file(CXCursor const& cursor)
@@ -330,7 +353,7 @@ public:
 };
 // }}}
 
-// TODO: :%s/clang_vimson//g
+// Kind extracter for AST {{{
 template<class Predicate>
 class kind_extracter {
     char const* file_name;
@@ -386,6 +409,7 @@ inline auto make_kind_extracter(char const* file_name, Predicate const& predicat
 {
     return {file_name, std::function<Predicate>{predicate}};
 }
+// }}}
 
 } // namespace libclang_vim
 
