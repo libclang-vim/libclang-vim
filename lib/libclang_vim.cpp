@@ -181,17 +181,32 @@ inline std::string stringize_extra_type_info(CXType const& type)
     std::string result = "";
 
     if (clang_isConstQualifiedType(type)) {
-        result += "'is_const_qualified' : 1,";
+        result += "'is_const_qualified':1,";
     }
     if (clang_isVolatileQualifiedType(type)) {
-        result += "'is_volatile_qualified' : 1,";
+        result += "'is_volatile_qualified':1,";
     }
     if (clang_isRestrictQualifiedType(type)) {
-        result += "'is_restrict_qualified' : 1,";
+        result += "'is_restrict_qualified':1,";
     }
     if (clang_isPODType(type)) {
-        result += "'is_POD_type' : 1,";
+        result += "'is_POD_type':1,";
     }
+
+    auto const ref_qualified = clang_Type_getCXXRefQualifier(type);
+    switch (ref_qualified) {
+    case CXRefQualifier_LValue: result += "'is_lvalue':1,"; break;
+    case CXRefQualifier_RValue: result += "'is_rvalue':1,"; break;
+    case CXRefQualifier_None: break;
+    default: break;
+    }
+
+    // Note: The information about calling convention is really needed?
+    //       If you want the information, please let me know that.
+    //
+    // auto const calling_convention = clang_getFunctionTypeCallingConv(type);
+    // switch (calling_convention) {
+    // ...
 
     return result;
 }
