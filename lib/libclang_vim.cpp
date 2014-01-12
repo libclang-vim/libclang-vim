@@ -212,11 +212,11 @@ inline std::string stringize_linkage(CXCursor const& cursor)
 
 inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
 {
-    auto semantic_parent = clang_getCursorSemanticParent(cursor);
-    auto lexical_parent = clang_getCursorLexicalParent(cursor);
-    auto parent_name = owned(clang_getCursorSpelling(parent));
-    auto semantic_parent_name = owned(clang_getCursorSpelling(semantic_parent));
-    auto lexical_parent_name = owned(clang_getCursorSpelling(lexical_parent));
+    auto const semantic_parent = clang_getCursorSemanticParent(cursor);
+    auto const lexical_parent = clang_getCursorLexicalParent(cursor);
+    auto const parent_name = owned(clang_getCursorSpelling(parent));
+    auto const semantic_parent_name = owned(clang_getCursorSpelling(semantic_parent));
+    auto const lexical_parent_name = owned(clang_getCursorSpelling(lexical_parent));
 
     return "'parent':'"_str + to_c_str(parent_name)
         + "','semantic_parent':'" + to_c_str(semantic_parent_name)
