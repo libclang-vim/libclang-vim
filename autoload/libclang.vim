@@ -1,24 +1,12 @@
-let s:libclang = expand('<sfile>:p:h:h') . '/lib/libclang-vim.so'
+let libclang#lib_path = expand('<sfile>:p:h:h') . '/lib/libclang-vim.so'
 
-if ! filereadable(s:libclang)
-    echoerr 'libclang-vim: ' . s:libclang . ' is not found! Please execute `make` in ' . expand('<sfile>:p:h:h')
+if ! filereadable(libclang#lib_path)
+    echoerr 'libclang-vim: ' . libclang#lib_path . ' is not found! Please execute `make` in ' . expand('<sfile>:p:h:h')
     finish
 endif
 
 function! libclang#version()
-    return libcall(s:libclang, 'vim_clang_version', '')
-endfunction
-
-function! libclang#path_to_libclang_vim()
-    return s:libclang
-endfunction
-
-function! libclang#tokens(filename)
-    if ! filereadable(a:filename)
-        echoerr "libclang: File not found: " . a:filename
-        return {}
-    endif
-    return eval(libcall(s:libclang, 'vim_clang_tokens', a:filename))
+    return libcall(libclang#lib_path, 'vim_clang_version', '')
 endfunction
 
 function! libclang#AST(filename)
@@ -26,7 +14,7 @@ function! libclang#AST(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_build_AST', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_build_AST', a:filename))
 endfunction
 
 function! libclang#declarations(filename)
@@ -34,7 +22,7 @@ function! libclang#declarations(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_declarations', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_declarations', a:filename))
 endfunction
 
 function! libclang#attributes(filename)
@@ -42,7 +30,7 @@ function! libclang#attributes(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_attributes', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_attributes', a:filename))
 endfunction
 
 function! libclang#expressions(filename)
@@ -50,7 +38,7 @@ function! libclang#expressions(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_expressions', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_expressions', a:filename))
 endfunction
 
 function! libclang#preprocessings(filename)
@@ -58,7 +46,7 @@ function! libclang#preprocessings(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_preprocessings', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_preprocessings', a:filename))
 endfunction
 
 function! libclang#references(filename)
@@ -66,7 +54,7 @@ function! libclang#references(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_references', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_references', a:filename))
 endfunction
 
 function! libclang#statements(filename)
@@ -74,7 +62,7 @@ function! libclang#statements(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_statements', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_statements', a:filename))
 endfunction
 
 function! libclang#translation_units(filename)
@@ -82,5 +70,5 @@ function! libclang#translation_units(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:libclang, 'vim_clang_extract_translation_units', a:filename))
+    return eval(libcall(libclang#lib_path, 'vim_clang_extract_translation_units', a:filename))
 endfunction
