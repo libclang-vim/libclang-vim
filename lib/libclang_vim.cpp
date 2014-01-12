@@ -328,6 +328,15 @@ inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
         result += "'is_static_member_function':1,";
     }
 
+    auto const access_specifier = clang_getCXXAccessSpecifier(cursor);
+    switch (access_specifier) {
+    case CX_CXXPublic:    result += "'access_specifier':'public',"; break;
+    case CX_CXXPrivate:    result += "'access_specifier':'private',"; break;
+    case CX_CXXProtected: result += "'access_specifier':'protected',"; break;
+    case CX_CXXInvalidAccessSpecifier: break;
+    default: break;
+    }
+
     return result;
 }
 
