@@ -1,4 +1,4 @@
-let s:lib_path = libclang#lib_path
+let s:lib_path = g:libclang#lib_path
 
 function! libclang#AST#all(filename)
     if ! filereadable(a:filename)

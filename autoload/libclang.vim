@@ -1,4 +1,4 @@
-let libclang#lib_path = expand('<sfile>:p:h:h') . '/lib/libclang-vim.so'
+let g:libclang#lib_path = expand('<sfile>:p:h:h') . '/lib/libclang-vim.so'
 
 if ! filereadable(libclang#lib_path)
     echoerr 'libclang-vim: ' . libclang#lib_path . ' is not found! Please execute `make` in ' . expand('<sfile>:p:h:h')
