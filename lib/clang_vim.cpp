@@ -53,26 +53,22 @@ inline std::string operator""_str(char const* s, size_t const)
     return {s};
 }
 
-inline bool is_empty(cxstring_ptr const& p)
-{
-    return std::strcmp(clang_getCString(*p), "") == 0;
-}
-
 inline std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
 {
-    if (is_empty(p)) {
+    auto const* cstring = clang_getCString(*p);
+    if (!cstring || std::strcmp(cstring, "") == 0) {
         return "";
     } else {
-        return "'" + std::string{key_name} + "':'" + to_c_str(p) + "',";
+        return "'" + std::string{key_name} + "':'" + cstring + "',";
     }
 }
 
-inline std::string stringize_key_value(char const* key_name, std::string const& s)
+std::string stringize_key_value(char const* key_name, std::string const& s)
 {
     if (s.empty()) {
         return "";
     } else {
-        return ("'" + (key_name + ("':'" + s + "',")));
+        return "'" + (key_name + ("':'" + s + "',"));
     }
 }
 
@@ -384,7 +380,7 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
 
 // AST builder {{{
 class AST_builder {
-    char const* file_name;
+    std::string file_name;
     std::string vimson_result;
 
 public:
@@ -393,7 +389,6 @@ public:
     {}
 
 private:
-
     static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
     {
         auto *this_ = reinterpret_cast<AST_builder *>(data);
@@ -413,12 +408,16 @@ public:
         vimson_result = "";
         CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
         if (translation_unit == NULL) {
             return "";
         }
 
-        auto cursor = clang_getTranslationUnitCursor(translation_unit);
+        CXCursor cursor = clang_getTranslationUnitCursor(translation_unit);
+        if (clang_Cursor_isNull(cursor)) {
+            return "";
+        }
+
         clang_visitChildren(cursor, visit_AST, this);
 
         clang_disposeTranslationUnit(translation_unit);
@@ -431,10 +430,10 @@ public:
 };
 // }}}
 
-// Kind extracter for AST {{{
+// AST extracter {{{
 template<class Predicate>
 class AST_extracter {
-    char const* file_name;
+    std::string file_name;
     Predicate predicate;
     std::string vimson_result;
 
@@ -465,7 +464,7 @@ public:
         vimson_result = "";
         CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
         if (translation_unit == NULL) {
             return "";
         }
