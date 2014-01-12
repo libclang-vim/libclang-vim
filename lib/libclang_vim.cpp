@@ -328,6 +328,9 @@ inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
     if (clang_CXXMethod_isVirtual(cursor)) {
         result += "'is_virtual_member_function':1,";
     }
+    if (clang_CXXMethod_isPureVirtual(cursor)) {
+        result += "'is_pure_virtual_member_function':1,";
+    }
     if (clang_CXXMethod_isStatic(cursor)) {
         result += "'is_static_member_function':1,";
     }
