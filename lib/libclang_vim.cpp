@@ -153,7 +153,7 @@ public:
 };
 // }}}
 
-// AST builder {{{
+// Stringizers {{{
 inline std::string stringize_spell(CXCursor const& cursor)
 {
     auto const spell = owned(clang_getCursorSpelling(cursor));
@@ -278,14 +278,15 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
         + stringize_cursor_kind(cursor)
         + stringize_included_file(cursor);
 }
+// }}}
 
+// AST builder {{{
 class clang_vimson_AST_builder {
-    CXTranslationUnit translation_unit;
     char const* file_name;
     std::string vimson_result;
 public:
     clang_vimson_AST_builder(char const* file_name)
-        : translation_unit(), file_name(file_name), vimson_result()
+        : file_name(file_name), vimson_result()
     {}
 
 private:
@@ -309,7 +310,7 @@ public:
         vimson_result = "";
         CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-        translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
         if (translation_unit == NULL) {
             return "";
         }
