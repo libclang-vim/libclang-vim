@@ -224,9 +224,8 @@ inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& pare
         + "',";
 }
 
-inline std::string stringize_location(CXCursor const& cursor)
+inline std::string stringize_location(CXSourceLocation const& location)
 {
-    CXSourceLocation const location = clang_getCursorLocation(cursor);
     CXFile file;
     unsigned int line, column, offset;
     clang_getSpellingLocation(location, &file, &line, &column, &offset);
@@ -237,6 +236,12 @@ inline std::string stringize_location(CXCursor const& cursor)
          + "','offset':'" + std::to_string(offset)
          + "','file':'" + to_c_str(file_name)
          + "',";
+}
+
+inline std::string stringize_cursor_location(CXCursor const& cursor)
+{
+    CXSourceLocation const location = clang_getCursorLocation(cursor);
+    return stringize_location(location);
 }
 
 inline std::string stringize_USR(CXCursor const& cursor)
@@ -320,7 +325,7 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
         + stringize_type(cursor)
         + stringize_linkage(cursor)
         + stringize_parent(cursor, parent)
-        + stringize_location(cursor)
+        + stringize_cursor_location(cursor)
         + stringize_USR(cursor)
         + stringize_cursor_kind(cursor)
         + stringize_included_file(cursor);
