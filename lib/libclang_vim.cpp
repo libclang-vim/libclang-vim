@@ -4,10 +4,12 @@
 #include <fstream>
 #include <vector>
 #include <numeric>
+#include <memory>
 #include <clang-c/Index.h>
 
 using std::size_t;
 
+// Helpers {{{
 // Note: boost::filesystem
 inline size_t get_file_size(char const* filename)
 {
@@ -20,6 +22,22 @@ inline bool is_null_location(Location const& location)
 {
     return clang_equalLocations(location, clang_getNullLocation());
 }
+
+struct cxstring_deleter {
+    void operator()(CXString *str) const
+    {
+        clang_disposeString(*str);
+        delete str;
+    }
+};
+
+typedef std::shared_ptr<CXString> cxstring_ptr;
+
+inline cxstring_ptr owned(CXString const& str)
+{
+    return {new CXString(str), cxstring_deleter{}};
+}
+// }}}
 
 // Tokenizer {{{
 class clang_vimson_tokenizer {
@@ -71,27 +89,22 @@ private:
     {
         return "[" + std::accumulate(std::begin(tokens), std::end(tokens), std::string{}, [&](std::string const& acc, Token const& token){
             auto const kind = clang_getTokenKind(token);
-            auto const spell = clang_getTokenSpelling(translation_unit, token);
+            auto const spell = owned(clang_getTokenSpelling(translation_unit, token));
             auto const location = clang_getTokenLocation(translation_unit, token);
 
             CXFile file;
             unsigned int line, column, offset;
             clang_getFileLocation(location, &file, &line, &column, &offset);
-            auto const file_name = clang_getFileName(file);
+            auto const file_name = owned(clang_getFileName(file));
 
-            auto const result = acc
-                + "{'spell':'" + clang_getCString(spell)
+            return acc
+                + "{'spell':'" + clang_getCString(*spell)
                 + "','kind':'" + get_kind_spelling(kind)
-                + "','file':'" + clang_getCString(file_name)
+                + "','file':'" + clang_getCString(*file_name)
                 + "','line':'" + std::to_string(line)
                 + "','column':'" + std::to_string(column)
                 + "','offset':'" + std::to_string(offset)
                 + "'},";
-
-            clang_disposeString(file_name);
-            clang_disposeString(spell);
-
-            return result;
         }) + "]";
     }
 
@@ -192,8 +205,8 @@ extern "C" {
 
 char const* vim_clang_version()
 {
-    CXString version = clang_getClangVersion();
-    return clang_getCString(version);
+    auto version = owned(clang_getClangVersion());
+    return clang_getCString(*version);
 }
 
 char const* vim_clang_tokens(char const* file_name)
