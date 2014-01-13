@@ -44,10 +44,10 @@ If you want to get information about definitions and not to get AST information 
 
 ## Environment
 
-    I check libclang-vim in below environment.  It may not work in other environments.
-    If you see some errors, issues or pull requests are welcome.
+I check libclang-vim in below environment.  It may not work in other environments.
+If you see some errors, issues or pull requests are welcome.
 
-    - OS X 10.9, LLVM 3.4 (installed with Homebrew)
+- OS X 10.9, LLVM 3.4 (installed with Homebrew)
 
 
 ## Example
