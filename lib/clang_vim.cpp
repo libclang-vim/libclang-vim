@@ -581,9 +581,8 @@ char const* vim_clang_extract_all_current_file(char const* file_name)
 {
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
-                [](CXCursor const& c) -> bool {
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l);
+                [](CXCursor const&) -> bool {
+                    return true;
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -595,8 +594,7 @@ char const* vim_clang_extract_declarations_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isDeclaration(clang_getCursorKind(c));
+                    return clang_isDeclaration(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -608,8 +606,7 @@ char const* vim_clang_extract_attributes_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isAttribute(clang_getCursorKind(c));
+                    return clang_isAttribute(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -621,8 +618,7 @@ char const* vim_clang_extract_expressions_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isExpression(clang_getCursorKind(c));
+                    return clang_isExpression(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -634,8 +630,7 @@ char const* vim_clang_extract_preprocessings_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isPreprocessing(clang_getCursorKind(c));
+                    return clang_isPreprocessing(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -647,8 +642,7 @@ char const* vim_clang_extract_references_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isReference(clang_getCursorKind(c));
+                    return clang_isReference(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -660,8 +654,7 @@ char const* vim_clang_extract_statements_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isStatement(clang_getCursorKind(c));
+                    return clang_isStatement(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -673,8 +666,7 @@ char const* vim_clang_extract_translation_units_current_file(char const* file_na
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isTranslationUnit(clang_getCursorKind(c));
+                    return clang_isTranslationUnit(clang_getCursorKind(c));
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -686,8 +678,7 @@ char const* vim_clang_extract_definitions_current_file(char const* file_name)
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_isCursorDefinition(c);
+                    return clang_isCursorDefinition(c);
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -699,8 +690,7 @@ char const* vim_clang_extract_virtual_member_functions_current_file(char const* 
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_CXXMethod_isVirtual(c);
+                    return clang_CXXMethod_isVirtual(c);
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -712,8 +702,7 @@ char const* vim_clang_extract_pure_virtual_member_functions_current_file(char co
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_CXXMethod_isPureVirtual(c);
+                    return clang_CXXMethod_isPureVirtual(c);
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
@@ -725,166 +714,7 @@ char const* vim_clang_extract_static_member_functions_current_file(char const* f
     auto extracter = libclang_vim::make_AST_extracter(
                 file_name,
                 [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return clang_Location_isFromMainFile(l) && clang_CXXMethod_isStatic(c);
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-// }}}
-
-// API to extract AST except for system headers {{{
-char const* vim_clang_extract_all_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c) -> bool {
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l);
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_declarations_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isDeclaration(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_attributes_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isAttribute(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_expressions_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isExpression(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_preprocessings_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isPreprocessing(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_references_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isReference(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_statements_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isStatement(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_translation_units_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isTranslationUnit(clang_getCursorKind(c));
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_definitions_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_isCursorDefinition(c);
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_virtual_member_functions_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_CXXMethod_isVirtual(c);
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_pure_virtual_member_functions_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_CXXMethod_isPureVirtual(c);
-                }
-            );
-    static auto const vimson = extracter.extract_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
-}
-
-char const* vim_clang_extract_static_member_functions_non_system_headers(char const* file_name)
-{
-    auto extracter = libclang_vim::make_AST_extracter(
-                file_name,
-                [](CXCursor const& c){
-                    auto const l = clang_getCursorLocation(c);
-                    return !clang_Location_isInSystemHeader(l) && clang_CXXMethod_isStatic(c);
+                    return clang_CXXMethod_isStatic(c);
                 }
             );
     static auto const vimson = extracter.extract_as_vimson(0, {});
