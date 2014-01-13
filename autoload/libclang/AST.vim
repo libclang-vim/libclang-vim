@@ -5,7 +5,7 @@ function! libclang#AST#all(filename)
         echoerr "libclang: File not found: " . a:filename
         return {}
     endif
-    return eval(libcall(s:lib_path, 'vim_clang_build_AST', a:filename))
+    return eval(libcall(s:lib_path, 'vim_clang_extract_all', a:filename))
 endfunction
 
 " TODO: DRY using meta programming
