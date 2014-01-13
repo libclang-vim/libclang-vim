@@ -18,23 +18,23 @@ You can
 
 ## Usage
 
-- `libclang#version()`
+### `libclang#version()`
 
-    Get version of libclang as a string.
+Get version of libclang as a string.
 
-- `libclang#tokens#all({filename})`
+### `libclang#tokens#all({filename})`
 
-    Get tokens in `{filename}`.  It includes all tokens in included header files.
+Get tokens in `{filename}`.  It includes all tokens in included header files.
 
-- `libclang#AST#{extent}#{kind of node}({filename})`
+### `libclang#AST#{extent}#{kind of node}({filename})`
 
-    Get information of specific kind of node in AST as a dictionary.
+Get information of specific kind of node in AST as a dictionary.
 
-    `{extent}` is the extent of analysis. `whole` searches all of the code, `non_system_headers` searches all of the code except for system headers (which are included with `#include <>`), `current_file` searches the code in only the current file.
+`{extent}` is the extent of analysis. `whole` searches all of the code, `non_system_headers` searches all of the code except for system headers (which are included with `#include <>`), `current_file` searches the code in only the current file.
 
-    `{kind of node}` is a kind of AST nodes which you want to extract.  `all` extracts all kind of AST nodes, `declarations` extracts all AST nodes related to declarations, `definitions` extracts all AST nodes related to definitions, `expressions` extracts all AST node related to expressions, and so on.
+`{kind of node}` is a kind of AST nodes which you want to extract.  `all` extracts all kind of AST nodes, `declarations` extracts all AST nodes related to declarations, `definitions` extracts all AST nodes related to definitions, `expressions` extracts all AST node related to expressions, and so on.
 
-    If you want to get information about definitions and not to get AST information about system headers, you should use `libclang#AST#non_system_headers#definitions()`.
+If you want to get information about definitions and not to get AST information about system headers, you should use `libclang#AST#non_system_headers#definitions()`.
 
 
 ## Installation
