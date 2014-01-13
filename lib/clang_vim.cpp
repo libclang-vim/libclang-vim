@@ -378,61 +378,17 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
 }
 // }}}
 
-// AST builder {{{
-class AST_builder {
-    std::string file_name;
-    std::string vimson_result;
-
-public:
-    AST_builder(char const* file_name)
-        : file_name(file_name), vimson_result()
-    {}
-
-private:
-    static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
-    {
-        auto *this_ = reinterpret_cast<AST_builder *>(data);
-
-        this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
-
-        clang_visitChildren(cursor, visit_AST, this_);
-
-        this_->vimson_result += "]},";
-
-        return CXChildVisit_Continue;
-    }
-
-public:
-    std::string build_as_vimson(int const argc, char const* argv[])
-    {
-        vimson_result = "";
-        CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-
-        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
-        if (translation_unit == NULL) {
-            return "";
-        }
-
-        CXCursor cursor = clang_getTranslationUnitCursor(translation_unit);
-        if (clang_Cursor_isNull(cursor)) {
-            return "";
-        }
-
-        clang_visitChildren(cursor, visit_AST, this);
-
-        clang_disposeTranslationUnit(translation_unit);
-        clang_disposeIndex(index);
-
-        vimson_result = "{'AST':[" + vimson_result + "]}";
-
-        return vimson_result;
-    }
-};
-// }}}
-
 // AST extracter {{{
 template<class Predicate>
 class AST_extracter {
+public:
+    enum struct policy {
+        all = 0,
+        non_system_headers,
+        current_file
+    }
+
+private:
     std::string file_name;
     Predicate predicate;
     std::string vimson_result;
@@ -451,9 +407,9 @@ private:
             return CXChildVisit_Continue;
         }
 
-        this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "},";
-
+        this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
         clang_visitChildren(cursor, visit_AST, this_);
+        this_->vimson_result += "]},";
 
         return CXChildVisit_Continue;
     }
@@ -475,7 +431,7 @@ public:
         clang_disposeTranslationUnit(translation_unit);
         clang_disposeIndex(index);
 
-        vimson_result = "[" + vimson_result + "]";
+        vimson_result = "{'root':[" + vimson_result + "]}";
         return vimson_result;
     }
 };
@@ -506,10 +462,10 @@ char const* vim_clang_tokens(char const* file_name)
     return vimson == "" ? NULL : vimson.c_str();
 }
 
-char const* vim_clang_build_AST(char const* file_name)
+char const* vim_clang_extract_all(char const* file_name)
 {
-    libclang_vim::AST_builder builder(file_name);
-    static auto const vimson = builder.build_as_vimson(0, {});
+    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const&){ return true; });
+    static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
