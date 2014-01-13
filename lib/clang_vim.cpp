@@ -379,23 +379,22 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
 // }}}
 
 // AST extracter {{{
+enum struct extraction_policy {
+    all = 0,
+    non_system_headers,
+    current_file
+};
+
 template<class Predicate>
 class AST_extracter {
-public:
-    enum struct policy {
-        all = 0,
-        non_system_headers,
-        current_file
-    }
-
-private:
     std::string file_name;
     Predicate predicate;
     std::string vimson_result;
+    extraction_policy const policy;
 
 public:
-    AST_extracter(char const* file_name, Predicate const& predicate)
-        : file_name(file_name), predicate(predicate), vimson_result()
+    AST_extracter(char const* file_name, extraction_policy const policy, Predicate const& predicate)
+        : file_name(file_name), predicate(predicate), vimson_result(), policy(policy)
     {}
 
 private:
@@ -437,10 +436,10 @@ public:
 };
 
 template<class Predicate>
-inline auto make_AST_extracter(char const* file_name, Predicate const& predicate)
+inline auto make_AST_extracter(char const* file_name, extraction_policy const policy, Predicate const& predicate)
     -> AST_extracter<std::function<decltype(predicate(std::declval<CXCursor>()))(CXCursor const&)>>
 {
-    return {file_name, predicate};
+    return {file_name, policy, predicate};
 }
 // }}}
 
@@ -464,84 +463,132 @@ char const* vim_clang_tokens(char const* file_name)
 
 char const* vim_clang_extract_all(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const&){ return true; });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const&){ return true; }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_declarations(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isDeclaration(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isDeclaration(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_attributes(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isAttribute(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isAttribute(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_expressions(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isExpression(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isExpression(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_preprocessings(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isPreprocessing(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isPreprocessing(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_references(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isReference(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isReference(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_statements(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isStatement(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isStatement(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_translation_units(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isTranslationUnit(clang_getCursorKind(c)); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isTranslationUnit(clang_getCursorKind(c)); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_definitions(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_isCursorDefinition(c); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_isCursorDefinition(c); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_virtual_member_functions(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_CXXMethod_isVirtual(c); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_CXXMethod_isVirtual(c); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_pure_virtual_member_functions(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_CXXMethod_isPureVirtual(c); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_CXXMethod_isPureVirtual(c); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
 
 char const* vim_clang_extract_static_member_functions(char const* file_name)
 {
-    auto extracter = libclang_vim::make_AST_extracter(file_name, [](CXCursor const& c){ return clang_CXXMethod_isStatic(c); });
+    auto extracter = libclang_vim::make_AST_extracter(
+                file_name,
+                libclang_vim::extraction_policy::all,
+                [](CXCursor const& c){ return clang_CXXMethod_isStatic(c); }
+            );
     static auto const vimson = extracter.extract_as_vimson(0, {});
     return vimson == "" ? NULL : vimson.c_str();
 }
