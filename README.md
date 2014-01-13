@@ -7,7 +7,7 @@ It enables to parse the code with an abstract syntax tree (AST).
 It means considering the context of the code.
 The analysis with AST is further powerful than the one with regular expressions.
 
-You can do
+You can
 
 - get tokens of the code.
 - extract AST information of the code.
