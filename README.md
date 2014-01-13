@@ -71,7 +71,7 @@ int main()
 :call libclang#AST#non_system_headers#all('hello_libclang.cpp')
 ```
 
-- __Result string__
+- __Result dictionary__
 
 ```
 {
