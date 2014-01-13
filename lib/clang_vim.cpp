@@ -395,13 +395,17 @@ private:
     {
         auto *this_ = reinterpret_cast<AST_extracter *>(data);
 
-        if (!this_->predicate(cursor)) {
-            return CXChildVisit_Continue;
+        bool const is_target_node = this_->predicate(cursor);
+        if (is_target_node) {
+            this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
         }
 
-        this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
+        // visit children recursively
         clang_visitChildren(cursor, visit_AST, this_);
-        this_->vimson_result += "]},";
+
+        if (is_target_node) {
+            this_->vimson_result += "]},";
+        }
 
         return CXChildVisit_Continue;
     }
