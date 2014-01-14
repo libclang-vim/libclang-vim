@@ -434,7 +434,7 @@ namespace detail {
 template<class Predicate>
 auto extract_AST_nodes(
         char const* file_name,
-        extraction_policy const& policy,
+        extraction_policy const policy,
         Predicate const& predicate,
         char const* argv[] = {},
         int const argc = 0
@@ -443,8 +443,8 @@ auto extract_AST_nodes(
     static std::string vimson;
     vimson = "";
 
-    typedef std::tuple<std::string&, extraction_policy, Predicate> callback_data_type;
-    auto callback_data = callback_data_type{vimson, policy, predicate};
+    typedef std::tuple<std::string&, extraction_policy const, Predicate const&> callback_data_type;
+    callback_data_type callback_data{vimson, policy, predicate};
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
