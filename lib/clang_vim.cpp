@@ -469,8 +469,7 @@ extern "C" {
 
 char const* vim_clang_version()
 {
-    auto version = libclang_vim::owned(clang_getClangVersion());
-    return clang_getCString(*version);
+    return clang_getCString(clang_getClangVersion());
 }
 
 char const* vim_clang_tokens(char const* file_name)
