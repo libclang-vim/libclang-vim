@@ -14,6 +14,8 @@ You can
 - get information at the specific location of the code. (not implemented yet)
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
+- get preprocessing information. (not implemented yet)
+- get comment information. (not implemented yet)
 
 
 ## Usage
