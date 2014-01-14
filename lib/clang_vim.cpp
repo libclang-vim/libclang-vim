@@ -6,6 +6,7 @@
 #include <numeric>
 #include <memory>
 #include <functional>
+#include <tuple>
 #include <utility>
 
 #include <clang-c/Index.h>
@@ -386,81 +387,79 @@ enum struct extraction_policy {
     current_file,
 };
 
-template<class Predicate>
-class AST_extracter {
-    std::string file_name;
-    Predicate predicate;
-    std::string vimson_result;
-    extraction_policy policy;
+namespace detail {
 
-public:
-    AST_extracter(char const* file_name, extraction_policy const& policy, Predicate const& predicate)
-        : file_name(file_name), predicate(predicate), vimson_result(), policy(policy)
-    {}
+    enum {
+        result = 0, visit_policy, predicate
+    };
 
-private:
-    static CXChildVisitResult visit_AST(CXCursor cursor, CXCursor parent, CXClientData data)
+    template<class CallbackData>
+    CXChildVisitResult AST_extracter(CXCursor cursor, CXCursor parent, CXClientData data)
     {
-        auto *this_ = reinterpret_cast<AST_extracter *>(data);
+        auto &callback_data = *reinterpret_cast<CallbackData *>(data);
+        auto &vimson = std::get<result>(callback_data);
+        auto &policy = std::get<visit_policy>(callback_data);
 
-        if (this_->policy == extraction_policy::current_file) {
+        if (policy == extraction_policy::current_file) {
             auto const location = clang_getCursorLocation(cursor);
             if (!clang_Location_isFromMainFile(location)) {
                 return CXChildVisit_Continue;
             }
         }
 
-        if (this_->policy == extraction_policy::non_system_headers) {
+        if (policy == extraction_policy::non_system_headers) {
             auto const location = clang_getCursorLocation(cursor);
             if (clang_Location_isInSystemHeader(location)) {
                 return CXChildVisit_Continue;
             }
         }
 
-        bool const is_target_node = this_->predicate(cursor);
+        bool const is_target_node = std::get<predicate>(callback_data)(cursor);
         if (is_target_node) {
-            this_->vimson_result += "{" + stringize_cursor(cursor, parent) + "'children':[";
+            vimson += "{" + stringize_cursor(cursor, parent) + "'children':[";
         }
 
         // visit children recursively
-        clang_visitChildren(cursor, visit_AST, this_);
+        clang_visitChildren(cursor, AST_extracter<CallbackData>, data);
 
         if (is_target_node) {
-            this_->vimson_result += "]},";
+            vimson += "]},";
         }
 
         return CXChildVisit_Continue;
     }
 
-public:
-    std::string extract_as_vimson(int const argc, char const* argv[])
-    {
-        vimson_result = "";
-        CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-
-        CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
-        if (translation_unit == NULL) {
-            return "";
-        }
-
-        auto cursor = clang_getTranslationUnitCursor(translation_unit);
-        clang_visitChildren(cursor, visit_AST, this);
-
-        clang_disposeTranslationUnit(translation_unit);
-        clang_disposeIndex(index);
-
-        vimson_result = "{'root':[" + vimson_result + "]}";
-        return vimson_result;
-    }
-};
+} // namespace detail
 
 template<class Predicate>
-inline char const* extract_AST_nodes(char const* file_name, extraction_policy const& policy, Predicate const& predicate)
+auto extract_AST_nodes(
+        char const* file_name,
+        extraction_policy const& policy,
+        Predicate const& predicate,
+        char const* argv[] = {},
+        int const argc = 0
+    ) -> char const*
 {
-    using extracter_type = AST_extracter<std::function<decltype(predicate(std::declval<CXCursor>()))(CXCursor const&)>>;
-    extracter_type extracter{file_name, policy, predicate};
     static std::string vimson;
-    vimson = extracter.extract_as_vimson(0, {});
+    vimson = "";
+
+    typedef std::tuple<std::string&, extraction_policy, Predicate> callback_data_type;
+    auto callback_data = callback_data_type{vimson, policy, predicate};
+
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    if (translation_unit == NULL) {
+        return "";
+    }
+
+    CXCursor cursor = clang_getTranslationUnitCursor(translation_unit);
+    clang_visitChildren(cursor, detail::AST_extracter<callback_data_type>, &callback_data);
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    vimson = "{'root':[" + vimson + "]}";
+
     return vimson.c_str();
 }
 
