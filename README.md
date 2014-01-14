@@ -48,6 +48,7 @@ I check libclang-vim in below environment.  It may not work in other environment
 If you see some errors, issues or pull requests are welcome.
 
 - OS X 10.9, LLVM 3.4 (installed with Homebrew)
+- Ubuntu 12.04, LLVM 3.5 (installed with apt)
 
 
 ## Example
