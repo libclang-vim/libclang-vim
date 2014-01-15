@@ -2,7 +2,6 @@ let g:libclang#lib_path = expand('<sfile>:p:h:h') . '/lib/libclang-vim.so'
 
 if ! filereadable(g:libclang#lib_path)
     echoerr 'libclang-vim: ' . g:libclang#lib_path . ' is not found! Please execute `make` in ' . expand('<sfile>:p:h:h')
-    finish
 endif
 
 function! libclang#version()
