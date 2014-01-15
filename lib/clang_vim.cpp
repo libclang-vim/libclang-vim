@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstring>
+#include <cstdio>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -8,6 +9,7 @@
 #include <functional>
 #include <tuple>
 #include <utility>
+#include <algorithm>
 
 #include <clang-c/Index.h>
 
@@ -151,10 +153,13 @@ public:
 
         translation_unit = clang_parseTranslationUnit(index, file_name, args, argc, NULL, 0, CXTranslationUnit_Incomplete);
         if (translation_unit == NULL) {
+            clang_disposeIndex(index);
             return "{}";
         }
         auto file_range = get_range_whole_file();
         if (clang_Range_isNull(file_range)) {
+            clang_disposeTranslationUnit(translation_unit);
+            clang_disposeIndex(index);
             return "{}";
         }
 
@@ -449,6 +454,7 @@ auto extract_AST_nodes(
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
+        clang_disposeIndex(index);
         return "{}";
     }
 
@@ -464,6 +470,25 @@ auto extract_AST_nodes(
 }
 
 // }}}
+
+auto parse_location_string(std::string const& location_string)
+    -> std::tuple<size_t, size_t, std::string>
+{
+    auto const end = std::end(location_string);
+    auto const path_end = std::find(std::begin(location_string), end, ':');
+    if (path_end == end || path_end + 1 == end) {
+        return std::make_tuple(0, 0, "");
+    }
+    std::string file{std::begin(location_string), path_end};
+
+    size_t line, col;
+    auto const num_input = std::sscanf(std::string{path_end+1, end}.c_str(), "%zu:%zu", &line, &col);
+    if (num_input != 2) {
+        return std::make_tuple(0, 0, "");
+    }
+
+    return std::make_tuple(line, col, file);
+}
 
 } // namespace libclang_vim
 
@@ -857,6 +882,31 @@ char const* vim_clang_extract_static_member_functions_non_system_headers(char co
                     return clang_CXXMethod_isStatic(c);
                 }
             );
+}
+// }}}
+
+// API to get information of specific location {{{
+char const* vim_clang_get_location_information(char const* location_string)
+{
+    auto location_info = libclang_vim::parse_location_string(location_string);
+    char const* file_name = std::get<2>(location_info).c_str();
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, {}, 0, NULL, 0, CXTranslationUnit_Incomplete);
+    if (translation_unit == NULL) {
+        clang_disposeIndex(index);
+        return "{}";
+    }
+
+    CXFile const file = clang_getFile(translation_unit, file_name);
+    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_info), std::get<1>(location_info));
+    CXCursor const cursor = clang_getCursor(translation_unit, location);
+    static std::string result;
+    result = "{" + libclang_vim::stringize_cursor(cursor, clang_getCursorSemanticParent(cursor)) + "}";
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    return result.c_str();
 }
 // }}}
 
