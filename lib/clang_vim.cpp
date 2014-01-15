@@ -151,11 +151,11 @@ public:
 
         translation_unit = clang_parseTranslationUnit(index, file_name, args, argc, NULL, 0, CXTranslationUnit_Incomplete);
         if (translation_unit == NULL) {
-            return "";
+            return "{}";
         }
         auto file_range = get_range_whole_file();
         if (clang_Range_isNull(file_range)) {
-            return "";
+            return "{}";
         }
 
         CXToken *tokens_;
@@ -449,7 +449,7 @@ auto extract_AST_nodes(
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
-        return "";
+        return "{}";
     }
 
     CXCursor cursor = clang_getTranslationUnitCursor(translation_unit);
@@ -479,7 +479,7 @@ char const* vim_clang_tokens(char const* file_name)
 {
     libclang_vim::tokenizer tokenizer(file_name);
     static auto const vimson = tokenizer.tokenize_as_vimson(0, {});
-    return vimson == "" ? NULL : vimson.c_str();
+    return vimson.c_str();
 }
 
 // API to extract all {{{
