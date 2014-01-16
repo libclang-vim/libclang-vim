@@ -533,6 +533,9 @@ namespace detail {
         case CXCursor_FunctionDecl:
         case CXCursor_FunctionTemplate:
         case CXCursor_ConversionFunction:
+        case CXCursor_CXXMethod:
+        case CXCursor_ObjCInstanceMethodDecl:
+        case CXCursor_ObjCClassMethodDecl:
             return true;
         default:
             return false;
