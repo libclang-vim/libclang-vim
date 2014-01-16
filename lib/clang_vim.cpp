@@ -515,6 +515,30 @@ namespace detail {
         return clang_getNullCursor();
     }
 
+    bool is_class_decl(CXCursor const& cursor) {
+        switch(clang_getCursorKind(cursor)) {
+        case CXCursor_StructDecl:
+        case CXCursor_ClassDecl:
+        case CXCursor_UnionDecl:
+        case CXCursor_ClassTemplate:
+        case CXCursor_ClassTemplatePartialSpecialization:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    bool is_function_decl(CXCursor const& cursor) {
+        switch(clang_getCursorKind(cursor)) {
+        case CXCursor_FunctionDecl:
+        case CXCursor_FunctionTemplate:
+        case CXCursor_ConversionFunction:
+            return true;
+        default:
+            return false;
+        }
+    }
+
 } // namespace detail
 
 template<class LocationTuple, class Predicate>
@@ -1029,6 +1053,28 @@ char const* vim_clang_get_statement_extent_at_specific_location(char const* loca
                 parsed_location,
                 [](CXCursor const& c){
                     return clang_isStatement(clang_getCursorKind(c));
+                }
+            );
+}
+
+char const* vim_clang_get_class_extent_at_specific_location(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::search_AST_upward(
+                parsed_location,
+                [](CXCursor const& c){
+                    return libclang_vim::detail::is_class_decl(c);
+                }
+            );
+}
+
+char const* vim_clang_get_function_extent_at_specific_location(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::search_AST_upward(
+                parsed_location,
+                [](CXCursor const& c){
+                    return libclang_vim::detail::is_function_decl(c);
                 }
             );
 }
