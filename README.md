@@ -11,7 +11,7 @@ You can
 
 - get tokens of the code.
 - extract AST information of the code.
-- get information at the specific location of the code. (not implemented yet)
+- get information at the specific location of the code. (work in progress)
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
