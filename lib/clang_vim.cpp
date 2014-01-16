@@ -507,7 +507,7 @@ namespace detail {
     CXCursor parent_definition_cursor(CXCursor cursor, Predicate const& predicate)
     {
         while (!clang_isInvalid(clang_getCursorKind(cursor))) {
-            if (clang_isCursorDefinition(cursor)){
+            if (predicate(cursor)){
                 return cursor;
             }
             cursor = clang_getCursorSemanticParent(cursor);
@@ -976,7 +976,7 @@ char const* vim_clang_get_location_information(char const* location_string)
 // }}}
 
 // API to get extent of identifier at specific location {{{
-char const* vim_clang_get_extent_of_specific_location(char const* location_string)
+char const* vim_clang_get_extent_of_node_at_specific_location(char const* location_string)
 {
     auto location_info = libclang_vim::parse_location_string(location_string);
     char const* file_name = std::get<2>(location_info).c_str();
