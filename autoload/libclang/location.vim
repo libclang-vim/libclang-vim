@@ -12,6 +12,20 @@ function! libclang#location#extent(filename, line, col)
     return eval(libcall(g:libclang#lib_path, 'vim_clang_get_extent_of_node_at_specific_location', printf("%s:%d:%d", a:filename, a:line, a:col)))
 endfunction
 
+function! libclang#location#expression_extent(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_expression_extent_at_specific_location', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction
+
+function! libclang#location#statement_extent(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_statement_extent_at_specific_location', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction
+
 function! libclang#location#function_extent(filename, line, col)
     if ! filereadable(a:filename)
         return {}

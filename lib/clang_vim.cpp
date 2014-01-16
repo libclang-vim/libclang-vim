@@ -1010,6 +1010,28 @@ char const* vim_clang_get_inner_definition_extent_at_specific_location(char cons
                 }
             );
 }
+
+char const* vim_clang_get_expression_extent_at_specific_location(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::search_AST_upward(
+                parsed_location,
+                [](CXCursor const& c){
+                    return clang_isExpression(clang_getCursorKind(c));
+                }
+            );
+}
+
+char const* vim_clang_get_statement_extent_at_specific_location(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::search_AST_upward(
+                parsed_location,
+                [](CXCursor const& c){
+                    return clang_isStatement(clang_getCursorKind(c));
+                }
+            );
+}
 // }}}
 
 } // extern "C"
