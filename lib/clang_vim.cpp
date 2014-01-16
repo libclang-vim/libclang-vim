@@ -814,9 +814,7 @@ char const* vim_clang_extract_definitions_current_file(char const* file_name)
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::current_file,
-                [](CXCursor const& c){
-                    return clang_isCursorDefinition(c);
-                }
+                clang_isCursorDefinition
             );
 }
 
@@ -825,9 +823,7 @@ char const* vim_clang_extract_virtual_member_functions_current_file(char const* 
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::current_file,
-                [](CXCursor const& c){
-                    return clang_CXXMethod_isVirtual(c);
-                }
+                clang_CXXMethod_isVirtual
             );
 }
 
@@ -836,9 +832,7 @@ char const* vim_clang_extract_pure_virtual_member_functions_current_file(char co
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::current_file,
-                [](CXCursor const& c){
-                    return clang_CXXMethod_isPureVirtual(c);
-                }
+                clang_CXXMethod_isPureVirtual
             );
 }
 
@@ -847,9 +841,7 @@ char const* vim_clang_extract_static_member_functions_current_file(char const* f
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::current_file,
-                [](CXCursor const& c){
-                    return clang_CXXMethod_isStatic(c);
-                }
+                clang_CXXMethod_isStatic
             );
 }
 // }}}
@@ -948,9 +940,7 @@ char const* vim_clang_extract_definitions_non_system_headers(char const* file_na
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::non_system_headers,
-                [](CXCursor const& c){
-                    return clang_isCursorDefinition(c);
-                }
+                clang_isCursorDefinition
             );
 }
 
@@ -959,9 +949,7 @@ char const* vim_clang_extract_virtual_member_functions_non_system_headers(char c
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::non_system_headers,
-                [](CXCursor const& c){
-                    return clang_CXXMethod_isVirtual(c);
-                }
+                clang_CXXMethod_isVirtual
             );
 }
 
@@ -970,9 +958,7 @@ char const* vim_clang_extract_pure_virtual_member_functions_non_system_headers(c
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::non_system_headers,
-                [](CXCursor const& c){
-                    return clang_CXXMethod_isPureVirtual(c);
-                }
+                clang_CXXMethod_isPureVirtual
             );
 }
 
@@ -981,9 +967,7 @@ char const* vim_clang_extract_static_member_functions_non_system_headers(char co
     return libclang_vim::extract_AST_nodes(
                 file_name,
                 libclang_vim::extraction_policy::non_system_headers,
-                [](CXCursor const& c){
-                    return clang_CXXMethod_isStatic(c);
-                }
+                clang_CXXMethod_isStatic
             );
 }
 // }}}
@@ -1043,9 +1027,7 @@ char const* vim_clang_get_inner_definition_extent_at_specific_location(char cons
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
     return libclang_vim::search_AST_upward(
                 parsed_location,
-                [](CXCursor const& c){
-                    return clang_isCursorDefinition(c);
-                }
+                clang_isCursorDefinition
             );
 }
 
@@ -1076,9 +1058,7 @@ char const* vim_clang_get_class_extent_at_specific_location(char const* location
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
     return libclang_vim::search_AST_upward(
                 parsed_location,
-                [](CXCursor const& c){
-                    return libclang_vim::detail::is_class_decl(c);
-                }
+                libclang_vim::detail::is_class_decl
             );
 }
 
