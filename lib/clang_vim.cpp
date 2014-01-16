@@ -1083,6 +1083,17 @@ char const* vim_clang_get_parameter_extent_at_specific_location(char const* loca
                 libclang_vim::detail::is_parameter
             );
 }
+
+char const* vim_clang_get_namespace_extent_at_specific_location(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::get_extent(
+                parsed_location,
+                [](CXCursor const& c){
+                    return clang_getCursorKind(c) == CXCursor_Namespace;
+                }
+            );
+}
 // }}}
 
 } // extern "C"
