@@ -542,6 +542,17 @@ namespace detail {
         }
     }
 
+    bool is_parameter(CXCursor const& cursor) {
+        switch(clang_getCursorKind(cursor)) {
+        case CXCursor_ParmDecl:
+        case CXCursor_TemplateTypeParameter:
+        case CXCursor_NonTypeTemplateParameter:
+        case CXCursor_TemplateTemplateParameter:
+            return true;
+        default:
+            return false;
+        }
+    }
 } // namespace detail
 
 template<class LocationTuple, class Predicate>
@@ -1076,9 +1087,16 @@ char const* vim_clang_get_function_extent_at_specific_location(char const* locat
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
     return libclang_vim::search_AST_upward(
                 parsed_location,
-                [](CXCursor const& c){
-                    return libclang_vim::detail::is_function_decl(c);
-                }
+                libclang_vim::detail::is_function_decl
+            );
+}
+
+char const* vim_clang_get_parameter_extent_at_specific_location(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::search_AST_upward(
+                parsed_location,
+                libclang_vim::detail::is_parameter
             );
 }
 // }}}
