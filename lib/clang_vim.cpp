@@ -382,6 +382,15 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
         + stringize_cursor_kind(cursor)
         + stringize_included_file(cursor);
 }
+
+inline std::string stringize_range(CXSourceRange const& range)
+{
+    if (clang_Range_isNull(range)) {
+        return "";
+    }
+    return "'range':{'start':{" + stringize_location(clang_getRangeStart(range))
+         + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
+}
 // }}}
 
 // AST extracter {{{
@@ -910,6 +919,30 @@ char const* vim_clang_get_location_information(char const* location_string)
 }
 // }}}
 
+// API to get extent of identifier at specific location
+char const* vim_clang_get_extent_of_specific_location(char const* location_string)
+{
+    auto location_info = libclang_vim::parse_location_string(location_string);
+    char const* file_name = std::get<2>(location_info).c_str();
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, {}, 0, NULL, 0, CXTranslationUnit_Incomplete);
+    if (translation_unit == NULL) {
+        clang_disposeIndex(index);
+        return "{}";
+    }
+
+    CXFile const file = clang_getFile(translation_unit, file_name);
+    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_info), std::get<1>(location_info));
+    CXCursor const cursor = clang_getCursor(translation_unit, location);
+    auto const range = clang_getCursorExtent(cursor);
+    static std::string result;
+    result = "{" + libclang_vim::stringize_range(range) + "}";
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    return result.c_str();
+}
 } // extern "C"
 // }}}
 
