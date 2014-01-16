@@ -501,10 +501,11 @@ auto parse_location_string(std::string const& location_string)
 }
 // }}}
 
+// Get extent {{{
 namespace detail {
 
     template<class Predicate>
-    CXCursor parent_definition_cursor(CXCursor cursor, Predicate const& predicate)
+    CXCursor search_AST_upward(CXCursor cursor, Predicate const& predicate)
     {
         while (!clang_isInvalid(clang_getCursorKind(cursor))) {
             if (predicate(cursor)){
@@ -556,7 +557,7 @@ namespace detail {
 } // namespace detail
 
 template<class LocationTuple, class Predicate>
-auto search_AST_upward(
+auto get_extent(
         LocationTuple const& location_tuple,
         Predicate const& predicate,
         char const* argv[] = {},
@@ -575,7 +576,7 @@ auto search_AST_upward(
 
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
-    CXCursor const result_cursor = detail::parent_definition_cursor(
+    CXCursor const result_cursor = detail::search_AST_upward(
             clang_getCursor(translation_unit, location),
             predicate
         );
@@ -592,6 +593,7 @@ auto search_AST_upward(
 
     return vimson.c_str();
 };
+// }}}
 
 } // namespace libclang_vim
 
@@ -610,6 +612,7 @@ char const* vim_clang_tokens(char const* file_name)
     return vimson.c_str();
 }
 
+// API to extract AST nodes {{{
 // API to extract all {{{
 char const* vim_clang_extract_all(char const* file_name)
 {
@@ -971,6 +974,7 @@ char const* vim_clang_extract_static_member_functions_non_system_headers(char co
             );
 }
 // }}}
+// }}}
 
 // API to get information of specific location {{{
 char const* vim_clang_get_location_information(char const* location_string)
@@ -1025,7 +1029,7 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
 char const* vim_clang_get_inner_definition_extent_at_specific_location(char const* location_string)
 {
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
-    return libclang_vim::search_AST_upward(
+    return libclang_vim::get_extent(
                 parsed_location,
                 clang_isCursorDefinition
             );
@@ -1034,7 +1038,7 @@ char const* vim_clang_get_inner_definition_extent_at_specific_location(char cons
 char const* vim_clang_get_expression_extent_at_specific_location(char const* location_string)
 {
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
-    return libclang_vim::search_AST_upward(
+    return libclang_vim::get_extent(
                 parsed_location,
                 [](CXCursor const& c){
                     return clang_isExpression(clang_getCursorKind(c));
@@ -1045,7 +1049,7 @@ char const* vim_clang_get_expression_extent_at_specific_location(char const* loc
 char const* vim_clang_get_statement_extent_at_specific_location(char const* location_string)
 {
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
-    return libclang_vim::search_AST_upward(
+    return libclang_vim::get_extent(
                 parsed_location,
                 [](CXCursor const& c){
                     return clang_isStatement(clang_getCursorKind(c));
@@ -1056,7 +1060,7 @@ char const* vim_clang_get_statement_extent_at_specific_location(char const* loca
 char const* vim_clang_get_class_extent_at_specific_location(char const* location_string)
 {
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
-    return libclang_vim::search_AST_upward(
+    return libclang_vim::get_extent(
                 parsed_location,
                 libclang_vim::detail::is_class_decl
             );
@@ -1065,7 +1069,7 @@ char const* vim_clang_get_class_extent_at_specific_location(char const* location
 char const* vim_clang_get_function_extent_at_specific_location(char const* location_string)
 {
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
-    return libclang_vim::search_AST_upward(
+    return libclang_vim::get_extent(
                 parsed_location,
                 libclang_vim::detail::is_function_decl
             );
@@ -1074,7 +1078,7 @@ char const* vim_clang_get_function_extent_at_specific_location(char const* locat
 char const* vim_clang_get_parameter_extent_at_specific_location(char const* location_string)
 {
     auto const parsed_location = libclang_vim::parse_location_string(location_string);
-    return libclang_vim::search_AST_upward(
+    return libclang_vim::get_extent(
                 parsed_location,
                 libclang_vim::detail::is_parameter
             );
