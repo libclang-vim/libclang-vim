@@ -1,4 +1,4 @@
-function! libclang#location#information(filename, line, col)
+function! libclang#location#AST_node(filename, line, col)
     if ! filereadable(a:filename)
         return {}
     endif
