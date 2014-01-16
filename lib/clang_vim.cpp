@@ -480,6 +480,7 @@ auto extract_AST_nodes(
 
 // }}}
 
+// Location string parser {{{
 auto parse_location_string(std::string const& location_string)
     -> std::tuple<size_t, size_t, std::string>
 {
@@ -498,6 +499,7 @@ auto parse_location_string(std::string const& location_string)
 
     return std::make_tuple(line, col, file);
 }
+// }}}
 
 } // namespace libclang_vim
 
@@ -919,7 +921,7 @@ char const* vim_clang_get_location_information(char const* location_string)
 }
 // }}}
 
-// API to get extent of identifier at specific location
+// API to get extent of identifier at specific location {{{
 char const* vim_clang_get_extent_of_specific_location(char const* location_string)
 {
     auto location_info = libclang_vim::parse_location_string(location_string);
@@ -943,6 +945,8 @@ char const* vim_clang_get_extent_of_specific_location(char const* location_strin
 
     return result.c_str();
 }
+// }}}
+
 } // extern "C"
 // }}}
 
