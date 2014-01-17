@@ -11,7 +11,9 @@ You can
 
 - get tokens of the code.
 - extract AST information of the code.
-- get information at the specific location of the code. (work in progress)
+- get information at the specific location of the code.
+- get extent at the specific location of the code
+- get definition, decralation and refarenced node of the item at specific location (work in progress)
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
@@ -38,6 +40,31 @@ Get information of specific kind of node in AST as a dictionary.
 
 If you want to get information about definitions and not to get AST information about system headers, you should use `libclang#AST#non_system_headers#definitions()`.
 
+### `libclang#location#AST_node({filename}, {line}, {col})`
+
+Get the AST node information at specific location.
+
+### `libclang#location#extent({filename}, {line}, {col})`
+
+Get the extent of the most inner syntax element at specific location.
+
+### `libclang#location#{syntax element}_extent({filename}, {line}, {col})`
+
+Get the extent of `{syntax element}` at specific location.
+
+`{syntax element}` is a kind of AST node and you can select one of below kinds.
+
+- `expression`
+- `statement`
+- `function` : function, function template member function, member function template
+- `class` : class, class template
+- `parameter` : function parameter, template parameter, template template parameter
+- `namespace`
+- `inner_definition` : the most inner definition
+
+If you want to get the extent of a class at specific location, you should use `libclang#location#class_extent()`.
+
+You want to see actual input and output?  Please see below Example section.
 
 ## Installation
 
