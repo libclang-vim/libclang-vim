@@ -567,5 +567,10 @@ char const* vim_clang_get_class_type_of_member_pointer_at(char const* location_s
             clang_Type_getClassType
         );
 }
+
+char const* vim_clang_get_all_extents_at(char const* location_string)
+{
+    return libclang_vim::get_all_extents(libclang_vim::parse_location_string(location_string));
+}
 } // extern "C"
 

@@ -124,6 +124,52 @@ inline auto get_type_related_to(
             argv, argc);
 }
 
+template<class LocationTuple>
+auto get_all_extents(
+        LocationTuple const& location_tuple,
+        char const* argv[] = {},
+        int const argc = 0
+    ) -> char const*
+{
+    static std::string vimson;
+    vimson = "";
+    char const* file_name = std::get<2>(location_tuple).c_str();
+
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    if (translation_unit == NULL) {
+        clang_disposeIndex(index);
+        return "[]";
+    }
+
+    CXFile const file = clang_getFile(translation_unit, file_name);
+    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
+    CXCursor cursor = clang_getCursor(translation_unit, location);
+    auto const range = clang_getCursorExtent(cursor);
+    vimson += "{'start':{" + stringize_location(clang_getRangeStart(range)) + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
+
+    bool already_pass_expression = false, already_pass_statement = false;
+    while (!clang_isInvalid(clang_getCursorKind(cursor))) {
+        if ( is_class_decl(cursor) ||
+             is_function_decl(cursor) ||
+             clang_getCursorKind(cursor) == CXCursor_Namespace ||
+             (!already_pass_expression && clang_isExpression(clang_getCursorKind(cursor))) ||
+             (!already_pass_statement && clang_isStatement(clang_getCursorKind(cursor)))
+           ) {
+            auto const range = clang_getCursorExtent(cursor);
+            vimson += "{'start':{" + stringize_location(clang_getRangeStart(range)) + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
+        }
+        cursor = clang_getCursorSemanticParent(cursor);
+    }
+
+    vimson = "[" + vimson + "]";
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    return vimson.c_str();
+}
+
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_LOCATION_HPP_INCLUDED
