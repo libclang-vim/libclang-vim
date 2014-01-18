@@ -76,7 +76,7 @@ auto get_extent(
                         return "{}";
                     } else {
                         auto const range = clang_getCursorExtent(rc);
-                        return "{" + stringize_range(range) + "}";
+                        return "{'start':{" + stringize_location(clang_getRangeStart(range)) + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}}";
                     }
                 },
                 argv, argc);
