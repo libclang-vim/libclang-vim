@@ -14,7 +14,6 @@
 
 namespace libclang_vim {
 
-// Get extent {{{
 namespace detail {
 
     template<class Predicate>
@@ -82,11 +81,9 @@ auto get_extent(
                 },
                 argv, argc);
 };
-// }}}
 
-// Get related location
 template<class LocationTuple, class JumpFunc>
-auto get_related_node_of(
+inline auto get_related_node_of(
         LocationTuple const& location_tuple,
         JumpFunc const& predicate,
         char const* argv[] = {},
@@ -104,6 +101,27 @@ auto get_related_node_of(
                     }
                 },
                 argv, argc);
+}
+
+template<class LocationTuple, class JumpFunc>
+inline auto get_type_related_to(
+        LocationTuple const& location_tuple,
+        JumpFunc const& predicate,
+        char const* argv[] = {},
+        int const argc = 0
+    ) -> char const*
+{
+    return detail::invoke_at_specific_location_with(
+            location_tuple,
+            [&predicate](CXCursor const& c) -> std::string {
+                CXType const type = predicate(clang_getCursorType(c));
+                if (type.kind == CXType_Invalid) {
+                    return "{}";
+                } else {
+                    return "{" + stringize_type(type)+ "}";
+                }
+            },
+            argv, argc);
 }
 
 } // namespace libclang_vim

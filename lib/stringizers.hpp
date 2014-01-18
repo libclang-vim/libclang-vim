@@ -50,9 +50,8 @@ inline std::string stringize_extra_type_info(CXType const& type)
     return result;
 }
 
-inline std::string stringize_type(CXCursor const& cursor)
+inline std::string stringize_type(CXType const& type)
 {
-    CXType const type = clang_getCursorType(cursor);
     CXTypeKind const type_kind = type.kind;
     auto const type_name = owned(clang_getTypeSpelling(type));
     auto const type_kind_name = owned(clang_getTypeKindSpelling(type_kind));
@@ -202,7 +201,7 @@ inline std::string stringize_included_file(CXCursor const& cursor)
 inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& parent)
 {
     return stringize_spell(cursor)
-        + stringize_type(cursor)
+        + stringize_type(clang_getCursorType(cursor))
         + stringize_linkage(cursor)
         + stringize_parent(cursor, parent)
         + stringize_cursor_location(cursor)
