@@ -14,7 +14,7 @@ You can
 - get information at the specific location of the code.
 - get extent at the specific location of the code
 - get definition, decralation and refarenced node of the item at specific location
-- get pointee type, result type, canonical type (unaliased type aliased by typedef) (work in progress)
+- get pointee type, result type, canonical type (unaliased type aliased by typedef)
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
@@ -76,9 +76,14 @@ Get the node information related at specific location.
 - `definition` : definition node of node at specific location
 - `referenced` : node which node at specific location references
 - `declaration` : declaration node of node at specific location
+- `pointee_type` : type of the pointer at specific location
+- `canonical_type` : canonical type of the type at specific location
+- `result_type` : result type at specific location (e.g. result type of function)
+- `class_type_of_member_pointer` : class type of member funciton at specific location
 
 If you want to get the definition of specific location, you should use `libclang#location#definition_at()`.
 If you want to know what item specific location references, you should use `libclang#location#referenced_at()`.
+If you want to get the type of a function at specific location, you should use `libclang#locaiton#result_type_at()`.
 
 ## Installation
 

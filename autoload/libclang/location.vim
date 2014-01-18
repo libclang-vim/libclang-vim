@@ -81,3 +81,31 @@ function! libclang#location#declaration_at(filename, line, col)
     endif
     return eval(libcall(g:libclang#lib_path, 'vim_clang_get_declaration_at', printf("%s:%d:%d", a:filename, a:line, a:col)))
 endfunction
+
+function! libclang#location#pointee_type_at(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_pointee_type_at', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction
+
+function! libclang#location#canonical_type_at(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_canonical_type_at', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction
+
+function! libclang#location#result_type_at(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_result_type_at', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction
+
+function! libclang#location#class_type_of_member_pointer_at(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_class_type_of_member_pointer_at', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction

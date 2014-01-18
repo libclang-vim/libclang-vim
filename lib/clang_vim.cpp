@@ -531,5 +531,41 @@ char const* vim_clang_get_declaration_at(char const* location_string)
             clang_getCanonicalCursor
         );
 }
+
+char const* vim_clang_get_pointee_type_at(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::get_type_related_to(
+            parsed_location,
+            clang_getPointeeType
+        );
+}
+
+char const* vim_clang_get_canonical_type_at(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::get_type_related_to(
+            parsed_location,
+            clang_getCanonicalType
+        );
+}
+
+char const* vim_clang_get_result_type_at(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::get_type_related_to(
+            parsed_location,
+            clang_getResultType
+        );
+}
+
+char const* vim_clang_get_class_type_of_member_pointer_at(char const* location_string)
+{
+    auto const parsed_location = libclang_vim::parse_location_string(location_string);
+    return libclang_vim::get_type_related_to(
+            parsed_location,
+            clang_Type_getClassType
+        );
+}
 } // extern "C"
 
