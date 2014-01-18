@@ -14,27 +14,6 @@
 
 namespace libclang_vim {
 
-// Location string parser {{{
-auto parse_location_string(std::string const& location_string)
-    -> std::tuple<size_t, size_t, std::string>
-{
-    auto const end = std::end(location_string);
-    auto const path_end = std::find(std::begin(location_string), end, ':');
-    if (path_end == end || path_end + 1 == end) {
-        return std::make_tuple(0, 0, "");
-    }
-    std::string file{std::begin(location_string), path_end};
-
-    size_t line, col;
-    auto const num_input = std::sscanf(std::string{path_end+1, end}.c_str(), "%zu:%zu", &line, &col);
-    if (num_input != 2) {
-        return std::make_tuple(0, 0, "");
-    }
-
-    return std::make_tuple(line, col, file);
-}
-// }}}
-
 // Get extent {{{
 namespace detail {
 

@@ -7,7 +7,6 @@
 #include "AST_extracter.hpp"
 #include "location.hpp"
 
-// C APIs {{{
 extern "C" {
 
 char const* vim_clang_version()
