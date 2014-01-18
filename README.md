@@ -13,7 +13,8 @@ You can
 - extract AST information of the code.
 - get information at the specific location of the code.
 - get extent at the specific location of the code
-- get definition, decralation and refarenced node of the item at specific location (work in progress)
+- get definition, decralation and refarenced node of the item at specific location
+- get pointee type, result type, canonical type (unaliased type aliased by typedef) (work in progress)
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
@@ -66,6 +67,19 @@ If you want to get the extent of a class at specific location, you should use `l
 
 You want to see actual input and output?  Please see below Example section.
 
+### `libclang#location#{something}_at({filename}, {line}, {col})`
+
+Get the node information related at specific location.
+
+`{something}` is one of below items.
+
+- `definition` : definition node of node at specific location
+- `referenced` : node which node at specific location references
+- `declaration` : declaration node of node at specific location
+
+If you want to get the definition of specific location, you should use `libclang#location#definition_at()`.
+If you want to know what item specific location references, you should use `libclang#location#referenced_at()`.
+
 ## Installation
 
 `llvm-config` command is required.  After cloning this repository, execute `make` in the repository.  Or compile `lib/clang_vim.cpp` manually.
@@ -81,6 +95,8 @@ If you see some errors, issues or pull requests are welcome.
 - BGM: [TSAR MOMBA](http://www.youtube.com/watch?v=wi4WRhwhnCk)
 
 ## Example
+
+### Get AST Information
 
 - __Input file__
 
