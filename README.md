@@ -87,7 +87,7 @@ If you want to get the type of a function at specific location, you should use `
 
 ## Installation
 
-`llvm-config` command is required.  After cloning this repository, execute `make` in the repository.  Or compile `lib/clang_vim.cpp` manually.
+`llvm-config` command is required.  After cloning this repository, execute `make` in the repository.  Or compile `lib/libclang-vim/clang_vim.cpp` manually as a shared object.
 
 
 ## Environment
