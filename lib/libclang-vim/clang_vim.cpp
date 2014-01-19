@@ -425,12 +425,8 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_info), std::get<1>(location_info));
     CXCursor const cursor = clang_getCursor(translation_unit, location);
-    auto const range = clang_getCursorExtent(cursor);
     static std::string result;
-    result = "{'start':{"
-                + libclang_vim::stringize_location(clang_getRangeStart(range))
-                + "},'end':{" + libclang_vim::stringize_location(clang_getRangeEnd(range))
-                + "}}";
+    result = "{" + libclang_vim::stringize_extent(cursor) + "}";
 
     clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);

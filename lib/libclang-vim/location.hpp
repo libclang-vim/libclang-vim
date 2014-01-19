@@ -75,8 +75,7 @@ auto get_extent(
                     if (clang_Cursor_isNull(rc)) {
                         return "{}";
                     } else {
-                        auto const range = clang_getCursorExtent(rc);
-                        return "{'start':{" + stringize_location(clang_getRangeStart(range)) + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}}";
+                        return "{" + stringize_extent(rc) + "}";
                     }
                 },
                 argv, argc);
@@ -145,8 +144,7 @@ auto get_all_extents(
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
     CXCursor cursor = clang_getCursor(translation_unit, location);
-    auto const range = clang_getCursorExtent(cursor);
-    vimson += "{'start':{" + stringize_location(clang_getRangeStart(range)) + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
+    vimson += "{" + stringize_extent(cursor) + "},";
 
     bool already_pass_expression = false, already_pass_statement = false;
     while (!clang_isInvalid(clang_getCursorKind(cursor))) {
@@ -156,8 +154,7 @@ auto get_all_extents(
              (!already_pass_expression && clang_isExpression(clang_getCursorKind(cursor))) ||
              (!already_pass_statement && clang_isStatement(clang_getCursorKind(cursor)))
            ) {
-            auto const range = clang_getCursorExtent(cursor);
-            vimson += "{'start':{" + stringize_location(clang_getRangeStart(range)) + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
+            vimson += "{" + stringize_extent(cursor) + "},";
         }
         cursor = clang_getCursorSemanticParent(cursor);
     }

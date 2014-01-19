@@ -219,6 +219,12 @@ inline std::string stringize_range(CXSourceRange const& range)
          + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
 }
 
+inline std::string stringize_extent(CXCursor const& cursor)
+{
+    auto const r = clang_getCursorExtent(cursor);
+    return "'start':{" + stringize_location(clang_getRangeStart(r)) + "},'end':{" + stringize_location(clang_getRangeEnd(r)) + "}";
+}
+
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_STRINGIZERS_HPP_INCLUDED
