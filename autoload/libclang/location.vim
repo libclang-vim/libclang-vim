@@ -61,6 +61,13 @@ function! libclang#location#inner_definition_extent(filename, line, col)
     return eval(libcall(g:libclang#lib_path, 'vim_clang_get_inner_definition_extent_at_specific_location', printf("%s:%d:%d", a:filename, a:line, a:col)))
 endfunction
 
+function! libclang#location#all_extents(filename, line, col)
+    if ! filereadable(a:filename)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, 'vim_clang_get_all_extents_at', printf("%s:%d:%d", a:filename, a:line, a:col)))
+endfunction
+
 function! libclang#location#definition_at(filename, line, col)
     if ! filereadable(a:filename)
         return {}
