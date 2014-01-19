@@ -98,10 +98,10 @@ inline std::string stringize_location(CXSourceLocation const& location)
     clang_getSpellingLocation(location, &file, &line, &column, &offset);
     auto const file_name = owned(clang_getFileName(file));
 
-    return stringize_key_value("line", std::to_string(line))
-         + stringize_key_value("column", std::to_string(column))
-         + stringize_key_value("offset", std::to_string(offset))
-         + stringize_key_value("file", file_name);
+    return "'line':" + std::to_string(line)
+        + ",'column':" + std::to_string(column)
+        + ",'offset':" + std::to_string(offset) + ','
+        + stringize_key_value("file", file_name);
 }
 
 inline std::string stringize_cursor_location(CXCursor const& cursor)
