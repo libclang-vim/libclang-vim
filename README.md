@@ -14,7 +14,7 @@ You can
 - get information at the specific location of the code.
 - get extent at the specific location of the code
 - get definition, decralation and refarenced node of the item at specific location
-- get pointee type, result type, canonical type (unaliased type aliased by typedef)
+- get pointee type, result type, canonical type
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
