@@ -144,8 +144,7 @@ auto get_all_extents(
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
     CXCursor cursor = clang_getCursor(translation_unit, location);
-    auto const kind_name = owned(clang_getCursorKindSpelling(clang_getCursorKind(cursor)));
-    vimson += "{" + stringize_key_value("kind", kind_name) + stringize_extent(cursor) + "},";
+    vimson += "{" + stringize_extent(cursor) + "},";
 
     bool already_pass_expression = false, already_pass_statement = false;
     while (!clang_isInvalid(clang_getCursorKind(cursor))) {
@@ -155,8 +154,7 @@ auto get_all_extents(
              (!already_pass_expression && clang_isExpression(clang_getCursorKind(cursor))) ||
              (!already_pass_statement && clang_isStatement(clang_getCursorKind(cursor)))
            ) {
-            auto const kind_name = owned(clang_getCursorKindSpelling(clang_getCursorKind(cursor)));
-            vimson += "{" + stringize_key_value("kind", kind_name) + stringize_extent(cursor) + "},";
+            vimson += "{" + stringize_extent(cursor) + "},";
         }
         cursor = clang_getCursorSemanticParent(cursor);
     }
