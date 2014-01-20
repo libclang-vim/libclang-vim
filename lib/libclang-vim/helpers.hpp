@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include <fstream>
+#include <algorithm>
 
 #include <clang-c/Index.h>
 

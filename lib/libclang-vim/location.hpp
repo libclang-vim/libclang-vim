@@ -4,8 +4,6 @@
 #include <tuple>
 #include <string>
 #include <cstdio>
-#include <algorithm>
-
 
 #include <clang-c/Index.h>
 
