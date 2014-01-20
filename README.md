@@ -1,4 +1,4 @@
-Vim script Wrapper for Libclang [![Build Status](https://travis-ci.org/rhysd/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
+Vim script libclang Wrapper [![Build Status](https://travis-ci.org/rhysd/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
 ===============================
 
 libclang-vim is a wrapper library of [libclang](http://clang.llvm.org/doxygen/group__CINDEX.html) for Vim script developers who want to make a great C, C++ and Objective-C plugin.
