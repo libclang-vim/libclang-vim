@@ -222,7 +222,11 @@ inline std::string stringize_range(CXSourceRange const& range)
 inline std::string stringize_extent(CXCursor const& cursor)
 {
     auto const r = clang_getCursorExtent(cursor);
-    return "'start':{" + stringize_location(clang_getRangeStart(r)) + "},'end':{" + stringize_location(clang_getRangeEnd(r)) + "}";
+    if (clang_Range_isNull(r)) {
+        return "";
+    } else {
+        return "'start':{" + stringize_location(clang_getRangeStart(r)) + "},'end':{" + stringize_location(clang_getRangeEnd(r)) + "}";
+    }
 }
 
 } // namespace libclang_vim
