@@ -160,6 +160,30 @@ auto at_specific_location(
     return vimson.c_str();
 }
 
+template<class DataType>
+CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
+{
+    auto const kind = clang_getCursorKind(cursor);
+    if (kind == CXCursor_VarDecl) {
+        (reinterpret_cast<DataType *>(data))->first = cursor;
+        return CXChildVisit_Break;
+    }
+
+    clang_visitChildren(cursor, search_kind_visitor<DataType>, data);
+    return CXChildVisit_Continue;
+}
+
+CXCursor search_kind(CXCursor const cursor, CXCursorKind const target_kind)
+{
+    auto const kind = clang_getCursorKind(cursor);
+    if (kind == target_kind) {
+        return cursor;
+    }
+
+    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), target_kind);
+    clang_visitChildren(cursor, search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
+    return kind_visitor_data.first;
+}
 
 } // namespace libclang_vim
 
