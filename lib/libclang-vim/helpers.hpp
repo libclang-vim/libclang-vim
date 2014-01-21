@@ -130,6 +130,37 @@ auto parse_location_string(std::string const& location_string)
     return std::make_tuple(line, col, file);
 }
 
+template<class LocationTuple, class Predicate>
+auto at_specific_location(
+        LocationTuple const& location_tuple,
+        Predicate const& predicate,
+        char const* argv[] = {},
+        int const argc = 0
+    ) -> char const*
+{
+    static std::string vimson;
+    char const* file_name = std::get<2>(location_tuple).c_str();
+
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    if (translation_unit == NULL) {
+        clang_disposeIndex(index);
+        return "{}";
+    }
+
+    CXFile const file = clang_getFile(translation_unit, file_name);
+    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
+    CXCursor const cursor = clang_getCursor(translation_unit, location);
+
+    vimson = predicate(cursor);
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    return vimson.c_str();
+}
+
+
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_HELPERS_HPP_INCLUDED
