@@ -1,5 +1,6 @@
-Vim script libclang Wrapper [![Build Status](https://travis-ci.org/rhysd/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
-===============================
+Vim script libclang Wrapper
+===========================
+[![Build Status](https://travis-ci.org/rhysd/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
 
 libclang-vim is a wrapper library of [libclang](http://clang.llvm.org/doxygen/group__CINDEX.html) for Vim script developers who want to make a great C, C++ and Objective-C plugin.
 You can use the power of clang's C, C++ and Objective-C code analysis from Vim script directly.
@@ -13,8 +14,8 @@ You can
 - extract AST information of the code.
 - get information at the specific location of the code.
 - get extent at the specific location of the code
-- get definition, decralation and refarenced node of the item at specific location
-- get pointee type, result type, canonical type
+- get definition, declaration and referenced node of the item at specific location
+- get pointee type, result type, canonical type at specific location
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
@@ -79,7 +80,7 @@ Get the node information related at specific location.
 - `pointee_type` : type of the pointer at specific location
 - `canonical_type` : canonical type of the type at specific location
 - `result_type` : result type at specific location (e.g. result type of function)
-- `class_type_of_member_pointer` : class type of member funciton at specific location
+- `class_type_of_member_pointer` : class type of member function at specific location
 
 If you want to get the definition of specific location, you should use `libclang#location#definition_at()`.
 If you want to know what item specific location references, you should use `libclang#location#referenced_at()`.
