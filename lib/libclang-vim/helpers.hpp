@@ -160,6 +160,8 @@ auto at_specific_location(
     return vimson.c_str();
 }
 
+namespace detail {
+
 template<class DataType>
 CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
 {
@@ -173,6 +175,8 @@ CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData d
     return CXChildVisit_Continue;
 }
 
+} // namespace detail
+
 CXCursor search_kind(CXCursor const cursor, CXCursorKind const target_kind)
 {
     auto const kind = clang_getCursorKind(cursor);
@@ -181,7 +185,7 @@ CXCursor search_kind(CXCursor const cursor, CXCursorKind const target_kind)
     }
 
     auto kind_visitor_data = std::make_pair(clang_getNullCursor(), target_kind);
-    clang_visitChildren(cursor, search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
+    clang_visitChildren(cursor, detail::search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
     return kind_visitor_data.first;
 }
 
