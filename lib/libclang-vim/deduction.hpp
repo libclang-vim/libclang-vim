@@ -10,12 +10,27 @@ namespace libclang_vim {
 
 namespace detail {
 
-CXType deduct_cursor_type(CXCursor const& cursor)
+CXChildVisitResult rhs_type_deducter(CXCursor cursor, CXCursor, CXClientData data)
+{
+    auto const type = clang_getCursorType(cursor);
+
+    if (type.kind == CXType_Unexposed || type.kind == CXType_Invalid) {
+        clang_visitChildren(cursor, rhs_type_deducter, data);
+        return CXChildVisit_Continue;
+    } else {
+        *(reinterpret_cast<CXType *>(data)) = type;
+        return CXChildVisit_Break;
+    }
+}
+
+CXType deduct_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
     if (type.kind == CXType_Unexposed) {
-        // TODO: Should deduct
-        return type;
+        CXType deducted_type;
+        deducted_type.kind = CXType_Invalid;
+        clang_visitChildren(cursor, rhs_type_deducter, &deducted_type);
+        return deducted_type;
     } else {
         return type;
     }
@@ -36,7 +51,10 @@ inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, cha
                         return "{}";
                     }
 
-                    CXType const var_type = detail::deduct_cursor_type(var_decl_cursor);
+                    CXType const var_type = detail::deduct_type_at_cursor(var_decl_cursor);
+                    if (var_type.kind == CXType_Invalid) {
+                        return "{}";
+                    }
 
                     std::string result;
                     result += stringize_type(var_type);
