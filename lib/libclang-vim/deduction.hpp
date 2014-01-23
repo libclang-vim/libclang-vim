@@ -13,26 +13,44 @@ namespace detail {
 CXChildVisitResult rhs_type_deducter(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
-
-    if (type.kind == CXType_Unexposed || type.kind == CXType_Invalid) {
-        clang_visitChildren(cursor, rhs_type_deducter, data);
-        return CXChildVisit_Continue;
-    } else {
-        *(reinterpret_cast<CXType *>(data)) = type;
-        return CXChildVisit_Break;
+    switch (type.kind) {
+        case CXType_Unexposed: {
+            auto const type_name = owned(clang_getTypeSpelling(type));
+            if (std::strcmp(to_c_str(type_name), "auto") != 0) {
+                *(reinterpret_cast<CXType *>(data)) = type;
+                return CXChildVisit_Break;
+            }
+        }
+        case CXType_Invalid: {
+            // When (unexposed and "auto") or invalid
+            clang_visitChildren(cursor, rhs_type_deducter, data);
+            return CXChildVisit_Continue;
+        }
+        default: {
+            *(reinterpret_cast<CXType *>(data)) = type;
+            return CXChildVisit_Break;
+        }
     }
 }
 
 CXType deduct_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
-    if (type.kind == CXType_Unexposed || type.kind == CXType_Invalid) {
-        CXType deducted_type;
-        deducted_type.kind = CXType_Invalid;
-        clang_visitChildren(cursor, rhs_type_deducter, &deducted_type);
-        return deducted_type;
-    } else {
-        return type;
+    switch (type.kind) {
+        case CXType_Unexposed: {
+            auto const type_name = owned(clang_getTypeSpelling(type));
+            if (std::strcmp(to_c_str(type_name), "auto") != 0) {
+                return type;
+            }
+        }
+        case CXType_Invalid: {
+            // When (unexposed and "auto") or invalid
+            CXType deducted_type;
+            deducted_type.kind = CXType_Invalid;
+            clang_visitChildren(cursor, rhs_type_deducter, &deducted_type);
+            return deducted_type;
+        }
+        default: return type;
     }
 }
 
