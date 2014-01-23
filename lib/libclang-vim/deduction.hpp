@@ -26,7 +26,7 @@ CXChildVisitResult rhs_type_deducter(CXCursor cursor, CXCursor, CXClientData dat
 CXType deduct_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
-    if (type.kind == CXType_Unexposed) {
+    if (type.kind == CXType_Unexposed || type.kind == CXType_Invalid) {
         CXType deducted_type;
         deducted_type.kind = CXType_Invalid;
         clang_visitChildren(cursor, rhs_type_deducter, &deducted_type);
