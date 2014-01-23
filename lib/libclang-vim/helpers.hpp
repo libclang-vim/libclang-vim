@@ -130,6 +130,65 @@ auto parse_location_string(std::string const& location_string)
     return std::make_tuple(line, col, file);
 }
 
+template<class LocationTuple, class Predicate>
+auto at_specific_location(
+        LocationTuple const& location_tuple,
+        Predicate const& predicate,
+        char const* argv[] = {},
+        int const argc = 0
+    ) -> char const*
+{
+    static std::string vimson;
+    char const* file_name = std::get<2>(location_tuple).c_str();
+
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    if (translation_unit == NULL) {
+        clang_disposeIndex(index);
+        return "{}";
+    }
+
+    CXFile const file = clang_getFile(translation_unit, file_name);
+    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
+    CXCursor const cursor = clang_getCursor(translation_unit, location);
+
+    vimson = predicate(cursor);
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    return vimson.c_str();
+}
+
+namespace detail {
+
+template<class DataType>
+CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
+{
+    auto const kind = clang_getCursorKind(cursor);
+    if (kind == CXCursor_VarDecl) {
+        (reinterpret_cast<DataType *>(data))->first = cursor;
+        return CXChildVisit_Break;
+    }
+
+    clang_visitChildren(cursor, search_kind_visitor<DataType>, data);
+    return CXChildVisit_Continue;
+}
+
+} // namespace detail
+
+CXCursor search_kind(CXCursor const cursor, CXCursorKind const target_kind)
+{
+    auto const kind = clang_getCursorKind(cursor);
+    if (kind == target_kind) {
+        return cursor;
+    }
+
+    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), target_kind);
+    clang_visitChildren(cursor, detail::search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
+    return kind_visitor_data.first;
+}
+
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_HELPERS_HPP_INCLUDED

@@ -6,6 +6,7 @@
 #include "tokenizer.hpp"
 #include "AST_extracter.hpp"
 #include "location.hpp"
+#include "deduction.hpp"
 
 extern "C" {
 
@@ -570,6 +571,12 @@ char const* vim_clang_get_class_type_of_member_pointer_at(char const* location_s
 char const* vim_clang_get_all_extents_at(char const* location_string)
 {
     return libclang_vim::get_all_extents(libclang_vim::parse_location_string(location_string));
+}
+
+char const* vim_clang_deduct_var_decl_at(char const* location_string)
+{
+    char const* argv[] = {"-std=c++1y"}; // XXX: Temporary
+    return libclang_vim::deduct_var_decl_type(libclang_vim::parse_location_string(location_string), argv, 1);
 }
 } // extern "C"
 
