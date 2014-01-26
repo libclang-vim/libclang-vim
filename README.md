@@ -16,6 +16,7 @@ You can
 - get extent at the specific location of the code
 - get definition, declaration and referenced node of the item at specific location
 - get pointee type, result type, canonical type at specific location
+- deduct type of variable declaration and return value of function (work in progress)
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
@@ -34,7 +35,7 @@ Get tokens in `{filename}`.  It includes all tokens in included header files.
 
 ### `libclang#AST#{extent}#{kind of node}({filename})`
 
-Get information of specific kind of node in AST as a dictionary.
+Get information of a specific kind of node in AST as a dictionary.
 
 `{extent}` is the extent of analysis. `whole` searches all of the code, `non_system_headers` searches all of the code except for system headers (which are included with `#include <>`), `current_file` searches the code in only the current file.
 
