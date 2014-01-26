@@ -166,7 +166,7 @@ template<class DataType>
 CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const kind = clang_getCursorKind(cursor);
-    if (kind == CXCursor_VarDecl) {
+    if (kind == (reinterpret_cast<DataType *>(data))->second) {
         (reinterpret_cast<DataType *>(data))->first = cursor;
         return CXChildVisit_Break;
     }
