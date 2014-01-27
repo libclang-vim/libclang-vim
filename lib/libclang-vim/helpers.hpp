@@ -71,8 +71,9 @@ std::string stringize_key_value(char const* key_name, std::string const& s)
     }
 }
 
-bool is_class_decl(CXCursor const& cursor) {
-    switch(clang_getCursorKind(cursor)) {
+bool is_class_decl_kind(CXCursorKind const& kind)
+{
+    switch(kind) {
     case CXCursor_StructDecl:
     case CXCursor_ClassDecl:
     case CXCursor_UnionDecl:
@@ -84,8 +85,14 @@ bool is_class_decl(CXCursor const& cursor) {
     }
 }
 
-bool is_function_decl(CXCursor const& cursor) {
-    switch(clang_getCursorKind(cursor)) {
+bool is_class_decl(CXCursor const& cursor)
+{
+    return is_class_decl_kind(clang_getCursorKind(cursor));
+}
+
+bool is_function_decl_kind(CXCursorKind const& kind)
+{
+    switch(kind) {
     case CXCursor_FunctionDecl:
     case CXCursor_FunctionTemplate:
     case CXCursor_ConversionFunction:
@@ -100,8 +107,14 @@ bool is_function_decl(CXCursor const& cursor) {
     }
 }
 
-bool is_parameter(CXCursor const& cursor) {
-    switch(clang_getCursorKind(cursor)) {
+bool is_function_decl(CXCursor const& cursor)
+{
+    return is_function_decl_kind(clang_getCursorKind(cursor));
+}
+
+bool is_parameter_kind(CXCursorKind const& kind)
+{
+    switch(kind) {
     case CXCursor_ParmDecl:
     case CXCursor_TemplateTypeParameter:
     case CXCursor_NonTypeTemplateParameter:
@@ -110,6 +123,11 @@ bool is_parameter(CXCursor const& cursor) {
     default:
         return false;
     }
+}
+
+bool is_parameter(CXCursor const& cursor)
+{
+    return is_parameter_kind(clang_getCursorKind(cursor));
 }
 
 // Location string parser
