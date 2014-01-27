@@ -10,7 +10,7 @@ namespace libclang_vim {
 
 namespace detail {
 
-CXChildVisitResult rhs_type_deducter(CXCursor cursor, CXCursor, CXClientData data)
+CXChildVisitResult unexposed_type_deducter(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
     switch (type.kind) {
@@ -23,7 +23,7 @@ CXChildVisitResult rhs_type_deducter(CXCursor cursor, CXCursor, CXClientData dat
         }
         case CXType_Invalid: {
             // When (unexposed and "auto") or invalid
-            clang_visitChildren(cursor, rhs_type_deducter, data);
+            clang_visitChildren(cursor, unexposed_type_deducter, data);
             return CXChildVisit_Continue;
         }
         default: {
@@ -47,7 +47,7 @@ CXType deduct_type_at_cursor(CXCursor const& cursor)
             // When (unexposed and "auto") or invalid
             CXType deducted_type;
             deducted_type.kind = CXType_Invalid;
-            clang_visitChildren(cursor, rhs_type_deducter, &deducted_type);
+            clang_visitChildren(cursor, unexposed_type_deducter, &deducted_type);
             return deducted_type;
         }
         default: return type;
