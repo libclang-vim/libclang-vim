@@ -84,6 +84,40 @@ inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, cha
             );
 }
 
+namespace detail {
+
+CXType deduct_func_decl_type_at_cursor(CXCursor const& cursor)
+{
+    auto const func_type = clang_getCursorType(cursor);
+    auto const result_type = clang_getResultType(func_type);
+
+    switch (result_type.kind) {
+        case CXType_Unexposed: {
+            auto const type_name = owned(clang_getTypeSpelling(result_type));
+            if (std::strcmp(to_c_str(type_name), "auto") != 0) {
+                return result_type;
+            }
+        }
+        case CXType_Invalid: {
+            // When (unexposed and "auto") or invalid
+
+            // Get cursor at a return statement
+            CXCursor const return_stmt_cursor = search_kind(cursor, [](CXCursorKind const& kind){ return kind == CXCursor_ReturnStmt; });
+            if (clang_Cursor_isNull(return_stmt_cursor)) {
+                return clang_getCursorType(return_stmt_cursor);
+            }
+
+            CXType deducted_type;
+            deducted_type.kind = CXType_Invalid;
+            clang_visitChildren(return_stmt_cursor, unexposed_type_deducter, &deducted_type);
+            return deducted_type;
+        }
+        default: return result_type;
+    }
+}
+
+} // namespace detail
+
 template<class LocationTuple>
 inline char const* deduct_func_return_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
 {
@@ -92,6 +126,20 @@ inline char const* deduct_func_return_type(LocationTuple const& location_tuple, 
                 [](CXCursor const& cursor)
                     -> std::string
                 {
+                    CXCursor const func_decl_cursor = search_kind(cursor, [](CXCursorKind const& kind){ return is_function_decl_kind(kind); });
+                    if (clang_Cursor_isNull(func_decl_cursor)) {
+                        return "{}";
+                    }
+
+                    CXType const func_type = detail::deduct_func_decl_type_at_cursor(func_decl_cursor);
+                    if (func_type.kind == CXType_Invalid) {
+                        return "{}";
+                    }
+
+                    std::string result;
+                    result += stringize_type(func_type);
+                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(func_type)) + "},";
+                    return "{" + result + "}";
                     return "";
                 },
                 argv,
