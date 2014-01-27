@@ -92,6 +92,8 @@ bool is_function_decl(CXCursor const& cursor) {
     case CXCursor_CXXMethod:
     case CXCursor_ObjCInstanceMethodDecl:
     case CXCursor_ObjCClassMethodDecl:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
         return true;
     default:
         return false;
