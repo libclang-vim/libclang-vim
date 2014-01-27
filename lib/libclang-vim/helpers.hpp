@@ -166,7 +166,7 @@ template<class DataType>
 CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const kind = clang_getCursorKind(cursor);
-    if (kind == CXCursor_VarDecl) {
+    if ((reinterpret_cast<DataType *>(data)->second(kind))) {
         (reinterpret_cast<DataType *>(data))->first = cursor;
         return CXChildVisit_Break;
     }
@@ -177,14 +177,15 @@ CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData d
 
 } // namespace detail
 
-CXCursor search_kind(CXCursor const cursor, CXCursorKind const target_kind)
+template<class Predicate>
+CXCursor search_kind(CXCursor const& cursor, Predicate const& predicate)
 {
     auto const kind = clang_getCursorKind(cursor);
-    if (kind == target_kind) {
+    if (predicate(kind)) {
         return cursor;
     }
 
-    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), target_kind);
+    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), predicate);
     clang_visitChildren(cursor, detail::search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
     return kind_visitor_data.first;
 }

@@ -64,7 +64,7 @@ inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, cha
                 [](CXCursor const& cursor)
                     -> std::string
                 {
-                    CXCursor const var_decl_cursor = search_kind(cursor, CXCursor_VarDecl);
+                    CXCursor const var_decl_cursor = search_kind(cursor, [](CXCursorKind const& kind){ return kind == CXCursor_VarDecl; });
                     if (clang_Cursor_isNull(var_decl_cursor)) {
                         return "{}";
                     }
@@ -78,6 +78,21 @@ inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, cha
                     result += stringize_type(var_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(var_type)) + "},";
                     return "{" + result + "}";
+                },
+                argv,
+                argc
+            );
+}
+
+template<class LocationTuple>
+inline char const* deduct_func_return_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+{
+    return at_specific_location(
+                location_tuple,
+                [](CXCursor const& cursor)
+                    -> std::string
+                {
+                    return "";
                 },
                 argv,
                 argc
