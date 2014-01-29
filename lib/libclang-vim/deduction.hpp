@@ -1,6 +1,7 @@
 #if !defined LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
 #define      LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
 
+#include <cctype>
 #include <string>
 
 #include "helpers.hpp"
@@ -10,47 +11,54 @@ namespace libclang_vim {
 
 namespace detail {
 
+bool is_auto_type(std::string const& type_name)
+{
+    for ( auto pos = type_name.find("auto")
+        ; pos != std::string::npos
+        ; pos = type_name.find("auto", pos+1)) {
+
+        if (pos != 0) {
+            if (std::isalnum(type_name[pos-1]) || type_name[pos-1] == '_') {
+                continue;
+            }
+        }
+
+        if (pos + 3/*pos of 'o'*/ < type_name.size()-1) {
+            if (std::isalnum(type_name[pos+3+1]) || type_name[pos+3+1] == '_') {
+                continue;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 CXChildVisitResult unexposed_type_deducter(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
-    switch (type.kind) {
-        case CXType_Unexposed: {
-            auto const type_name = owned(clang_getTypeSpelling(type));
-            if (std::strcmp(to_c_str(type_name), "auto") != 0) {
-                *(reinterpret_cast<CXType *>(data)) = type;
-                return CXChildVisit_Break;
-            }
-        }
-        case CXType_Invalid: {
-            // When (unexposed and "auto") or invalid
-            clang_visitChildren(cursor, unexposed_type_deducter, data);
-            return CXChildVisit_Continue;
-        }
-        default: {
-            *(reinterpret_cast<CXType *>(data)) = type;
-            return CXChildVisit_Break;
-        }
+    auto const type_name = owned(clang_getTypeSpelling(type));
+    if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
+        clang_visitChildren(cursor, unexposed_type_deducter, data);
+        return CXChildVisit_Continue;
+    } else {
+        *(reinterpret_cast<CXType *>(data)) = type;
+        return CXChildVisit_Break;
     }
 }
 
 CXType deduct_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
-    switch (type.kind) {
-        case CXType_Unexposed: {
-            auto const type_name = owned(clang_getTypeSpelling(type));
-            if (std::strcmp(to_c_str(type_name), "auto") != 0) {
-                return type;
-            }
-        }
-        case CXType_Invalid: {
-            // When (unexposed and "auto") or invalid
-            CXType deducted_type;
-            deducted_type.kind = CXType_Invalid;
-            clang_visitChildren(cursor, unexposed_type_deducter, &deducted_type);
-            return deducted_type;
-        }
-        default: return type;
+    auto const type_name = owned(clang_getTypeSpelling(type));
+    if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
+        CXType deducted_type;
+        deducted_type.kind = CXType_Invalid;
+        clang_visitChildren(cursor, unexposed_type_deducter, &deducted_type);
+        return deducted_type;
+    } else {
+        return type;
     }
 }
 
