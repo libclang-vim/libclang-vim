@@ -71,8 +71,9 @@ std::string stringize_key_value(char const* key_name, std::string const& s)
     }
 }
 
-bool is_class_decl(CXCursor const& cursor) {
-    switch(clang_getCursorKind(cursor)) {
+bool is_class_decl_kind(CXCursorKind const& kind)
+{
+    switch(kind) {
     case CXCursor_StructDecl:
     case CXCursor_ClassDecl:
     case CXCursor_UnionDecl:
@@ -84,22 +85,36 @@ bool is_class_decl(CXCursor const& cursor) {
     }
 }
 
-bool is_function_decl(CXCursor const& cursor) {
-    switch(clang_getCursorKind(cursor)) {
+bool is_class_decl(CXCursor const& cursor)
+{
+    return is_class_decl_kind(clang_getCursorKind(cursor));
+}
+
+bool is_function_decl_kind(CXCursorKind const& kind)
+{
+    switch(kind) {
     case CXCursor_FunctionDecl:
     case CXCursor_FunctionTemplate:
     case CXCursor_ConversionFunction:
     case CXCursor_CXXMethod:
     case CXCursor_ObjCInstanceMethodDecl:
     case CXCursor_ObjCClassMethodDecl:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
         return true;
     default:
         return false;
     }
 }
 
-bool is_parameter(CXCursor const& cursor) {
-    switch(clang_getCursorKind(cursor)) {
+bool is_function_decl(CXCursor const& cursor)
+{
+    return is_function_decl_kind(clang_getCursorKind(cursor));
+}
+
+bool is_parameter_kind(CXCursorKind const& kind)
+{
+    switch(kind) {
     case CXCursor_ParmDecl:
     case CXCursor_TemplateTypeParameter:
     case CXCursor_NonTypeTemplateParameter:
@@ -108,6 +123,11 @@ bool is_parameter(CXCursor const& cursor) {
     default:
         return false;
     }
+}
+
+bool is_parameter(CXCursor const& cursor)
+{
+    return is_parameter_kind(clang_getCursorKind(cursor));
 }
 
 // Location string parser
@@ -166,7 +186,7 @@ template<class DataType>
 CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const kind = clang_getCursorKind(cursor);
-    if (kind == (reinterpret_cast<DataType *>(data))->second) {
+    if ((reinterpret_cast<DataType *>(data)->second(kind))) {
         (reinterpret_cast<DataType *>(data))->first = cursor;
         return CXChildVisit_Break;
     }
@@ -177,14 +197,15 @@ CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData d
 
 } // namespace detail
 
-CXCursor search_kind(CXCursor const cursor, CXCursorKind const target_kind)
+template<class Predicate>
+CXCursor search_kind(CXCursor const& cursor, Predicate const& predicate)
 {
     auto const kind = clang_getCursorKind(cursor);
-    if (kind == target_kind) {
+    if (predicate(kind)) {
         return cursor;
     }
 
-    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), target_kind);
+    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), predicate);
     clang_visitChildren(cursor, detail::search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
     return kind_visitor_data.first;
 }
