@@ -585,5 +585,11 @@ char const* vim_clang_deduct_func_decl_at(char const* location_string)
     return libclang_vim::deduct_func_return_type(libclang_vim::parse_location_string(location_string), argv, 1);
 }
 
+char const* vim_clang_deduct_func_or_var_decl_at(char const* location_string)
+{
+    char const* argv[] = {"-std=c++1y"}; // XXX: Temporary
+    return libclang_vim::deduct_func_or_var_decl(libclang_vim::parse_location_string(location_string), argv, 1);
+}
+
 } // extern "C"
 
