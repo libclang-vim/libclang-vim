@@ -1,4 +1,4 @@
-Vim script libclang Wrapper
+Vim script Interface to Clang
 ===========================
 [![Build Status](https://travis-ci.org/rhysd/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
 
@@ -16,7 +16,7 @@ You can
 - get extent at the specific location of the code
 - get definition, declaration and referenced node of the item at specific location
 - get pointee type, result type, canonical type at specific location
-- deduct type of variable declaration and return value of function (work in progress)
+- deduct type of variable declaration and return value of function
 - get the information for completion. (not implemented yet)
 - get diagnostic information. (not implemented yet)
 - get preprocessing information. (not implemented yet)
