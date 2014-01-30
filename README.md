@@ -87,6 +87,10 @@ If you want to get the definition of specific location, you should use `libclang
 If you want to know what item specific location references, you should use `libclang#location#referenced_at()`.
 If you want to get the type of a function at specific location, you should use `libclang#locaiton#result_type_at()`.
 
+### `libclang#deduction#type_of_function_or_variable_declaration({filename}, {line}, {col})`
+
+Deduct type of variable and return value of function at `{line}, {col}`.  You must specify `{line}` and `{col}` of variable declaration or function declaration.  If you specify the place of variable declaration and the type of variable is `auto`, it searches type of left hand side of the declaration.  And if you specify the place of function declaration whose return type is `auto`, it searches type of return statement in the function.
+
 ## Installation
 
 `llvm-config` command is required.  After cloning this repository, execute `make` in the repository.  Or compile `lib/libclang-vim/clang_vim.cpp` manually as a shared object.
