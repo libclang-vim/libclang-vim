@@ -17,10 +17,10 @@ You can
 - get definition, declaration and referenced node of the item at specific location
 - get pointee type, result type, canonical type at specific location
 - deduct type of variable declaration and return value of function
-- get the information for completion. (not implemented yet)
-- get diagnostic information. (not implemented yet)
-- get preprocessing information. (not implemented yet)
-- get comment information. (not implemented yet)
+- get the information for completion. *(not implemented yet)*
+- get diagnostic information. *(not implemented yet)*
+- get preprocessing information. *(not implemented yet)*
+- get comment information. *(not implemented yet)*
 
 
 ## Usage
