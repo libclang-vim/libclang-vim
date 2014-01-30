@@ -148,7 +148,41 @@ inline char const* deduct_func_return_type(LocationTuple const& location_tuple, 
                     result += stringize_type(func_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(func_type)) + "},";
                     return "{" + result + "}";
-                    return "";
+                },
+                argv,
+                argc
+            );
+}
+
+template<class LocationTuple>
+inline char const* deduct_func_or_var_decl(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+{
+    return at_specific_location(
+                location_tuple,
+                [](CXCursor const& cursor)
+                    -> std::string
+                {
+                    CXCursor const func_or_var_decl = search_kind(
+                            cursor,
+                            [](CXCursorKind const& kind){
+                                return kind == CXCursor_VarDecl || is_function_decl_kind(kind);
+                            });
+                    if (clang_Cursor_isNull(func_or_var_decl)) {
+                        return "{}";
+                    }
+
+                    CXType const result_type = 
+                        clang_getCursorKind(cursor) == CXCursor_VarDecl ?
+                            detail::deduct_type_at_cursor(func_or_var_decl) :
+                            detail::deduct_func_decl_type_at_cursor(func_or_var_decl);
+                    if (result_type.kind == CXType_Invalid) {
+                        return "{}";
+                    }
+
+                    std::string result;
+                    result += stringize_type(result_type);
+                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
+                    return "{" + result + "}";
                 },
                 argv,
                 argc
