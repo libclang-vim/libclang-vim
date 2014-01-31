@@ -35,12 +35,12 @@ bool is_auto_type(std::string const& type_name)
     return false;
 }
 
-CXChildVisitResult unexposed_type_deducter(CXCursor cursor, CXCursor, CXClientData data)
+CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
     auto const type_name = owned(clang_getTypeSpelling(type));
     if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
-        clang_visitChildren(cursor, unexposed_type_deducter, data);
+        clang_visitChildren(cursor, unexposed_type_deducer, data);
         return CXChildVisit_Continue;
     } else {
         *(reinterpret_cast<CXType *>(data)) = type;
@@ -48,15 +48,15 @@ CXChildVisitResult unexposed_type_deducter(CXCursor cursor, CXCursor, CXClientDa
     }
 }
 
-CXType deduct_type_at_cursor(CXCursor const& cursor)
+CXType deduce_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
     auto const type_name = owned(clang_getTypeSpelling(type));
     if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
-        CXType deducted_type;
-        deducted_type.kind = CXType_Invalid;
-        clang_visitChildren(cursor, unexposed_type_deducter, &deducted_type);
-        return deducted_type;
+        CXType deduced_type;
+        deduced_type.kind = CXType_Invalid;
+        clang_visitChildren(cursor, unexposed_type_deducer, &deduced_type);
+        return deduced_type;
     } else {
         return type;
     }
@@ -65,7 +65,7 @@ CXType deduct_type_at_cursor(CXCursor const& cursor)
 } // namespace detail
 
 template<class LocationTuple>
-inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_var_decl_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
 {
     return at_specific_location(
                 location_tuple,
@@ -77,7 +77,7 @@ inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, cha
                         return "{}";
                     }
 
-                    CXType const var_type = detail::deduct_type_at_cursor(var_decl_cursor);
+                    CXType const var_type = detail::deduce_type_at_cursor(var_decl_cursor);
                     if (var_type.kind == CXType_Invalid) {
                         return "{}";
                     }
@@ -94,7 +94,7 @@ inline char const* deduct_var_decl_type(LocationTuple const& location_tuple, cha
 
 namespace detail {
 
-CXType deduct_func_decl_type_at_cursor(CXCursor const& cursor)
+CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 {
     auto const func_type = clang_getCursorType(cursor);
     auto const result_type = clang_getResultType(func_type);
@@ -115,10 +115,10 @@ CXType deduct_func_decl_type_at_cursor(CXCursor const& cursor)
                 return clang_getCursorType(return_stmt_cursor);
             }
 
-            CXType deducted_type;
-            deducted_type.kind = CXType_Invalid;
-            clang_visitChildren(return_stmt_cursor, unexposed_type_deducter, &deducted_type);
-            return deducted_type;
+            CXType deduced_type;
+            deduced_type.kind = CXType_Invalid;
+            clang_visitChildren(return_stmt_cursor, unexposed_type_deducer, &deduced_type);
+            return deduced_type;
         }
         default: return result_type;
     }
@@ -127,7 +127,7 @@ CXType deduct_func_decl_type_at_cursor(CXCursor const& cursor)
 } // namespace detail
 
 template<class LocationTuple>
-inline char const* deduct_func_return_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_func_return_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
 {
     return at_specific_location(
                 location_tuple,
@@ -139,7 +139,7 @@ inline char const* deduct_func_return_type(LocationTuple const& location_tuple, 
                         return "{}";
                     }
 
-                    CXType const func_type = detail::deduct_func_decl_type_at_cursor(func_decl_cursor);
+                    CXType const func_type = detail::deduce_func_decl_type_at_cursor(func_decl_cursor);
                     if (func_type.kind == CXType_Invalid) {
                         return "{}";
                     }
@@ -155,7 +155,7 @@ inline char const* deduct_func_return_type(LocationTuple const& location_tuple, 
 }
 
 template<class LocationTuple>
-inline char const* deduct_func_or_var_decl(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_func_or_var_decl(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
 {
     return at_specific_location(
                 location_tuple,
@@ -173,8 +173,8 @@ inline char const* deduct_func_or_var_decl(LocationTuple const& location_tuple, 
 
                     CXType const result_type = 
                         clang_getCursorKind(cursor) == CXCursor_VarDecl ?
-                            detail::deduct_type_at_cursor(func_or_var_decl) :
-                            detail::deduct_func_decl_type_at_cursor(func_or_var_decl);
+                            detail::deduce_type_at_cursor(func_or_var_decl) :
+                            detail::deduce_func_decl_type_at_cursor(func_or_var_decl);
                     if (result_type.kind == CXType_Invalid) {
                         return "{}";
                     }

@@ -16,7 +16,7 @@ You can
 - get extent at the specific location of the code
 - get definition, declaration and referenced node of the item at specific location
 - get pointee type, result type, canonical type at specific location
-- deduct type of variable declaration and return value of function
+- deduce type of variable declaration and return value of function
 - get the information for completion. *(not implemented yet)*
 - get diagnostic information. *(not implemented yet)*
 - get preprocessing information. *(not implemented yet)*
@@ -89,7 +89,7 @@ If you want to get the type of a function at specific location, you should use `
 
 ### `libclang#deduction#type_of_function_or_variable_declaration({filename}, {line}, {col})`
 
-Deduct type of variable and return value of function at `{line}, {col}`.  You must specify `{line}` and `{col}` of variable declaration or function declaration.  If you specify the place of variable declaration and the type of variable is `auto`, it searches type of left hand side of the declaration.  And if you specify the place of function declaration whose return type is `auto`, it searches type of return statement in the function.
+Deduce type of variable and return value of function at `{line}, {col}`.  You must specify `{line}` and `{col}` of variable declaration or function declaration.  If you specify the place of variable declaration and the type of variable is `auto`, it searches type of left hand side of the declaration.  And if you specify the place of function declaration whose return type is `auto`, it searches type of return statement in the function.
 
 This manual detection will be obsolete when `clang_getCanonicalType()` API will be fixed.  Then I will simply use the API and remove manual detection. Reference links are below.
 
