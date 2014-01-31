@@ -91,6 +91,11 @@ If you want to get the type of a function at specific location, you should use `
 
 Deduct type of variable and return value of function at `{line}, {col}`.  You must specify `{line}` and `{col}` of variable declaration or function declaration.  If you specify the place of variable declaration and the type of variable is `auto`, it searches type of left hand side of the declaration.  And if you specify the place of function declaration whose return type is `auto`, it searches type of return statement in the function.
 
+This manual detection will be obsolete when `clang_getCanonicalType()` API will be fixed.  Then I will simply use the API and remove manual detection. Reference links are below.
+
+- http://clang-developers.42468.n3.nabble.com/API-for-auto-type-deduction-in-libclang-td4037350.html
+- http://llvm.org/bugs/show_bug.cgi?id=18669
+
 ## Installation
 
 `llvm-config` command is required.  After cloning this repository, execute `make` in the repository.  Or compile `lib/libclang-vim/clang_vim.cpp` manually as a shared object.
