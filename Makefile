@@ -8,6 +8,16 @@ else
 LLVMCONFIG=llvm-config-3.4
 endif
 
+ifeq ($(shell which clang++-3.4),)
+ifeq ($(shell which clang++-3.5),)
+CC=clang++
+else
+CC=clang++-3.5
+endif
+else
+CC=clang++-3.4
+endif
+
 TARGET=lib/libclang-vim.so
 SRC=lib/libclang-vim/clang_vim.cpp lib/libclang-vim/AST_extracter.hpp lib/libclang-vim/helpers.hpp lib/libclang-vim/location.hpp lib/libclang-vim/stringizers.hpp lib/libclang-vim/tokenizer.hpp lib/libclang-vim/deduction.hpp
 CPPSRC=lib/libclang-vim/clang_vim.cpp
@@ -22,7 +32,7 @@ endif
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	clang++ $(CXXFLAGS) $(CPPSRC) $(LDFLAGS) -o $(TARGET)
+	$(CC) $(CXXFLAGS) $(CPPSRC) $(LDFLAGS) -o $(TARGET)
 
 clean:
 	rm -f $(TARGET)
