@@ -110,12 +110,6 @@ inline std::string stringize_cursor_location(CXCursor const& cursor)
     return stringize_location(location);
 }
 
-inline std::string stringize_USR(CXCursor const& cursor)
-{
-    auto USR = owned(clang_getCursorUSR(cursor));
-    return stringize_key_value("USR", USR);
-}
-
 inline std::string stringize_cursor_kind_type(CXCursorKind const& kind)
 {
     if (clang_isAttribute(kind)) {
@@ -205,7 +199,6 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
         + stringize_linkage(cursor)
         + stringize_parent(cursor, parent)
         + stringize_cursor_location(cursor)
-        + stringize_USR(cursor)
         + stringize_cursor_kind(cursor)
         + stringize_included_file(cursor);
 }
