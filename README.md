@@ -96,6 +96,10 @@ This manual detection will be obsolete when `clang_getCanonicalType()` API will 
 - http://clang-developers.42468.n3.nabble.com/API-for-auto-type-deduction-in-libclang-td4037350.html
 - http://llvm.org/bugs/show_bug.cgi?id=18669
 
+### `libclang#deduction#type_at({filename}, {line}, {col})`
+
+Get type at specific location with auto-deduction described above.
+
 ## Installation
 
 ### LLVM Installation
