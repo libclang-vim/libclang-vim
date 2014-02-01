@@ -171,13 +171,66 @@ inline char const* deduce_func_or_var_decl(LocationTuple const& location_tuple, 
                         return "{}";
                     }
 
-                    CXType const result_type = 
+                    CXType const result_type =
                         clang_getCursorKind(cursor) == CXCursor_VarDecl ?
                             detail::deduce_type_at_cursor(func_or_var_decl) :
                             detail::deduce_func_decl_type_at_cursor(func_or_var_decl);
                     if (result_type.kind == CXType_Invalid) {
                         return "{}";
                     }
+
+                    std::string result;
+                    result += stringize_type(result_type);
+                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
+                    return "{" + result + "}";
+                },
+                argv,
+                argc
+            );
+}
+
+namespace detail {
+
+CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientData data)
+{
+    auto const type = clang_getCursorType(cursor);
+    if (type.kind != CXType_Invalid) {
+        *(reinterpret_cast<CXCursor *>(data)) = cursor;
+        return CXChildVisit_Break;
+    }
+    return CXChildVisit_Recurse;
+}
+
+inline bool is_invalid_type_cursor(CXCursor const& cursor)
+{
+    return clang_getCursorType(cursor).kind == CXType_Invalid;
+}
+
+} // namespace detail
+
+template<class LocationTuple>
+inline char const* deduce_type_at(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+{
+    return at_specific_location(
+                location_tuple,
+                [](CXCursor const& cursor)
+                    -> std::string
+                {
+                    CXCursor valid_cursor = cursor;
+                    if (detail::is_invalid_type_cursor(valid_cursor)) {
+                        clang_visitChildren(cursor, detail::valid_type_cursor_getter, &valid_cursor);
+                    }
+                    if (detail::is_invalid_type_cursor(valid_cursor)) {
+                        return "{}";
+                    }
+
+                    CXCursorKind const kind = clang_getCursorKind(valid_cursor);
+                    CXType const result_type =
+                        kind == CXCursor_VarDecl ?
+                            detail::deduce_type_at_cursor(valid_cursor) :
+                            is_function_decl_kind(kind) ?
+                                detail::deduce_func_decl_type_at_cursor(valid_cursor) :
+                                clang_getCursorType(valid_cursor);
 
                     std::string result;
                     result += stringize_type(result_type);
