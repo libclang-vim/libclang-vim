@@ -231,6 +231,9 @@ inline char const* deduce_type_at(LocationTuple const& location_tuple, char cons
                             is_function_decl_kind(kind) ?
                                 detail::deduce_func_decl_type_at_cursor(valid_cursor) :
                                 clang_getCursorType(valid_cursor);
+                    if (result_type.kind == CXType_Invalid) {
+                        return "{}";
+                    }
 
                     std::string result;
                     result += stringize_type(result_type);
