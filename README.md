@@ -98,8 +98,44 @@ This manual detection will be obsolete when `clang_getCanonicalType()` API will 
 
 ## Installation
 
-`llvm-config` command is required.  After cloning this repository, execute `make` in the repository.  Or compile `lib/libclang-vim/clang_vim.cpp` manually as a shared object.
+### LLVM Installation
 
+- __OS X__
+
+```
+$ brew tap https://github.com/Homebrew/homebrew-dupes
+$ brew update
+$ brew install llvm34 --with-clang --with-libcxx --disable-assertions
+```
+
+- __Ubuntu__
+
+```
+$ sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+$ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+$ echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise main' > llvm.list
+$ echo 'deb-src http://llvm.org/apt/precise/ llvm-toolchain-precise main' >> llvm.list
+$ sudo mv llvm.list /etc/apt/sources.list.d/
+$ sudo apt-get update
+$ sudo apt-get install llvm-3.5 clang-3.5 libclang-3.5-dev
+```
+
+- __Other OS__
+
+Please lookup how to install the latest stable LLVM manually.
+
+### libclang-vim Installation
+
+- __With `Makefile`__
+
+`llvm-config` command is required.  After cloning this repository, execute `make` in the repository.
+
+```
+$ cd libclang-vim/
+$ make
+```
+
+Or compile `lib/libclang-vim/clang_vim.cpp` manually as a shared object.
 
 ## Environment
 
