@@ -150,6 +150,12 @@ If you see some errors, issues or pull requests are welcome.
 - Ubuntu 12.04, LLVM 3.5 (installed with apt)
 - BGM: [TSAR MOMBA](http://www.youtube.com/watch?v=wi4WRhwhnCk)
 
+## Vim Plugins Using libclang-vim
+
+- [vim-textobj-clang](https://github.com/rhysd/vim-textobj-clang) : Deal with many C++ structures as text objects.
+- [clang-extent-selector.vim](https://github.com/rhysd/clang-extent-selector.vim) : Only one mapping to select various C and C++ blocks.
+- [rhysd/clang-type-inspector.vim](https://github.com/rhysd/clang-type-inspector.vim) : Show type under the cursor and mouse pointer even if it is `auto`.
+
 ## Example
 
 ### Get AST Information
