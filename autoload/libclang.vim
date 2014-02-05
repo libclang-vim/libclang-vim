@@ -7,3 +7,17 @@ endif
 function! libclang#version()
     return libcall(g:libclang#lib_path, 'vim_clang_version', '')
 endfunction
+
+function! libclang#call(api, file)
+    if ! filereadable(a:file)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, a:api, a:file))
+endfunction
+
+function! libclang#call_at(api, file, line, col)
+    if ! filereadable(a:file)
+        return {}
+    endif
+    return eval(libcall(g:libclang#lib_path, a:api, printf("%s:%d:%d", a:file, a:line, a:col)))
+endfunction
