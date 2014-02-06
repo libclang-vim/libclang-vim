@@ -23,10 +23,10 @@ function! libclang#call_at(api, file, line, col, extra)
         return {}
     endif
 
-    if ! empty(a:extra)
-        if type(a:extra) == s:LIST_TYPE
+    if len(a:extra) == 1
+        if type(a:extra[0]) == s:LIST_TYPE
             let compiler_args = join(a:extra[0], ' ')
-        elseif type(a:extra) == s:STRING_TYPE
+        elseif type(a:extra[0]) == s:STRING_TYPE
             let compiler_args = a:extra[0]
         else
             let compiler_args = string(a:extra[0])
