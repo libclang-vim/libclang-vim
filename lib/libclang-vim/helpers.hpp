@@ -10,6 +10,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include <utility>
 
 #include <clang-c/Index.h>
 
@@ -137,7 +138,7 @@ using args_type = std::vector<std::string>;
 
 namespace detail {
 
-    args_type parse_args_string(std::string const& s)
+    args_type parse_compiler_args(std::string const& s)
     {
         using iterator = std::istream_iterator<std::string>;
         args_type result;
@@ -148,30 +149,50 @@ namespace detail {
 
 } // namespace detail
 
-// "file:args:line:col"
+// Parse "file:args"
+auto parse_default_args(std::string const& args_string)
+    -> std::pair<std::string, args_type>
+{
+    auto const end = std::end(args_string);
+    auto const path_end = std::find(std::begin(args_string), end, ':');
+    if (path_end == end) {
+        return {"", args_type{}};
+    };
+    std::string const file{std::begin(args_string), path_end};
+    if (path_end+1 == end) {
+        return {file, {}};
+    } else {
+        return {file, detail::parse_compiler_args({path_end+1, end})};
+    }
+}
+
+// Parse "file:args:line:col"
 auto parse_args_with_location(std::string const& args_string)
     -> std::tuple<std::string, args_type, size_t, size_t>
 {
     auto const end = std::end(args_string);
-    auto const path_end = std::find(std::begin(args_string), end, ':');
-    if (path_end == end || path_end + 1 == end) {
-        return std::make_tuple("", args_type{}, 0, 0);
-    }
-    std::string const file{std::begin(args_string), path_end};
 
-    auto const args_end = std::find(path_end + 1, end, ':');
-    if (args_end == end || args_end + 1 == end) {
+    auto second_colon = std::find(std::begin(args_string), end, ':');
+    if (second_colon == end || second_colon + 1 == end) {
         return std::make_tuple("", args_type{}, 0, 0);
     }
-    auto const args = detail::parse_args_string({path_end+1, args_end});
+    second_colon = std::find(second_colon + 1, end, ':');
+    if (second_colon == end || second_colon + 1 == end) {
+        return std::make_tuple("", args_type{}, 0, 0);
+    }
+
+    auto const default_args = parse_default_args({std::begin(args_string), second_colon});
+    if (default_args.first == "") {
+        return std::make_tuple("", args_type{}, 0, 0);
+    }
 
     size_t line, col;
-    auto const num_input = std::sscanf(std::string{args_end+1, end}.c_str(), "%zu:%zu", &line, &col);
+    auto const num_input = std::sscanf(std::string{second_colon+1, end}.c_str(), "%zu:%zu", &line, &col);
     if (num_input != 2) {
         return std::make_tuple("", args_type{}, 0, 0);
     }
 
-    return std::make_tuple(file, args, line, col);
+    return std::make_tuple(default_args.first, default_args.second, line, col);
 }
 
 inline std::vector<char const *> get_args_ptrs(args_type const& args)
