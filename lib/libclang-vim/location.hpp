@@ -31,9 +31,7 @@ namespace detail {
 template<class LocationTuple, class Predicate>
 auto get_extent(
         LocationTuple const& location_tuple,
-        Predicate const& predicate,
-        char const* argv[] = {},
-        int const argc = 0
+        Predicate const& predicate
     ) -> char const*
 {
     return at_specific_location(
@@ -45,16 +43,13 @@ auto get_extent(
                     } else {
                         return "{" + stringize_extent(rc) + "}";
                     }
-                },
-                argv, argc);
+                });
 };
 
 template<class LocationTuple, class JumpFunc>
 inline auto get_related_node_of(
         LocationTuple const& location_tuple,
-        JumpFunc const& predicate,
-        char const* argv[] = {},
-        int const argc = 0
+        JumpFunc const& predicate
     ) -> char const*
 {
     return at_specific_location(
@@ -66,16 +61,13 @@ inline auto get_related_node_of(
                     } else {
                         return "{" + stringize_cursor(rc, clang_getCursorSemanticParent(rc)) + "}";
                     }
-                },
-                argv, argc);
+                });
 }
 
 template<class LocationTuple, class JumpFunc>
 inline auto get_type_related_to(
         LocationTuple const& location_tuple,
-        JumpFunc const& predicate,
-        char const* argv[] = {},
-        int const argc = 0
+        JumpFunc const& predicate
     ) -> char const*
 {
     return at_specific_location(
@@ -87,30 +79,27 @@ inline auto get_type_related_to(
                 } else {
                     return "{" + stringize_type(type)+ "}";
                 }
-            },
-            argv, argc);
+            });
 }
 
 template<class LocationTuple>
-auto get_all_extents(
-        LocationTuple const& location_tuple,
-        char const* argv[] = {},
-        int const argc = 0
-    ) -> char const*
+auto get_all_extents( LocationTuple const& location_tuple)
+    -> char const*
 {
     static std::string vimson;
     vimson = "";
-    char const* file_name = std::get<2>(location_tuple).c_str();
+    char const* file_name = std::get<0>(location_tuple).c_str();
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    auto const args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
         clang_disposeIndex(index);
         return "[]";
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
+    auto const location = clang_getLocation(translation_unit, file, std::get<2>(location_tuple), std::get<3>(location_tuple));
     CXCursor cursor = clang_getCursor(translation_unit, location);
     vimson += "{" + stringize_extent(cursor) + "},";
 

@@ -7,6 +7,9 @@
 #include <memory>
 #include <fstream>
 #include <algorithm>
+#include <vector>
+#include <sstream>
+#include <iterator>
 
 #include <clang-c/Index.h>
 
@@ -130,46 +133,73 @@ bool is_parameter(CXCursor const& cursor)
     return is_parameter_kind(clang_getCursorKind(cursor));
 }
 
-// Location string parser
-auto parse_location_string(std::string const& location_string)
-    -> std::tuple<size_t, size_t, std::string>
-{
-    auto const end = std::end(location_string);
-    auto const path_end = std::find(std::begin(location_string), end, ':');
-    if (path_end == end || path_end + 1 == end) {
-        return std::make_tuple(0, 0, "");
+using args_type = std::vector<std::string>;
+
+namespace detail {
+
+    args_type parse_args_string(std::string const& s)
+    {
+        using iterator = std::istream_iterator<std::string>;
+        args_type result;
+        std::istringstream iss(s);
+        std::copy(iterator(iss), iterator{}, std::back_inserter(result));
+        return result;
     }
-    std::string file{std::begin(location_string), path_end};
+
+} // namespace detail
+
+// "file:args:line:col"
+auto parse_args_with_location(std::string const& args_string)
+    -> std::tuple<std::string, args_type, size_t, size_t>
+{
+    auto const end = std::end(args_string);
+    auto const path_end = std::find(std::begin(args_string), end, ':');
+    if (path_end == end || path_end + 1 == end) {
+        return std::make_tuple("", args_type{}, 0, 0);
+    }
+    std::string const file{std::begin(args_string), path_end};
+
+    auto const args_end = std::find(path_end + 1, end, ':');
+    if (args_end == end || args_end + 1 == end) {
+        return std::make_tuple("", args_type{}, 0, 0);
+    }
+    auto const args = detail::parse_args_string({path_end+1, args_end});
 
     size_t line, col;
-    auto const num_input = std::sscanf(std::string{path_end+1, end}.c_str(), "%zu:%zu", &line, &col);
+    auto const num_input = std::sscanf(std::string{args_end+1, end}.c_str(), "%zu:%zu", &line, &col);
     if (num_input != 2) {
-        return std::make_tuple(0, 0, "");
+        return std::make_tuple("", args_type{}, 0, 0);
     }
 
-    return std::make_tuple(line, col, file);
+    return std::make_tuple(file, args, line, col);
+}
+
+inline std::vector<char const *> get_args_ptrs(args_type const& args)
+{
+    std::vector<char const*> args_ptrs{args.size()};
+    std::transform(std::begin(args), std::end(args), std::begin(args_ptrs), [](std::string const& s){ return s.c_str(); });
+    return args_ptrs;
 }
 
 template<class LocationTuple, class Predicate>
 auto at_specific_location(
         LocationTuple const& location_tuple,
-        Predicate const& predicate,
-        char const* argv[] = {},
-        int const argc = 0
+        Predicate const& predicate
     ) -> char const*
 {
     static std::string vimson;
-    char const* file_name = std::get<2>(location_tuple).c_str();
+    char const* file_name = std::get<0>(location_tuple).c_str();
+    auto const args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
         clang_disposeIndex(index);
         return "{}";
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, std::get<0>(location_tuple), std::get<1>(location_tuple));
+    auto const location = clang_getLocation(translation_unit, file, std::get<2>(location_tuple), std::get<3>(location_tuple));
     CXCursor const cursor = clang_getCursor(translation_unit, location);
 
     vimson = predicate(cursor);
