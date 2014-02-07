@@ -11,29 +11,32 @@ function! libclang#version()
     return libcall(g:libclang#lib_path, 'vim_clang_version', '')
 endfunction
 
-function! libclang#call(api, file)
+function! s:get_extra_string(extra)
+    if len(a:extra) == 1
+        if type(a:extra[0]) == s:LIST_TYPE
+            return join(a:extra[0], ' ')
+        elseif type(a:extra[0]) == s:STRING_TYPE
+            return a:extra[0]
+        else
+            return string(a:extra[0])
+        endif
+    else
+        return ""
+    endif
+endfunction
+
+function! libclang#call(api, file, extra)
     if ! filereadable(a:file)
         return {}
     endif
-    return eval(libcall(g:libclang#lib_path, a:api, a:file))
+    let compiler_args = s:get_extra_string(a:extra)
+    return eval(libcall(g:libclang#lib_path, a:api, a:file . ':' . compiler_args))
 endfunction
 
 function! libclang#call_at(api, file, line, col, extra)
     if ! filereadable(a:file)
         return {}
     endif
-
-    if len(a:extra) == 1
-        if type(a:extra[0]) == s:LIST_TYPE
-            let compiler_args = join(a:extra[0], ' ')
-        elseif type(a:extra[0]) == s:STRING_TYPE
-            let compiler_args = a:extra[0]
-        else
-            let compiler_args = string(a:extra[0])
-        endif
-    else
-        let compiler_args = ""
-    endif
-
+    let compiler_args = s:get_extra_string(a:extra)
     return eval(libcall(g:libclang#lib_path, a:api, printf("%s:%s:%d:%d", a:file, compiler_args, a:line, a:col)))
 endfunction
