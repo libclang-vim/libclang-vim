@@ -15,10 +15,12 @@ char const* vim_clang_version()
     return clang_getCString(clang_getClangVersion());
 }
 
-char const* vim_clang_tokens(char const* file_name)
+char const* vim_clang_tokens(char const* arguments)
 {
-    libclang_vim::tokenizer tokenizer(file_name);
-    static auto const vimson = tokenizer.tokenize_as_vimson(0, {});
+    auto const parsed = libclang_vim::parse_default_args(arguments);
+    auto const args_ptrs = libclang_vim::get_args_ptrs(parsed.second);
+    libclang_vim::tokenizer tokenizer{parsed.first};
+    static auto const vimson = tokenizer.tokenize_as_vimson(args_ptrs.data(), args_ptrs.size());
     return vimson.c_str();
 }
 
