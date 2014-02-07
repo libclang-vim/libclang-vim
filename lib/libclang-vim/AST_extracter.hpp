@@ -63,21 +63,22 @@ namespace detail {
 
 template<class Predicate>
 auto extract_AST_nodes(
-        char const* file_name,
+        char const* arguments,
         extraction_policy const policy,
-        Predicate const& predicate,
-        char const* argv[] = {},
-        int const argc = 0
+        Predicate const& predicate
     ) -> char const*
 {
     static std::string vimson;
     vimson = "";
 
+    auto const parsed = parse_default_args(arguments);
+    auto const args_ptrs = get_args_ptrs(parsed.second);
+
     typedef std::tuple<std::string&, extraction_policy const, Predicate const&> callback_data_type;
     callback_data_type callback_data{vimson, policy, predicate};
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, argv, argc, NULL, 0, CXTranslationUnit_Incomplete);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, parsed.first.c_str(), args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
         clang_disposeIndex(index);
         return "{}";

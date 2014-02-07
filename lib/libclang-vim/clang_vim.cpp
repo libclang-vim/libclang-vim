@@ -24,109 +24,109 @@ char const* vim_clang_tokens(char const* file_name)
 
 // API to extract AST nodes {{{
 // API to extract all {{{
-char const* vim_clang_extract_all(char const* file_name)
+char const* vim_clang_extract_all(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const&){ return true; }
             );
 }
 
-char const* vim_clang_extract_declarations(char const* file_name)
+char const* vim_clang_extract_declarations(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isDeclaration(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_attributes(char const* file_name)
+char const* vim_clang_extract_attributes(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isAttribute(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_expressions(char const* file_name)
+char const* vim_clang_extract_expressions(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isExpression(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_preprocessings(char const* file_name)
+char const* vim_clang_extract_preprocessings(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isPreprocessing(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_references(char const* file_name)
+char const* vim_clang_extract_references(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isReference(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_statements(char const* file_name)
+char const* vim_clang_extract_statements(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isStatement(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_translation_units(char const* file_name)
+char const* vim_clang_extract_translation_units(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isTranslationUnit(clang_getCursorKind(c)); }
             );
 }
 
-char const* vim_clang_extract_definitions(char const* file_name)
+char const* vim_clang_extract_definitions(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_isCursorDefinition(c); }
             );
 }
 
-char const* vim_clang_extract_virtual_member_functions(char const* file_name)
+char const* vim_clang_extract_virtual_member_functions(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_CXXMethod_isVirtual(c); }
             );
 }
 
-char const* vim_clang_extract_pure_virtual_member_functions(char const* file_name)
+char const* vim_clang_extract_pure_virtual_member_functions(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_CXXMethod_isPureVirtual(c); }
             );
 }
 
-char const* vim_clang_extract_static_member_functions(char const* file_name)
+char const* vim_clang_extract_static_member_functions(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::all,
                 [](CXCursor const& c){ return clang_CXXMethod_isStatic(c); }
             );
@@ -134,10 +134,10 @@ char const* vim_clang_extract_static_member_functions(char const* file_name)
 // }}}
 
 // API to extract current file only {{{
-char const* vim_clang_extract_all_current_file(char const* file_name)
+char const* vim_clang_extract_all_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const&) -> bool {
                     return true;
@@ -145,10 +145,10 @@ char const* vim_clang_extract_all_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_declarations_current_file(char const* file_name)
+char const* vim_clang_extract_declarations_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isDeclaration(clang_getCursorKind(c));
@@ -156,10 +156,10 @@ char const* vim_clang_extract_declarations_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_attributes_current_file(char const* file_name)
+char const* vim_clang_extract_attributes_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isAttribute(clang_getCursorKind(c));
@@ -167,10 +167,10 @@ char const* vim_clang_extract_attributes_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_expressions_current_file(char const* file_name)
+char const* vim_clang_extract_expressions_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isExpression(clang_getCursorKind(c));
@@ -178,10 +178,10 @@ char const* vim_clang_extract_expressions_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_preprocessings_current_file(char const* file_name)
+char const* vim_clang_extract_preprocessings_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isPreprocessing(clang_getCursorKind(c));
@@ -189,10 +189,10 @@ char const* vim_clang_extract_preprocessings_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_references_current_file(char const* file_name)
+char const* vim_clang_extract_references_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isReference(clang_getCursorKind(c));
@@ -200,10 +200,10 @@ char const* vim_clang_extract_references_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_statements_current_file(char const* file_name)
+char const* vim_clang_extract_statements_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isStatement(clang_getCursorKind(c));
@@ -211,10 +211,10 @@ char const* vim_clang_extract_statements_current_file(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_translation_units_current_file(char const* file_name)
+char const* vim_clang_extract_translation_units_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 [](CXCursor const& c){
                     return clang_isTranslationUnit(clang_getCursorKind(c));
@@ -222,37 +222,37 @@ char const* vim_clang_extract_translation_units_current_file(char const* file_na
             );
 }
 
-char const* vim_clang_extract_definitions_current_file(char const* file_name)
+char const* vim_clang_extract_definitions_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 clang_isCursorDefinition
             );
 }
 
-char const* vim_clang_extract_virtual_member_functions_current_file(char const* file_name)
+char const* vim_clang_extract_virtual_member_functions_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 clang_CXXMethod_isVirtual
             );
 }
 
-char const* vim_clang_extract_pure_virtual_member_functions_current_file(char const* file_name)
+char const* vim_clang_extract_pure_virtual_member_functions_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 clang_CXXMethod_isPureVirtual
             );
 }
 
-char const* vim_clang_extract_static_member_functions_current_file(char const* file_name)
+char const* vim_clang_extract_static_member_functions_current_file(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::current_file,
                 clang_CXXMethod_isStatic
             );
@@ -260,10 +260,10 @@ char const* vim_clang_extract_static_member_functions_current_file(char const* f
 // }}}
 
 // API to extract current file only {{{
-char const* vim_clang_extract_all_non_system_headers(char const* file_name)
+char const* vim_clang_extract_all_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const&) -> bool {
                     return true;
@@ -271,10 +271,10 @@ char const* vim_clang_extract_all_non_system_headers(char const* file_name)
             );
 }
 
-char const* vim_clang_extract_declarations_non_system_headers(char const* file_name)
+char const* vim_clang_extract_declarations_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isDeclaration(clang_getCursorKind(c));
@@ -282,10 +282,10 @@ char const* vim_clang_extract_declarations_non_system_headers(char const* file_n
             );
 }
 
-char const* vim_clang_extract_attributes_non_system_headers(char const* file_name)
+char const* vim_clang_extract_attributes_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isAttribute(clang_getCursorKind(c));
@@ -293,10 +293,10 @@ char const* vim_clang_extract_attributes_non_system_headers(char const* file_nam
             );
 }
 
-char const* vim_clang_extract_expressions_non_system_headers(char const* file_name)
+char const* vim_clang_extract_expressions_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isExpression(clang_getCursorKind(c));
@@ -304,10 +304,10 @@ char const* vim_clang_extract_expressions_non_system_headers(char const* file_na
             );
 }
 
-char const* vim_clang_extract_preprocessings_non_system_headers(char const* file_name)
+char const* vim_clang_extract_preprocessings_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isPreprocessing(clang_getCursorKind(c));
@@ -315,10 +315,10 @@ char const* vim_clang_extract_preprocessings_non_system_headers(char const* file
             );
 }
 
-char const* vim_clang_extract_references_non_system_headers(char const* file_name)
+char const* vim_clang_extract_references_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isReference(clang_getCursorKind(c));
@@ -326,10 +326,10 @@ char const* vim_clang_extract_references_non_system_headers(char const* file_nam
             );
 }
 
-char const* vim_clang_extract_statements_non_system_headers(char const* file_name)
+char const* vim_clang_extract_statements_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isStatement(clang_getCursorKind(c));
@@ -337,10 +337,10 @@ char const* vim_clang_extract_statements_non_system_headers(char const* file_nam
             );
 }
 
-char const* vim_clang_extract_translation_units_non_system_headers(char const* file_name)
+char const* vim_clang_extract_translation_units_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 [](CXCursor const& c){
                     return clang_isTranslationUnit(clang_getCursorKind(c));
@@ -348,37 +348,37 @@ char const* vim_clang_extract_translation_units_non_system_headers(char const* f
             );
 }
 
-char const* vim_clang_extract_definitions_non_system_headers(char const* file_name)
+char const* vim_clang_extract_definitions_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 clang_isCursorDefinition
             );
 }
 
-char const* vim_clang_extract_virtual_member_functions_non_system_headers(char const* file_name)
+char const* vim_clang_extract_virtual_member_functions_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 clang_CXXMethod_isVirtual
             );
 }
 
-char const* vim_clang_extract_pure_virtual_member_functions_non_system_headers(char const* file_name)
+char const* vim_clang_extract_pure_virtual_member_functions_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 clang_CXXMethod_isPureVirtual
             );
 }
 
-char const* vim_clang_extract_static_member_functions_non_system_headers(char const* file_name)
+char const* vim_clang_extract_static_member_functions_non_system_headers(char const* arguments)
 {
     return libclang_vim::extract_AST_nodes(
-                file_name,
+                arguments,
                 libclang_vim::extraction_policy::non_system_headers,
                 clang_CXXMethod_isStatic
             );
