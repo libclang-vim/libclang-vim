@@ -25,15 +25,17 @@ You can
 
 ## Usage
 
+In all below usages, `{compiler args}` means arguments passed to a compiler. (e.g. `"-std=c++1y"`)
+
 ### `libclang#version()`
 
 Get version of libclang as a string.
 
-### `libclang#tokens#all({filename})`
+### `libclang#tokens#all({filename} [, {compiler args}])`
 
 Get tokens in `{filename}`.  It includes all tokens in included header files.
 
-### `libclang#AST#{extent}#{kind of node}({filename})`
+### `libclang#AST#{extent}#{kind of node}({filename} [, {compiler args}])`
 
 Get information of a specific kind of node in AST as a dictionary.
 
@@ -43,15 +45,15 @@ Get information of a specific kind of node in AST as a dictionary.
 
 If you want to get information about definitions and not to get AST information about system headers, you should use `libclang#AST#non_system_headers#definitions()`.
 
-### `libclang#location#AST_node({filename}, {line}, {col})`
+### `libclang#location#AST_node({filename}, {line}, {col} [, {compiler args}])`
 
 Get the AST node information at specific location.
 
-### `libclang#location#extent({filename}, {line}, {col})`
+### `libclang#location#extent({filename}, {line}, {col} [, {compiler args}])`
 
 Get the extent of the most inner syntax element at specific location.
 
-### `libclang#location#{syntax element}_extent({filename}, {line}, {col})`
+### `libclang#location#{syntax element}_extent({filename}, {line}, {col} [, {compiler args}])`
 
 Get the extent of `{syntax element}` at specific location.
 
@@ -69,7 +71,7 @@ If you want to get the extent of a class at specific location, you should use `l
 
 You want to see actual input and output?  Please see below Example section.
 
-### `libclang#location#{something}_at({filename}, {line}, {col})`
+### `libclang#location#{something}_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get the node information related at specific location.
 
@@ -87,7 +89,7 @@ If you want to get the definition of specific location, you should use `libclang
 If you want to know what item specific location references, you should use `libclang#location#referenced_at()`.
 If you want to get the type of a function at specific location, you should use `libclang#locaiton#result_type_at()`.
 
-### `libclang#deduction#type_of_function_or_variable_declaration({filename}, {line}, {col})`
+### `libclang#deduction#type_of_function_or_variable_declaration({filename}, {line}, {col} [, {compiler args}])`
 
 Deduce type of variable and return value of function at `{line}, {col}`.  You must specify `{line}` and `{col}` of variable declaration or function declaration.  If you specify the place of variable declaration and the type of variable is `auto`, it searches type of left hand side of the declaration.  And if you specify the place of function declaration whose return type is `auto`, it searches type of return statement in the function.
 
@@ -96,7 +98,7 @@ This manual detection will be obsolete when `clang_getCanonicalType()` API will 
 - http://clang-developers.42468.n3.nabble.com/API-for-auto-type-deduction-in-libclang-td4037350.html
 - http://llvm.org/bugs/show_bug.cgi?id=18669
 
-### `libclang#deduction#type_at({filename}, {line}, {col})`
+### `libclang#deduction#type_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get type at specific location with auto-deduction described above.
 
