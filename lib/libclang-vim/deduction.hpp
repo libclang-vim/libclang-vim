@@ -65,7 +65,7 @@ CXType deduce_type_at_cursor(CXCursor const& cursor)
 } // namespace detail
 
 template<class LocationTuple>
-inline char const* deduce_var_decl_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_var_decl_type(LocationTuple const& location_tuple)
 {
     return at_specific_location(
                 location_tuple,
@@ -86,9 +86,7 @@ inline char const* deduce_var_decl_type(LocationTuple const& location_tuple, cha
                     result += stringize_type(var_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(var_type)) + "},";
                     return "{" + result + "}";
-                },
-                argv,
-                argc
+                }
             );
 }
 
@@ -127,7 +125,7 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 } // namespace detail
 
 template<class LocationTuple>
-inline char const* deduce_func_return_type(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_func_return_type(LocationTuple const& location_tuple)
 {
     return at_specific_location(
                 location_tuple,
@@ -148,14 +146,12 @@ inline char const* deduce_func_return_type(LocationTuple const& location_tuple, 
                     result += stringize_type(func_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(func_type)) + "},";
                     return "{" + result + "}";
-                },
-                argv,
-                argc
+                }
             );
 }
 
 template<class LocationTuple>
-inline char const* deduce_func_or_var_decl(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_func_or_var_decl(LocationTuple const& location_tuple)
 {
     return at_specific_location(
                 location_tuple,
@@ -183,9 +179,7 @@ inline char const* deduce_func_or_var_decl(LocationTuple const& location_tuple, 
                     result += stringize_type(result_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
                     return "{" + result + "}";
-                },
-                argv,
-                argc
+                }
             );
 }
 
@@ -209,7 +203,7 @@ inline bool is_invalid_type_cursor(CXCursor const& cursor)
 } // namespace detail
 
 template<class LocationTuple>
-inline char const* deduce_type_at(LocationTuple const& location_tuple, char const* argv[] = {}, int const argc = 0)
+inline char const* deduce_type_at(LocationTuple const& location_tuple)
 {
     return at_specific_location(
                 location_tuple,
@@ -236,9 +230,7 @@ inline char const* deduce_type_at(LocationTuple const& location_tuple, char cons
                     result += stringize_type(result_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
                     return "{" + result + "}";
-                },
-                argv,
-                argc
+                }
             );
 }
 

@@ -14,18 +14,19 @@ namespace libclang_vim {
 class tokenizer {
 private:
     CXTranslationUnit translation_unit;
-    char const* file_name;
+    std::string file_name;
 
 public:
-    tokenizer(char const* file_name)
-        : translation_unit(), file_name(file_name)
+    tokenizer(std::string const& file_name)
+        : translation_unit()
+        , file_name(file_name)
     {}
 
 private:
     CXSourceRange get_range_whole_file() const
     {
-        size_t const file_size = get_file_size(file_name);
-        CXFile const file = clang_getFile(translation_unit, file_name);
+        size_t const file_size = get_file_size(file_name.c_str());
+        CXFile const file = clang_getFile(translation_unit, file_name.c_str());
 
         auto const file_begin = clang_getLocationForOffset(translation_unit, file, 0);
         auto const file_end = clang_getLocationForOffset(translation_unit, file, file_size);
@@ -66,12 +67,12 @@ private:
             CXFile file;
             unsigned int line, column, offset;
             clang_getFileLocation(location, &file, &line, &column, &offset);
-            auto const file_name = owned(clang_getFileName(file));
+            auto const source_name = owned(clang_getFileName(file));
 
             return acc
                 + "{'spell':'" + clang_getCString(*spell)
                 + "','kind':'" + get_kind_spelling(kind)
-                + "','file':'" + clang_getCString(*file_name)
+                + "','file':'" + clang_getCString(*source_name)
                 + "','line':" + std::to_string(line)
                 + ",'column':" + std::to_string(column)
                 + ",'offset':" + std::to_string(offset)
@@ -80,11 +81,11 @@ private:
     }
 
 public:
-    std::string tokenize_as_vimson(size_t const argc, char const* args[])
+    std::string tokenize_as_vimson(char const* const* args, size_t const argc)
     {
         CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-        translation_unit = clang_parseTranslationUnit(index, file_name, args, argc, NULL, 0, CXTranslationUnit_Incomplete);
+        translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, NULL, 0, CXTranslationUnit_Incomplete);
         if (translation_unit == NULL) {
             clang_disposeIndex(index);
             return "{}";
