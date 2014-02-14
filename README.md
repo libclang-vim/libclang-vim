@@ -156,7 +156,8 @@ If you see some errors, issues or pull requests are welcome.
 
 - [vim-textobj-clang](https://github.com/rhysd/vim-textobj-clang) : Deal with many C++ structures as text objects.
 - [clang-extent-selector.vim](https://github.com/rhysd/clang-extent-selector.vim) : Only one mapping to select various C and C++ blocks.
-- [rhysd/clang-type-inspector.vim](https://github.com/rhysd/clang-type-inspector.vim) : Show type under the cursor and mouse pointer even if it is `auto`.
+- [clang-type-inspector.vim](https://github.com/rhysd/clang-type-inspector.vim) : Show type under the cursor and mouse pointer even if it is `auto`.
+- [vim-textobj-function-clang](https://github.com/rhysd/vim-textobj-function-clang) : a plugin of vim-textobj-function.
 
 ## Example
 
