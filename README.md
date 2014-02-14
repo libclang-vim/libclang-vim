@@ -369,6 +369,16 @@ int main()
 }
 ```
 
+## Trouble Shootings
+
+### "fatal error: 'bits/c++config.h' file not found" occurs
+
+Include a path to `bits/c++config.h` in `CXXFLAGS`.  Below is an example in Ubuntu 12.04
+
+```
+CXXFLAGS=-I/usr/include/i386-linux-gnu/c++/4.8 make
+```
+
 ## TODO
 
 - Use unsaved file
