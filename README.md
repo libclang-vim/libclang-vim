@@ -371,8 +371,6 @@ int main()
 
 ## TODO
 
-- Compiler options
-- Refactorings for Vim APIs (DRY)
 - Use unsaved file
 
 ## License
