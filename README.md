@@ -39,7 +39,7 @@ Get tokens in `{filename}`.  It includes all tokens in included header files.
 
 Get information of a specific kind of node in AST as a dictionary.
 
-`{extent}` is the extent of analysis. `whole` searches all of the code, `non_system_headers` searches all of the code except for system headers (which are included with `#include <>`), `current_file` searches the code in only the current file.
+`{extent}` is the extent of analysis. `whole` searches all the code, `non_system_headers` searches all the code except for system headers (which are included with `#include <>`), `current_file` searches the code in only the current file.
 
 `{kind of node}` is a kind of AST nodes which you want to extract.  `all` extracts all kind of AST nodes, `declarations` extracts all AST nodes related to declarations, `definitions` extracts all AST nodes related to definitions, `expressions` extracts all AST node related to expressions, and so on.
 
@@ -87,7 +87,7 @@ Get the node information related at specific location.
 
 If you want to get the definition of specific location, you should use `libclang#location#definition_at()`.
 If you want to know what item specific location references, you should use `libclang#location#referenced_at()`.
-If you want to get the type of a function at specific location, you should use `libclang#locaiton#result_type_at()`.
+If you want to get the type of function at specific location, you should use `libclang#locaiton#result_type_at()`.
 
 ### `libclang#deduction#type_of_function_or_variable_declaration({filename}, {line}, {col} [, {compiler args}])`
 
