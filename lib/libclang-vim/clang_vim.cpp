@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <tuple>
 
 #include <clang-c/Index.h>
@@ -594,7 +595,16 @@ char const* vim_clang_deduce_func_or_var_decl_at(char const* location_string)
 
 char const* vim_clang_get_type_with_deduction_at(char const* location_string)
 {
-    return libclang_vim::deduce_type_at(libclang_vim::parse_args_with_location(location_string));
+    // Close stderr.
+    int old_stderr = dup(2);
+    close(2);
+
+    const char* ret = libclang_vim::deduce_type_at(libclang_vim::parse_args_with_location(location_string));
+
+    // Restore stderr.
+    dup(old_stderr);
+    close(old_stderr);
+    return ret;
 }
 
 } // extern "C"
