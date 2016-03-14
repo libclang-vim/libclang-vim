@@ -10,4 +10,7 @@ endfunction
 function! libclang#deduction#type_at(filename, line, col, ...)
     return libclang#call_at('vim_clang_get_type_with_deduction_at', a:filename, a:line, a:col, a:000)
 endfunction
+function! libclang#deduction#current_function_at(filename, line, col, ...)
+    return libclang#call_at('vim_clang_get_current_function_at', a:filename, a:line, a:col, a:000)
+endfunction
 
