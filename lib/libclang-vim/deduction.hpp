@@ -3,6 +3,7 @@
 
 #include <cctype>
 #include <string>
+#include <stack>
 
 #include "helpers.hpp"
 #include "stringizers.hpp"
@@ -200,6 +201,12 @@ inline bool is_invalid_type_cursor(CXCursor const& cursor)
     return clang_getCursorType(cursor).kind == CXType_Invalid;
 }
 
+/// Function or member function.
+bool is_function(CXCursorKind kind)
+{
+    return kind == CXCursor_FunctionDecl || kind == CXCursor_CXXMethod;
+}
+
 } // namespace detail
 
 template<class LocationTuple>
@@ -233,6 +240,61 @@ inline char const* deduce_type_at(LocationTuple const& location_tuple)
                     result += stringize_type(result_type);
                     result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
                     return "{" + result + "}";
+                }
+            );
+}
+
+template<class LocationTuple>
+inline char const* get_current_function_at(LocationTuple const& location_tuple)
+{
+    return at_specific_location(
+                location_tuple,
+                [](CXCursor const& orig_cursor)
+                    -> std::string
+                {
+                    // Write the header.
+                    CXCursor cursor = orig_cursor;
+                    std::stringstream ss;
+                    ss << "'name':'";
+
+                    // Write the actual name.
+                    CXCursorKind kind = clang_getCursorKind(cursor);
+                    while (true)
+                    {
+                        if (detail::is_function(kind) || kind == CXCursor_TranslationUnit)
+                            break;
+                        cursor = clang_getCursorSemanticParent(cursor);
+                        kind = clang_getCursorKind(cursor);
+                    }
+
+                    if (kind != CXCursor_TranslationUnit)
+                    {
+                        std::stack<std::string> stack;
+                        while (true)
+                        {
+                            CXString aString = clang_getCursorSpelling(cursor);
+                            stack.push(clang_getCString(aString));
+                            clang_disposeString(aString);
+
+                            cursor = clang_getCursorSemanticParent(cursor);
+                            if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
+                                break;
+                        }
+                        bool first = true;
+                        while (!stack.empty())
+                        {
+                            if (first)
+                                first = false;
+                            else
+                                ss << "::";
+                            ss << stack.top();
+                            stack.pop();
+                        }
+                    }
+
+                    // Write the footer.
+                    ss << "'";
+                    return "{" + ss.str() + "}";
                 }
             );
 }

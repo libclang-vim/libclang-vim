@@ -102,6 +102,10 @@ This manual detection will be obsolete when `clang_getCanonicalType()` API will 
 
 Get type at specific location with auto-deduction described above.
 
+### `libclang#deduction#current_function_at({filename}, {line}, {col} [, {compiler args}])`
+
+Get the name of the qualified name of the current function at specific location.
+
 ## Installation
 
 ### LLVM Installation
