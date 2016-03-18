@@ -1,6 +1,6 @@
 Vim script Interface to Clang
 ===========================
-[![Build Status](https://travis-ci.org/rhysd/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
+[![Build Status](https://travis-ci.org/libclang-vim/libclang-vim.png?branch=master)](https://travis-ci.org/rhysd/libclang-vim)
 
 libclang-vim is a wrapper library of [libclang](http://clang.llvm.org/doxygen/group__CINDEX.html) for Vim script developers who want to make a great C, C++ and Objective-C plugin.
 You can use the power of clang's C, C++ and Objective-C code analysis from Vim script directly.
