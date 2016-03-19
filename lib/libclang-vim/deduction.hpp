@@ -204,7 +204,18 @@ inline bool is_invalid_type_cursor(CXCursor const& cursor)
 /// Function or member function.
 bool is_function(CXCursorKind kind)
 {
-    return kind == CXCursor_FunctionDecl || kind == CXCursor_CXXMethod;
+    switch (kind)
+    {
+    case CXCursor_FunctionDecl:
+    case CXCursor_CXXMethod:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
+        return true;
+    default:
+        break;
+    }
+
+    return false;
 }
 
 } // namespace detail
