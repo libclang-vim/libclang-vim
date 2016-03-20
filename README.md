@@ -142,7 +142,7 @@ Please lookup how to install the latest stable LLVM manually.
 
 ```
 $ cd libclang-vim/
-$ ./configure
+$ ./autogen.sh
 $ make
 ```
 

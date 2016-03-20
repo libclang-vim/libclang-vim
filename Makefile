@@ -5,16 +5,22 @@ SRC=lib/libclang-vim/clang_vim.cpp lib/libclang-vim/AST_extracter.hpp lib/libcla
 CPPSRC=lib/libclang-vim/clang_vim.cpp
 CXXFLAGS+=$(shell $(LLVMCONFIG) --cxxflags --ldflags) -Wall -Wextra -std=c++11 -pedantic -shared -fPIC -lclang
 
-# For LLVM installed by Homebrew
-UNAME := $(shell uname -s)
-ifeq ($(UNAME),Darwin)
+# For LLVM installed in a custom location
 LDFLAGS+=-rpath $(shell $(LLVMCONFIG) --libdir)
-endif
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
+config.mak: configure.ac config.mak.in
+	./autogen.sh
+
+$(TARGET): $(SRC) config.mak
 	$(CLANG) $(CXXFLAGS) $(CPPSRC) $(LDFLAGS) -o $(TARGET)
 
 clean:
 	rm -f $(TARGET)
+
+qa/test: qa/test.cpp qa/deduction.cpp config.mak
+	$(CLANG) -std=c++11 $(CPPUNIT_CFLAGS) qa/test.cpp qa/deduction.cpp $(LDFLAGS) $(CPPUNIT_LIBS) -ldl -o qa/test
+
+check: qa/test
+	qa/test

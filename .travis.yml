@@ -4,9 +4,9 @@ language: cpp
 compiler:
     - clang++
 script:
-    - autoconf
-    - ./configure
+    - ./autogen.sh
     - make
+    - make check
 install:
     - sudo apt-get -qq update
-    - sudo apt-get -qq --force-yes install llvm clang libclang-dev
+    - sudo apt-get -qq --force-yes install llvm clang libclang-dev libcppunit-dev
