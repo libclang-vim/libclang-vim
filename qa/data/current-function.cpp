@@ -15,4 +15,20 @@ int C::foo(int x)
 
 }
 
+class D
+{
+    D();
+    ~D();
+}
+
+D::D()
+{
+    int x;
+}
+
+D::~D()
+{
+    int x;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
