@@ -621,5 +621,19 @@ char const* vim_clang_get_current_function_at(char const* location_string)
     return ret;
 }
 
+char const* vim_clang_get_completion_at(char const* location_string)
+{
+    // Close stderr.
+    int old_stderr = dup(2);
+    close(2);
+
+    const char* ret = libclang_vim::get_completion_at(libclang_vim::parse_args_with_location(location_string));
+
+    // Restore stderr.
+    dup(old_stderr);
+    close(old_stderr);
+    return ret;
+}
+
 } // extern "C"
 

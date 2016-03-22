@@ -17,7 +17,7 @@ You can
 - get definition, declaration and referenced node of the item at specific location
 - get pointee type, result type, canonical type at specific location
 - deduce type of variable declaration and return value of function
-- get the information for completion. *(not implemented yet)*
+- get the information for completion.
 - get diagnostic information. *(not implemented yet)*
 - get preprocessing information. *(not implemented yet)*
 - get comment information. *(not implemented yet)*
@@ -105,6 +105,10 @@ Get type at specific location with auto-deduction described above.
 ### `libclang#deduction#current_function_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get the name of the qualified name of the current function at specific location.
+
+### `libclang#deduction#completion_at({filename}, {line}, {col} [, {compiler args}])`
+
+Get the list of completion strings at specific location.
 
 ## Installation
 

@@ -13,4 +13,7 @@ endfunction
 function! libclang#deduction#current_function_at(filename, line, col, ...)
     return libclang#call_at('vim_clang_get_current_function_at', a:filename, a:line, a:col, a:000)
 endfunction
+function! libclang#deduction#completion_at(filename, line, col, ...)
+    return libclang#call_at('vim_clang_get_completion_at', a:filename, a:line, a:col, a:000)
+endfunction
 
