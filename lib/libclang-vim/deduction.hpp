@@ -201,23 +201,6 @@ inline bool is_invalid_type_cursor(CXCursor const& cursor)
     return clang_getCursorType(cursor).kind == CXType_Invalid;
 }
 
-/// Function or member function.
-bool is_function(CXCursorKind kind)
-{
-    switch (kind)
-    {
-    case CXCursor_FunctionDecl:
-    case CXCursor_CXXMethod:
-    case CXCursor_Constructor:
-    case CXCursor_Destructor:
-        return true;
-    default:
-        break;
-    }
-
-    return false;
-}
-
 } // namespace detail
 
 template<class LocationTuple>
@@ -266,13 +249,13 @@ inline char const* get_current_function_at(LocationTuple const& location_tuple)
                     // Write the header.
                     CXCursor cursor = orig_cursor;
                     std::stringstream ss;
-                    ss << "'name':'";
+                    ss << "{'name':'";
 
                     // Write the actual name.
                     CXCursorKind kind = clang_getCursorKind(cursor);
                     while (true)
                     {
-                        if (detail::is_function(kind) || kind == CXCursor_TranslationUnit)
+                        if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
                             break;
                         cursor = clang_getCursorSemanticParent(cursor);
                         kind = clang_getCursorKind(cursor);
@@ -304,8 +287,8 @@ inline char const* get_current_function_at(LocationTuple const& location_tuple)
                     }
 
                     // Write the footer.
-                    ss << "'";
-                    return "{" + ss.str() + "}";
+                    ss << "'}";
+                    return ss.str();
                 }
             );
 }
