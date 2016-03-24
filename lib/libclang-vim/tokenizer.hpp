@@ -52,7 +52,6 @@ private:
             case CXToken_Identifier:  return "identifier";
             case CXToken_Literal:     return "literal";
             case CXToken_Comment:     return "comment";
-            default:                  return "unknown";
         }
     }
 

@@ -37,7 +37,6 @@ inline std::string stringize_extra_type_info(CXType const& type)
     case CXRefQualifier_LValue: result += "'is_lvalue':1,"; break;
     case CXRefQualifier_RValue: result += "'is_rvalue':1,"; break;
     case CXRefQualifier_None: break;
-    default: break;
     }
 
     // Note: The information about calling convention is really needed?
@@ -68,7 +67,6 @@ inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
     case CXLinkage_Internal: return "Internal";
     case CXLinkage_UniqueExternal: return "UniqueExternal";
     case CXLinkage_External: return "External";
-    default:                 return "Unknown";
     }
 }
 
@@ -164,7 +162,6 @@ inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
     case CX_CXXPrivate:   result += "'access_specifier':'private',"; break;
     case CX_CXXProtected: result += "'access_specifier':'protected',"; break;
     case CX_CXXInvalidAccessSpecifier: break;
-    default: break;
     }
 
     return result;
