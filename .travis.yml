@@ -4,7 +4,7 @@ language: cpp
 compiler:
     - clang++
 script:
-    - ./autogen.sh
+    - ./autogen.sh --enable-werror
     - make
     - make check
 install:

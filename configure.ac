@@ -5,6 +5,12 @@ AC_ARG_ENABLE(tests,
         [Build and run unit tests.]),
 ,enable_tests=yes)
 
+AC_ARG_ENABLE(werror,
+    AS_HELP_STRING([--enable-werror],
+        [Turn warnings to errors. (Has no effect in modules where the treating
+         of warnings as errors is disabled explicitly.)]),
+,)
+
 AC_CHECK_PROGS(LLVMCONFIG, llvm-config llvm-config-3.5 llvm-config-3.4)
 if test -z "$LLVMCONFIG"; then
     AC_MSG_ERROR([llvm-config not found])
@@ -22,6 +28,15 @@ if test "$enable_tests" != "no"; then
 fi
 AC_SUBST([CPPUNIT_CFLAGS])
 AC_SUBST([CPPUNIT_LIBS])
+
+AC_MSG_CHECKING([whether to turn warnings to errors])
+if test -n "$enable_werror" -a "$enable_werror" != "no"; then
+    CXXFLAGS="$CXXFLAGS -Werror"
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
+fi
+AC_SUBST(CXXFLAGS)
 
 AC_OUTPUT(config.mak)
 
