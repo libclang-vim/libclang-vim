@@ -242,56 +242,69 @@ inline char const* deduce_type_at(LocationTuple const& location_tuple)
 template<class LocationTuple>
 inline char const* get_current_function_at(LocationTuple const& location_tuple)
 {
-    return at_specific_location(
-                location_tuple,
-                [](CXCursor const& orig_cursor)
-                    -> std::string
-                {
-                    // Write the header.
-                    CXCursor cursor = orig_cursor;
-                    std::stringstream ss;
-                    ss << "{'name':'";
+    static std::string vimson;
 
-                    // Write the actual name.
-                    CXCursorKind kind = clang_getCursorKind(cursor);
-                    while (true)
-                    {
-                        if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
-                            break;
-                        cursor = clang_getCursorSemanticParent(cursor);
-                        kind = clang_getCursorKind(cursor);
-                    }
+    // Write the header.
+    std::stringstream ss;
+    ss << "{'name':'";
 
-                    if (kind != CXCursor_TranslationUnit)
-                    {
-                        std::stack<std::string> stack;
-                        while (true)
-                        {
-                            CXString aString = clang_getCursorSpelling(cursor);
-                            stack.push(clang_getCString(aString));
-                            clang_disposeString(aString);
+    // Write the actual name.
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
-                            cursor = clang_getCursorSemanticParent(cursor);
-                            if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
-                                break;
-                        }
-                        bool first = true;
-                        while (!stack.empty())
-                        {
-                            if (first)
-                                first = false;
-                            else
-                                ss << "::";
-                            ss << stack.top();
-                            stack.pop();
-                        }
-                    }
+    std::string file_name = std::get<0>(location_tuple);
+    std::vector<const char*> args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
 
-                    // Write the footer.
-                    ss << "'}";
-                    return ss.str();
-                }
-            );
+    if (translation_unit)
+    {
+        const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+        unsigned line = std::get<2>(location_tuple);
+        unsigned column = std::get<3>(location_tuple);
+        CXSourceLocation source_location = clang_getLocation(translation_unit, file, /*line=*/line, /*column=*/column);
+        CXCursor cursor = clang_getCursor(translation_unit, source_location);
+
+        CXCursorKind kind = clang_getCursorKind(cursor);
+        while (true)
+        {
+            if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
+                break;
+            cursor = clang_getCursorSemanticParent(cursor);
+            kind = clang_getCursorKind(cursor);
+        }
+
+        if (kind != CXCursor_TranslationUnit)
+        {
+            std::stack<std::string> stack;
+            while (true)
+            {
+                CXString aString = clang_getCursorSpelling(cursor);
+                stack.push(clang_getCString(aString));
+                clang_disposeString(aString);
+
+                cursor = clang_getCursorSemanticParent(cursor);
+                if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
+                    break;
+            }
+            bool first = true;
+            while (!stack.empty())
+            {
+                if (first)
+                    first = false;
+                else
+                    ss << "::";
+                ss << stack.top();
+                stack.pop();
+            }
+        }
+    }
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    // Write the footer.
+    ss << "'}";
+    vimson = ss.str();
+    return vimson.c_str();
 }
 
 template<class LocationTuple>
