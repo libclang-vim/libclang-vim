@@ -260,10 +260,22 @@ inline char const* get_current_function_at(LocationTuple const& location_tuple)
         const CXFile file = clang_getFile(translation_unit, file_name.c_str());
         unsigned line = std::get<2>(location_tuple);
         unsigned column = std::get<3>(location_tuple);
-        CXSourceLocation source_location = clang_getLocation(translation_unit, file, /*line=*/line, /*column=*/column);
-        CXCursor cursor = clang_getCursor(translation_unit, source_location);
 
-        CXCursorKind kind = clang_getCursorKind(cursor);
+        CXCursor cursor;
+        CXCursorKind kind;
+        while (true)
+        {
+            CXSourceLocation location = clang_getLocation(translation_unit, file, line, column);
+            cursor = clang_getCursor(translation_unit, location);
+            kind = clang_getCursorKind(cursor);
+            if (clang_getCursorKind(clang_getCursorSemanticParent(cursor)) != CXCursor_InvalidFile || column <= 1)
+                break;
+
+            // This happens with e.g. CXCursor_TypeRef, work it around by going
+            // back till we get a sane parent, if we can.
+            --column;
+        }
+
         while (true)
         {
             if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
