@@ -1,5 +1,4 @@
-sudo: required
-dist: trusty
+sudo: false
 language: cpp
 compiler:
     - clang++
@@ -7,6 +6,9 @@ script:
     - ./autogen.sh --enable-werror
     - make
     - make check
-install:
-    - sudo apt-get -qq update
-    - sudo apt-get -qq --force-yes install llvm clang libclang-dev libcppunit-dev
+addons:
+    apt:
+        packages:
+            - llvm
+            - clang
+            - libcppunit-dev
