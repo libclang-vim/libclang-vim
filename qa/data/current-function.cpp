@@ -31,4 +31,11 @@ D::~D()
     int x;
 }
 
+class Buffer;
+
+static void func()
+{
+    Buffer buf;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
