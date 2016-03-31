@@ -9,6 +9,27 @@
 #include "location.hpp"
 #include "deduction.hpp"
 
+/// Ensures that writes to stderr are ignored.
+class stderr_guard
+{
+    int m_stderr;
+
+public:
+    stderr_guard()
+        : m_stderr(dup(STDERR_FILENO))
+    {
+        // Close stderr.
+        close(STDERR_FILENO);
+    }
+
+    ~stderr_guard()
+    {
+        // Restore stderr.
+        dup(m_stderr);
+        close(m_stderr);
+    }
+};
+
 extern "C" {
 
 char const* vim_clang_version()
@@ -595,43 +616,25 @@ char const* vim_clang_deduce_func_or_var_decl_at(char const* location_string)
 
 char const* vim_clang_get_type_with_deduction_at(char const* location_string)
 {
-    // Close stderr.
-    int old_stderr = dup(2);
-    close(2);
+    stderr_guard g;
 
     const char* ret = libclang_vim::deduce_type_at(libclang_vim::parse_args_with_location(location_string));
-
-    // Restore stderr.
-    dup(old_stderr);
-    close(old_stderr);
     return ret;
 }
 
 char const* vim_clang_get_current_function_at(char const* location_string)
 {
-    // Close stderr.
-    int old_stderr = dup(2);
-    close(2);
+    stderr_guard g;
 
     const char* ret = libclang_vim::get_current_function_at(libclang_vim::parse_args_with_location(location_string));
-
-    // Restore stderr.
-    dup(old_stderr);
-    close(old_stderr);
     return ret;
 }
 
 char const* vim_clang_get_completion_at(char const* location_string)
 {
-    // Close stderr.
-    int old_stderr = dup(2);
-    close(2);
+    stderr_guard g;
 
     const char* ret = libclang_vim::get_completion_at(libclang_vim::parse_args_with_location(location_string));
-
-    // Restore stderr.
-    dup(old_stderr);
-    close(old_stderr);
     return ret;
 }
 
