@@ -24,3 +24,6 @@ qa/test: qa/test.cpp qa/deduction.cpp config.mak
 
 check: qa/test $(TARGET)
 	qa/test
+
+tags:
+	ctags --c++-kinds=+p --fields=+iaS --extra=+q -R --totals=yes *
