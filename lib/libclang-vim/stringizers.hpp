@@ -222,3 +222,5 @@ inline std::string stringize_extent(CXCursor const& cursor)
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_STRINGIZERS_HPP_INCLUDED
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -379,3 +379,5 @@ inline char const* get_completion_at(LocationTuple const& location_tuple)
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

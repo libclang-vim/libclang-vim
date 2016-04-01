@@ -264,3 +264,5 @@ CXCursor search_kind(CXCursor const& cursor, Predicate const& predicate)
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_HELPERS_HPP_INCLUDED
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

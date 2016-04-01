@@ -115,3 +115,5 @@ public:
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_TOKENIZER_HPP_INCLUDED
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

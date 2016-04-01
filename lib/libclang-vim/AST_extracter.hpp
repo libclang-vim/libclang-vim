@@ -98,3 +98,5 @@ auto extract_AST_nodes(
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_AST_EXTRACTER_HPP_INCLUDED
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -127,3 +127,5 @@ auto get_all_extents( LocationTuple const& location_tuple)
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_LOCATION_HPP_INCLUDED
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

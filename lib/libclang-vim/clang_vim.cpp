@@ -640,3 +640,4 @@ char const* vim_clang_get_completion_at(char const* location_string)
 
 } // extern "C"
 
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
