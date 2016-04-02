@@ -414,8 +414,8 @@ char const* vim_clang_extract_static_member_functions_non_system_headers(char co
 char const* vim_clang_get_location_information(char const* location_string)
 {
     auto const location_info = libclang_vim::parse_args_with_location(location_string);
-    char const* file_name = std::get<0>(location_info).c_str();
-    auto const args_ptrs = libclang_vim::get_args_ptrs(std::get<1>(location_info));
+    char const* file_name = location_info.file.c_str();
+    auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
@@ -424,7 +424,7 @@ char const* vim_clang_get_location_information(char const* location_string)
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, std::get<2>(location_info), std::get<3>(location_info));
+    auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
     static std::string result;
     result = "{" + libclang_vim::stringize_cursor(cursor, clang_getCursorSemanticParent(cursor)) + "}";
@@ -440,8 +440,8 @@ char const* vim_clang_get_location_information(char const* location_string)
 char const* vim_clang_get_extent_of_node_at_specific_location(char const* location_string)
 {
     auto location_info = libclang_vim::parse_args_with_location(location_string);
-    char const* file_name = std::get<0>(location_info).c_str();
-    auto const args_ptrs = libclang_vim::get_args_ptrs(std::get<1>(location_info));
+    char const* file_name = location_info.file.c_str();
+    auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
@@ -450,7 +450,7 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, std::get<2>(location_info), std::get<3>(location_info));
+    auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
     static std::string result;
     result = "{" + libclang_vim::stringize_extent(cursor) + "}";

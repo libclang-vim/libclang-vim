@@ -88,10 +88,10 @@ auto get_all_extents( LocationTuple const& location_tuple)
 {
     static std::string vimson;
     vimson = "";
-    char const* file_name = std::get<0>(location_tuple).c_str();
+    char const* file_name = location_tuple.file.c_str();
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    auto const args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
+    auto const args_ptrs = get_args_ptrs(location_tuple.args);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
         clang_disposeIndex(index);
@@ -99,7 +99,7 @@ auto get_all_extents( LocationTuple const& location_tuple)
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, std::get<2>(location_tuple), std::get<3>(location_tuple));
+    auto const location = clang_getLocation(translation_unit, file, location_tuple.line, location_tuple.col);
     CXCursor cursor = clang_getCursor(translation_unit, location);
     vimson += "{" + stringize_extent(cursor) + "},";
 

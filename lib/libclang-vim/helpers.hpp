@@ -166,33 +166,53 @@ auto parse_default_args(std::string const& args_string)
     }
 }
 
+/// Stores compiler arguments with location.
+class location_tuple
+{
+public:
+    std::string file;
+    args_type args;
+    size_t line;
+    size_t col;
+
+    location_tuple()
+        : line(0),
+        col(0)
+    {
+    }
+};
+
 // Parse "file:args:line:col"
-auto parse_args_with_location(std::string const& args_string)
-    -> std::tuple<std::string, args_type, size_t, size_t>
+location_tuple parse_args_with_location(std::string const& args_string)
 {
     auto const end = std::end(args_string);
 
     auto second_colon = std::find(std::begin(args_string), end, ':');
     if (second_colon == end || second_colon + 1 == end) {
-        return std::make_tuple("", args_type{}, 0, 0);
+        return location_tuple();
     }
     second_colon = std::find(second_colon + 1, end, ':');
     if (second_colon == end || second_colon + 1 == end) {
-        return std::make_tuple("", args_type{}, 0, 0);
+        return location_tuple();
     }
 
     auto const default_args = parse_default_args({std::begin(args_string), second_colon});
     if (default_args.first == "") {
-        return std::make_tuple("", args_type{}, 0, 0);
+        return location_tuple();
     }
 
     size_t line, col;
     auto const num_input = std::sscanf(std::string{second_colon+1, end}.c_str(), "%zu:%zu", &line, &col);
     if (num_input != 2) {
-        return std::make_tuple("", args_type{}, 0, 0);
+        return location_tuple();
     }
 
-    return std::make_tuple(default_args.first, default_args.second, line, col);
+    location_tuple ret;
+    ret.file = default_args.first;
+    ret.args = default_args.second;
+    ret.line = line;
+    ret.col = col;
+    return ret;
 }
 
 inline std::vector<char const *> get_args_ptrs(args_type const& args)
@@ -209,8 +229,8 @@ auto at_specific_location(
     ) -> char const*
 {
     static std::string vimson;
-    char const* file_name = std::get<0>(location_tuple).c_str();
-    auto const args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
+    char const* file_name = location_tuple.file.c_str();
+    auto const args_ptrs = get_args_ptrs(location_tuple.args);
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
@@ -220,7 +240,7 @@ auto at_specific_location(
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, std::get<2>(location_tuple), std::get<3>(location_tuple));
+    auto const location = clang_getLocation(translation_unit, file, location_tuple.line, location_tuple.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
 
     vimson = predicate(cursor);

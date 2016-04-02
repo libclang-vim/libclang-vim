@@ -251,15 +251,15 @@ inline char const* get_current_function_at(LocationTuple const& location_tuple)
     // Write the actual name.
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
-    std::string file_name = std::get<0>(location_tuple);
-    std::vector<const char*> args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
+    std::string file_name = location_tuple.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_tuple.args);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
 
     if (translation_unit)
     {
         const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-        unsigned line = std::get<2>(location_tuple);
-        unsigned column = std::get<3>(location_tuple);
+        unsigned line = location_tuple.line;
+        unsigned column = location_tuple.col;
 
         CXCursor cursor;
         CXCursorKind kind;
@@ -331,14 +331,14 @@ inline char const* get_completion_at(LocationTuple const& location_tuple)
     // Write the completion list.
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
-    std::string file_name = std::get<0>(location_tuple);
-    std::vector<const char*> args_ptrs = get_args_ptrs(std::get<1>(location_tuple));
+    std::string file_name = location_tuple.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_tuple.args);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
 
     if (translation_unit)
     {
-        unsigned line = std::get<2>(location_tuple);
-        unsigned column = std::get<3>(location_tuple);
+        unsigned line = location_tuple.line;
+        unsigned column = location_tuple.col;
         CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, nullptr, 0, clang_defaultCodeCompleteOptions());
         std::set<std::string> matches;
         if (results)
