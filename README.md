@@ -110,6 +110,10 @@ Get the name of the qualified name of the current function at specific location.
 
 Get the list of completion strings at specific location.
 
+### `libclang#deduction#compile_commands({filename})`
+
+Get the list of compile commands for a specific file name.
+
 ## Installation
 
 ### LLVM Installation

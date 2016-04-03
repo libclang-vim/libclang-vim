@@ -2,6 +2,7 @@
 #include <tuple>
 
 #include <clang-c/Index.h>
+#include <clang-c/CXCompilationDatabase.h>
 
 #include "helpers.hpp"
 #include "tokenizer.hpp"
@@ -29,6 +30,87 @@ public:
         close(m_stderr);
     }
 };
+
+namespace libclang_vim
+{
+
+/// Look up compilation arguments for a file from a database in one of its parent directories.
+args_type parse_compilation_database(const std::string& file)
+{
+    args_type ret;
+
+    std::size_t found = file.find_last_of("/\\");
+    std::string directory = file.substr(0, found);
+    while (true)
+    {
+        std::string json = directory + file.substr(found, 1) + "compile_commands.json";
+        std::ifstream stream(json.c_str());
+        if (stream.good())
+            break;
+
+        found = directory.find_last_of("/\\");
+        if (found == std::string::npos)
+            break;
+
+        directory = directory.substr(0, found);
+    }
+
+    if (directory.empty())
+    {
+        // Our default when no JSON was found.
+        ret.push_back("-std=c++1y");
+
+        return ret;
+    }
+
+    CXCompilationDatabase_Error error;
+    CXCompilationDatabase database = clang_CompilationDatabase_fromDirectory(directory.c_str(), &error);
+    if (error == CXCompilationDatabase_NoError)
+    {
+        CXCompileCommands commands = clang_CompilationDatabase_getCompileCommands(database, file.c_str());
+        unsigned commandsSize = clang_CompileCommands_getSize(commands);
+        if (commandsSize >= 1)
+        {
+            CXCompileCommand command = clang_CompileCommands_getCommand(commands, 0);
+            unsigned args = clang_CompileCommand_getNumArgs(command);
+            for (unsigned i = 0; i < args; ++i)
+            {
+                CXString arg = clang_CompileCommand_getArg(command, i);
+                if (file != clang_getCString(arg))
+                    ret.push_back(clang_getCString(arg));
+                clang_disposeString(arg);
+            }
+        }
+        clang_CompileCommands_dispose(commands);
+    }
+    clang_CompilationDatabase_dispose(database);
+
+    return ret;
+}
+
+char const* get_compile_commands(const std::string& file)
+{
+    static std::string vimson;
+
+    // Write the header.
+    std::stringstream ss;
+    ss << "{'commands':'";
+
+    args_type args = parse_compilation_database(file);
+    for (std::size_t i = 0; i < args.size(); ++i)
+    {
+        if (i)
+            ss << " ";
+        ss << args[i];
+    }
+
+    // Write the footer.
+    ss << "'}";
+    vimson = ss.str();
+    return vimson.c_str();
+}
+
+} // namespace libclang_vim
 
 extern "C" {
 
@@ -635,6 +717,14 @@ char const* vim_clang_get_completion_at(char const* location_string)
     stderr_guard g;
 
     const char* ret = libclang_vim::get_completion_at(libclang_vim::parse_args_with_location(location_string));
+    return ret;
+}
+
+char const* vim_clang_get_compile_commands(char const* file)
+{
+    stderr_guard g;
+
+    const char* ret = libclang_vim::get_compile_commands(libclang_vim::parse_default_args(file).first);
     return ret;
 }
 
