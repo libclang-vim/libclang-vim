@@ -10,7 +10,7 @@ LDFLAGS+=-rpath $(shell $(LLVMCONFIG) --libdir)
 
 all: $(TARGET)
 
-config.mak: configure.ac config.mak.in
+config.mak: configure.ac config.mak.in qa/data/compile-commands/compile_commands.json.in
 	./autogen.sh
 
 $(TARGET): $(SRC) config.mak

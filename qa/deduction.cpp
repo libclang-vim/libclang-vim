@@ -9,12 +9,14 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_current_function_at_ctor_dtor);
     CPPUNIT_TEST(test_current_function_at_incomplete_type);
     CPPUNIT_TEST(test_completion_at);
+    CPPUNIT_TEST(test_compile_commands);
     CPPUNIT_TEST_SUITE_END();
 
     void test_current_function_at();
     void test_current_function_at_ctor_dtor();
     void test_current_function_at_incomplete_type();
     void test_completion_at();
+    void test_compile_commands();
 
     void* m_handle;
 
@@ -91,6 +93,19 @@ void deduction_test::test_completion_at()
 
     std::string expected("['C', 'bar', 'foo', 'operator=', '~C']");
     std::string actual(vim_clang_get_completion_at("qa/data/completion.cpp:-std=c++1y:25:7"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_compile_commands()
+{
+    auto vim_clang_get_compile_commands = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_compile_commands"));
+    CPPUNIT_ASSERT(vim_clang_get_compile_commands);
+
+    std::string expected("{'commands':'clang++ -DFOO -o test.o -c'}");
+    std::stringstream ss;
+    ss << getenv("PWD");
+    ss << "/qa/data/compile-commands/test.cpp:";
+    std::string actual(vim_clang_get_compile_commands(ss.str().c_str()));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

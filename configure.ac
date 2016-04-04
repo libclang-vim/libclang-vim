@@ -38,6 +38,11 @@ else
 fi
 AC_SUBST(CXXFLAGS)
 
-AC_OUTPUT(config.mak)
+SRC_ROOT=`pwd`
+AC_SUBST(SRC_ROOT)
+
+AC_CONFIG_FILES([config.mak
+                 qa/data/compile-commands/compile_commands.json])
+AC_OUTPUT
 
 dnl vim:set shiftwidth=4 softtabstop=4 expandtab:

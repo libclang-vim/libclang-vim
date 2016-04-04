@@ -1,0 +1,7 @@
+[
+{
+  "directory": "@SRC_ROOT@/qa/data/compile-commands",
+  "command": "clang++ -DFOO -o test.o -c @SRC_ROOT@/qa/data/compile-commands/test.cpp",
+  "file": "@SRC_ROOT@/qa/data/compile-commands/test.cpp"
+}
+]
