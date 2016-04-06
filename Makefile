@@ -20,7 +20,7 @@ clean:
 	rm -f $(TARGET)
 
 qa/test: qa/test.cpp qa/deduction.cpp config.mak
-	$(CLANG) -std=c++11 $(CPPUNIT_CFLAGS) qa/test.cpp qa/deduction.cpp $(LDFLAGS) $(CPPUNIT_LIBS) -ldl -o qa/test
+	$(CLANG) -std=c++11 $(CPPUNIT_CFLAGS) qa/test.cpp qa/deduction.cpp $(CPPUNIT_LIBS) -ldl -o qa/test
 
 check: qa/test $(TARGET)
 	qa/test
