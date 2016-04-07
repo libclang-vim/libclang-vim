@@ -68,4 +68,31 @@ function! ClangInspectCompletion(findstart, base)
     return l:ret
 endfunction
 
+" Example for libclang#deduction#compile_commands().
+" Note that this naturally can be correct when changes are necessary only
+" in the current buffer and nowhere else.
+function! ClangRename()
+    " Save cursor position.
+    let l:offset_orig = line2byte(line('.')) + col('.') - 1
+
+    " Look for the beginning of the current identifier.
+    let l:line = getline('.')
+    let l:start = col('.') - 1
+    while l:start > 0 && l:line[l:start - 1] =~ '\i'
+        let l:start -= 1
+    endwhile
+    let l:offset = line2byte(line('.')) + l:start + 1
+
+    let l:to = input('Rename to: ')
+
+    let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+
+    let l:file_name = ClangTempFile()
+    let l:command = 'clang-rename -offset ' . l:offset . ' -new-name ' . l:to . ' ' . l:file_name . ' -- ' . l:compiler_args.commands . ' 2>/dev/null'
+    execute "% !" . l:command
+    call delete(file_name)
+
+    execute "go " . l:offset_orig
+endfunction
+
 " vim:set shiftwidth=4 softtabstop=4 expandtab:
