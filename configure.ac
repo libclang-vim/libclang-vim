@@ -15,7 +15,12 @@ AC_CHECK_PROGS(LLVMCONFIG, llvm-config llvm-config-3.5 llvm-config-3.4)
 if test -z "$LLVMCONFIG"; then
     AC_MSG_ERROR([llvm-config not found])
 fi
-AC_SUBST(LLVMCONFIG)
+LLVM_CXXFLAGS=`$LLVMCONFIG --cxxflags`
+AC_SUBST(LLVM_CXXFLAGS)
+LLVM_LDFLAGS=`$LLVMCONFIG --ldflags`
+AC_SUBST(LLVM_LDFLAGS)
+LLVM_LIBDIR=`$LLVMCONFIG --libdir`
+AC_SUBST(LLVM_LIBDIR)
 
 AC_CHECK_PROGS(CLANG, clang++ clang++-3.5 clang++-3.4)
 if test -z "$CLANG"; then
