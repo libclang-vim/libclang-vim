@@ -222,9 +222,9 @@ inline std::vector<char const *> get_args_ptrs(args_type const& args)
     return args_ptrs;
 }
 
-template<class LocationTuple, class Predicate>
+template<class Predicate>
 auto at_specific_location(
-        LocationTuple const& location_tuple,
+        const location_tuple& location_tuple,
         Predicate const& predicate
     ) -> char const*
 {
