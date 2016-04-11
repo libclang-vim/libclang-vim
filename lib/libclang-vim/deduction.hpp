@@ -319,63 +319,6 @@ inline char const* get_current_function_at(LocationTuple const& location_tuple)
     return vimson.c_str();
 }
 
-template<class LocationTuple>
-inline char const* get_completion_at(LocationTuple const& location_tuple)
-{
-    static std::string vimson;
-
-    // Write the header.
-    std::stringstream ss;
-    ss << "['";
-
-    // Write the completion list.
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
-
-    std::string file_name = location_tuple.file;
-    std::vector<const char*> args_ptrs = get_args_ptrs(location_tuple.args);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
-
-    if (translation_unit)
-    {
-        unsigned line = location_tuple.line;
-        unsigned column = location_tuple.col;
-        CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, nullptr, 0, clang_defaultCodeCompleteOptions());
-        std::set<std::string> matches;
-        if (results)
-        {
-            for (unsigned i = 0; i < results->NumResults; ++i)
-            {
-                const CXCompletionString& completion_string = results->Results[i].CompletionString;
-                std::stringstream match;
-                for (unsigned j = 0; j < clang_getNumCompletionChunks(completion_string); ++j)
-                {
-                    if (clang_getCompletionChunkKind(completion_string, j) != CXCompletionChunk_TypedText)
-                        continue;
-
-                    const CXString& chunk_text = clang_getCompletionChunkText(completion_string, j);
-                    match << clang_getCString(chunk_text);
-                }
-                matches.insert(match.str());
-            }
-            clang_disposeCodeCompleteResults(results);
-        }
-        for (std::set<std::string>::iterator it = matches.begin(); it != matches.end(); ++it)
-        {
-            if (it != matches.begin())
-                ss << "', '";
-            ss << *it;
-        }
-    }
-
-    clang_disposeTranslationUnit(translation_unit);
-    clang_disposeIndex(index);
-
-    // Write the footer.
-    ss << "']";
-    vimson = ss.str();
-    return vimson.c_str();
-}
-
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED

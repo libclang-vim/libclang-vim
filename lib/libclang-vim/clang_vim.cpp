@@ -110,6 +110,62 @@ char const* get_compile_commands(const std::string& file)
     return vimson.c_str();
 }
 
+inline char const* get_completion_at(location_tuple const& location_info)
+{
+    static std::string vimson;
+
+    // Write the header.
+    std::stringstream ss;
+    ss << "['";
+
+    // Write the completion list.
+    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+
+    std::string file_name = location_info.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
+    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
+
+    if (translation_unit)
+    {
+        unsigned line = location_info.line;
+        unsigned column = location_info.col;
+        CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, nullptr, 0, clang_defaultCodeCompleteOptions());
+        std::set<std::string> matches;
+        if (results)
+        {
+            for (unsigned i = 0; i < results->NumResults; ++i)
+            {
+                const CXCompletionString& completion_string = results->Results[i].CompletionString;
+                std::stringstream match;
+                for (unsigned j = 0; j < clang_getNumCompletionChunks(completion_string); ++j)
+                {
+                    if (clang_getCompletionChunkKind(completion_string, j) != CXCompletionChunk_TypedText)
+                        continue;
+
+                    const CXString& chunk_text = clang_getCompletionChunkText(completion_string, j);
+                    match << clang_getCString(chunk_text);
+                }
+                matches.insert(match.str());
+            }
+            clang_disposeCodeCompleteResults(results);
+        }
+        for (std::set<std::string>::iterator it = matches.begin(); it != matches.end(); ++it)
+        {
+            if (it != matches.begin())
+                ss << "', '";
+            ss << *it;
+        }
+    }
+
+    clang_disposeTranslationUnit(translation_unit);
+    clang_disposeIndex(index);
+
+    // Write the footer.
+    ss << "']";
+    vimson = ss.str();
+    return vimson.c_str();
+}
+
 } // namespace libclang_vim
 
 extern "C" {
