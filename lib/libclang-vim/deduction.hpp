@@ -66,11 +66,10 @@ CXType deduce_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-template<class LocationTuple>
-inline char const* deduce_var_decl_type(LocationTuple const& location_tuple)
+inline char const* deduce_var_decl_type(const location_tuple& location_info)
 {
     return at_specific_location(
-                location_tuple,
+                location_info,
                 [](CXCursor const& cursor)
                     -> std::string
                 {
@@ -126,11 +125,10 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-template<class LocationTuple>
-inline char const* deduce_func_return_type(LocationTuple const& location_tuple)
+inline char const* deduce_func_return_type(const location_tuple& location_info)
 {
     return at_specific_location(
-                location_tuple,
+                location_info,
                 [](CXCursor const& cursor)
                     -> std::string
                 {
@@ -152,11 +150,10 @@ inline char const* deduce_func_return_type(LocationTuple const& location_tuple)
             );
 }
 
-template<class LocationTuple>
-inline char const* deduce_func_or_var_decl(LocationTuple const& location_tuple)
+inline char const* deduce_func_or_var_decl(const location_tuple& location_info)
 {
     return at_specific_location(
-                location_tuple,
+                location_info,
                 [](CXCursor const& cursor)
                     -> std::string
                 {
@@ -204,11 +201,10 @@ inline bool is_invalid_type_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-template<class LocationTuple>
-inline char const* deduce_type_at(LocationTuple const& location_tuple)
+inline char const* deduce_type_at(const location_tuple& location_info)
 {
     return at_specific_location(
-                location_tuple,
+                location_info,
                 [](CXCursor const& cursor)
                     -> std::string
                 {
@@ -239,8 +235,7 @@ inline char const* deduce_type_at(LocationTuple const& location_tuple)
             );
 }
 
-template<class LocationTuple>
-inline char const* get_current_function_at(LocationTuple const& location_tuple)
+inline char const* get_current_function_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -251,15 +246,15 @@ inline char const* get_current_function_at(LocationTuple const& location_tuple)
     // Write the actual name.
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
-    std::string file_name = location_tuple.file;
-    std::vector<const char*> args_ptrs = get_args_ptrs(location_tuple.args);
+    std::string file_name = location_info.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
 
     if (translation_unit)
     {
         const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-        unsigned line = location_tuple.line;
-        unsigned column = location_tuple.col;
+        unsigned line = location_info.line;
+        unsigned column = location_info.col;
 
         CXCursor cursor;
         CXCursorKind kind;
