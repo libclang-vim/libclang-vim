@@ -22,11 +22,11 @@ AC_SUBST(LLVM_LDFLAGS)
 LLVM_LIBDIR=`$LLVMCONFIG --libdir`
 AC_SUBST(LLVM_LIBDIR)
 
-AC_CHECK_PROGS(CLANG, clang++ clang++-3.5 clang++-3.4)
-if test -z "$CLANG"; then
+AC_CHECK_PROGS(CXX, clang++ clang++-3.5 clang++-3.4)
+if test -z "$CXX"; then
     AC_MSG_ERROR([clang++ not found])
 fi
-AC_SUBST(CLANG)
+AC_SUBST(CXX)
 
 if test "$enable_tests" != "no"; then
     PKG_CHECK_MODULES([CPPUNIT], [cppunit])

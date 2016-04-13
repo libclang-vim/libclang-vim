@@ -14,13 +14,13 @@ config.mak: configure.ac config.mak.in qa/data/compile-commands/compile_commands
 	./autogen.sh
 
 $(TARGET): $(SRC) config.mak
-	$(CLANG) $(CXXFLAGS) $(LLVM_CXXFLAGS) $(CPPSRC) $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) $(CPPSRC) $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $(TARGET)
 
 clean:
 	rm -f $(TARGET)
 
 qa/test: qa/test.cpp qa/deduction.cpp config.mak
-	$(CLANG) $(CXXFLAGS) $(CPPUNIT_CFLAGS) qa/test.cpp qa/deduction.cpp $(CPPUNIT_LIBS) -ldl -o qa/test
+	$(CXX) $(CXXFLAGS) $(CPPUNIT_CFLAGS) qa/test.cpp qa/deduction.cpp $(CPPUNIT_LIBS) -ldl -o qa/test
 
 check: qa/test $(TARGET)
 	qa/test
