@@ -28,14 +28,12 @@ namespace detail {
 
 } // namespace detail
 
-template<class LocationTuple, class Predicate>
-auto get_extent(
-        LocationTuple const& location_tuple,
-        Predicate const& predicate
-    ) -> char const*
+template<class Predicate>
+char const* get_extent(const location_tuple& location_info,
+        Predicate const& predicate)
 {
     return at_specific_location(
-                location_tuple,
+                location_info,
                 [&predicate](CXCursor const& c) -> std::string {
                     CXCursor const rc = detail::search_AST_upward(c, predicate);
                     if (clang_Cursor_isNull(rc)) {
