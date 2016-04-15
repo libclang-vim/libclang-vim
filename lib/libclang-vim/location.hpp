@@ -44,14 +44,11 @@ char const* get_extent(const location_tuple& location_info,
                 });
 };
 
-template<class LocationTuple, class JumpFunc>
-inline auto get_related_node_of(
-        LocationTuple const& location_tuple,
-        JumpFunc const& predicate
-    ) -> char const*
+template<class JumpFunc>
+const char* get_related_node_of(const location_tuple& location_info, JumpFunc const& predicate)
 {
     return at_specific_location(
-                location_tuple,
+                location_info,
                 [&predicate](CXCursor const& c) -> std::string {
                     CXCursor const rc = predicate(c);
                     if (clang_isInvalid(clang_getCursorKind(rc))) {
@@ -62,14 +59,11 @@ inline auto get_related_node_of(
                 });
 }
 
-template<class LocationTuple, class JumpFunc>
-inline auto get_type_related_to(
-        LocationTuple const& location_tuple,
-        JumpFunc const& predicate
-    ) -> char const*
+template<class JumpFunc>
+const char* get_type_related_to(const location_tuple& location_info, JumpFunc const& predicate)
 {
     return at_specific_location(
-            location_tuple,
+            location_info,
             [&predicate](CXCursor const& c) -> std::string {
                 CXType const type = predicate(clang_getCursorType(c));
                 if (type.kind == CXType_Invalid) {
@@ -80,16 +74,14 @@ inline auto get_type_related_to(
             });
 }
 
-template<class LocationTuple>
-auto get_all_extents( LocationTuple const& location_tuple)
-    -> char const*
+const char* get_all_extents(const location_tuple& location_info)
 {
     static std::string vimson;
     vimson = "";
-    char const* file_name = location_tuple.file.c_str();
+    char const* file_name = location_info.file.c_str();
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    auto const args_ptrs = get_args_ptrs(location_tuple.args);
+    auto const args_ptrs = get_args_ptrs(location_info.args);
     CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
     if (translation_unit == NULL) {
         clang_disposeIndex(index);
@@ -97,7 +89,7 @@ auto get_all_extents( LocationTuple const& location_tuple)
     }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, location_tuple.line, location_tuple.col);
+    auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor cursor = clang_getCursor(translation_unit, location);
     vimson += "{" + stringize_extent(cursor) + "},";
 
