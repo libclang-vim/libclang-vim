@@ -776,6 +776,14 @@ char const* vim_clang_get_completion_at(char const* location_string)
     return ret;
 }
 
+char const* vim_clang_get_comment_at(char const* location_string)
+{
+    stderr_guard g;
+
+    const char* ret = libclang_vim::get_comment_at(libclang_vim::parse_args_with_location(location_string));
+    return ret;
+}
+
 char const* vim_clang_get_compile_commands(char const* file)
 {
     stderr_guard g;

@@ -32,6 +32,15 @@ function! ClangInspectFunction()
     echo info.name
 endfunction
 
+" Example for libclang#deduction#comment_at().
+function! ClangInspectComment()
+    let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let file_name = ClangTempFile()
+    let info = libclang#deduction#comment_at(file_name, line('.'), col('.'), compiler_args.commands)
+    call delete(file_name)
+    echo info.brief
+endfunction
+
 " Example for libclang#deduction#completion_at().
 function! ClangInspectCompletion(findstart, base)
     if a:findstart == 1

@@ -38,4 +38,20 @@ static void func()
     Buffer buf;
 }
 
+class E
+{
+    /// This is foo.
+    void foo();
+};
+
+E::foo()
+{
+}
+
+static void func2()
+{
+    E e;
+    e.foo();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

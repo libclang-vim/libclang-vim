@@ -16,6 +16,9 @@ endfunction
 function! libclang#deduction#completion_at(filename, line, col, ...)
     return libclang#call_at('vim_clang_get_completion_at', a:filename, a:line, a:col, a:000)
 endfunction
+function! libclang#deduction#comment_at(filename, line, col, ...)
+    return libclang#call_at('vim_clang_get_comment_at', a:filename, a:line, a:col, a:000)
+endfunction
 function! libclang#deduction#compile_commands(filename)
     return libclang#call('vim_clang_get_compile_commands', a:filename, "")
 endfunction

@@ -20,7 +20,7 @@ You can
 - get the information for completion.
 - get diagnostic information. *(not implemented yet)*
 - get preprocessing information. *(not implemented yet)*
-- get comment information. *(not implemented yet)*
+- get comment information.
 
 
 ## Usage
@@ -109,6 +109,10 @@ Get the name of the qualified name of the current function at specific location.
 ### `libclang#deduction#completion_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get the list of completion strings at specific location.
+
+### `libclang#deduction#comment_at({filename}, {line}, {col} [, {compiler args}])`
+
+Get brief comment for the entity referenced at a specific location.
 
 ### `libclang#deduction#compile_commands({filename})`
 
