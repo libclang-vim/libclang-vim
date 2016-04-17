@@ -100,15 +100,12 @@ void deduction_test::test_completion_at()
 
 void deduction_test::test_comment_at()
 {
-    // At least passes for me with 3.7, fails with 3.4.
-#if (__clang_major__ == 3 && __clang_minor__ > 4) || __clang_major__ > 3
     auto vim_clang_get_completion_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_comment_at"));
     CPPUNIT_ASSERT(vim_clang_get_completion_at);
 
     std::string expected("{'brief':'This is foo.'}");
     std::string actual(vim_clang_get_completion_at("qa/data/current-function.cpp:-std=c++1y:54:8"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
-#endif
 }
 
 void deduction_test::test_compile_commands()
