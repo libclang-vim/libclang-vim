@@ -689,6 +689,7 @@ char const* vim_clang_get_referenced_at(char const* location_string)
 
 char const* vim_clang_get_declaration_at(char const* location_string)
 {
+    stderr_guard g;
     auto const parsed_location = libclang_vim::parse_args_with_location(location_string);
     return libclang_vim::get_related_node_of(
             parsed_location,
@@ -781,6 +782,14 @@ char const* vim_clang_get_comment_at(char const* location_string)
     stderr_guard g;
 
     const char* ret = libclang_vim::get_comment_at(libclang_vim::parse_args_with_location(location_string));
+    return ret;
+}
+
+char const* vim_clang_get_deduced_declaration_at(char const* location_string)
+{
+    stderr_guard g;
+
+    const char* ret = libclang_vim::get_deduced_declaration_at(libclang_vim::parse_args_with_location(location_string));
     return ret;
 }
 

@@ -114,6 +114,10 @@ Get the list of completion strings at specific location.
 
 Get brief comment for the entity referenced at a specific location.
 
+### `libclang#deduction#declaration_at({filename}, {line}, {col} [, {compiler args}])`
+
+Get location (file name, line, col) of the declaration referenced at a specific location.
+
 ### `libclang#deduction#compile_commands({filename})`
 
 Get the list of compile commands for a specific file name.

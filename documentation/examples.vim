@@ -41,6 +41,27 @@ function! ClangInspectComment()
     echo info.brief
 endfunction
 
+" Example for libclang#deduction#declaration_at().
+" See ':help jumplist', e.g. use Ctrl-O to jump back.
+function! ClangJumpDeclaration()
+    let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let file_name = ClangTempFile()
+    let info = libclang#deduction#declaration_at(file_name, line('.'), col('.'), compiler_args.commands)
+    call delete(file_name)
+
+    if info.file == file_name
+        let info.file = expand('%:p')
+    endif
+
+    " Add an entry to the jump list.
+    normal! m'
+    " Avoid adding the file open to the jump list.
+    execute "keepjumps edit " . info.file
+    call cursor(info.line, info.col)
+    " Move the cursor to the center of the screen.
+    normal! zz
+endfunction
+
 " Example for libclang#deduction#completion_at().
 function! ClangInspectCompletion(findstart, base)
     if a:findstart == 1
