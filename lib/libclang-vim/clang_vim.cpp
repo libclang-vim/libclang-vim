@@ -110,7 +110,7 @@ char const* get_compile_commands(const std::string& file)
     return vimson.c_str();
 }
 
-inline char const* get_completion_at(location_tuple const& location_info)
+char const* get_completion_at(location_tuple const& location_info)
 {
     static std::string vimson;
 

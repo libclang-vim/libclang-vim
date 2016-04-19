@@ -19,14 +19,14 @@ namespace libclang_vim {
 using std::size_t;
 
 // Note: boost::filesystem
-inline size_t get_file_size(char const* filename)
+size_t get_file_size(char const* filename)
 {
     std::ifstream input(filename);
     return input.seekg(0, std::ios::end).tellg();
 }
 
 template<class Location>
-inline bool is_null_location(Location const& location)
+bool is_null_location(Location const& location)
 {
     return clang_equalLocations(location, clang_getNullLocation());
 }
@@ -41,22 +41,22 @@ struct cxstring_deleter {
 
 typedef std::shared_ptr<CXString> cxstring_ptr;
 
-inline cxstring_ptr owned(CXString const& str)
+cxstring_ptr owned(CXString const& str)
 {
     return {new CXString(str), cxstring_deleter{}};
 }
 
-inline char const* to_c_str(cxstring_ptr const& p)
+char const* to_c_str(cxstring_ptr const& p)
 {
     return clang_getCString(*p);
 }
 
-inline std::string operator""_str(char const* s, size_t const)
+std::string operator""_str(char const* s, size_t const)
 {
     return {s};
 }
 
-inline std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
+std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
 {
     auto const* cstring = clang_getCString(*p);
     if (!cstring || std::strcmp(cstring, "") == 0) {
@@ -215,7 +215,7 @@ location_tuple parse_args_with_location(std::string const& args_string)
     return ret;
 }
 
-inline std::vector<char const *> get_args_ptrs(args_type const& args)
+std::vector<char const *> get_args_ptrs(args_type const& args)
 {
     std::vector<char const*> args_ptrs{args.size()};
     std::transform(std::begin(args), std::end(args), std::begin(args_ptrs), [](std::string const& s){ return s.c_str(); });

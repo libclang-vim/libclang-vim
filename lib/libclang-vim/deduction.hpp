@@ -66,7 +66,7 @@ CXType deduce_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-inline char const* deduce_var_decl_type(const location_tuple& location_info)
+char const* deduce_var_decl_type(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -125,7 +125,7 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-inline char const* deduce_func_return_type(const location_tuple& location_info)
+char const* deduce_func_return_type(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -150,7 +150,7 @@ inline char const* deduce_func_return_type(const location_tuple& location_info)
             );
 }
 
-inline char const* deduce_func_or_var_decl(const location_tuple& location_info)
+char const* deduce_func_or_var_decl(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -194,14 +194,14 @@ CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientD
     return CXChildVisit_Recurse;
 }
 
-inline bool is_invalid_type_cursor(CXCursor const& cursor)
+bool is_invalid_type_cursor(CXCursor const& cursor)
 {
     return clang_getCursorType(cursor).kind == CXType_Invalid;
 }
 
 } // namespace detail
 
-inline char const* deduce_type_at(const location_tuple& location_info)
+char const* deduce_type_at(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -235,7 +235,7 @@ inline char const* deduce_type_at(const location_tuple& location_info)
             );
 }
 
-inline char const* get_current_function_at(const location_tuple& location_info)
+char const* get_current_function_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -314,7 +314,7 @@ inline char const* get_current_function_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-inline char const* get_comment_at(const location_tuple& location_info)
+char const* get_comment_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -362,7 +362,7 @@ inline char const* get_comment_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-inline char const* get_deduced_declaration_at(const location_tuple& location_info)
+char const* get_deduced_declaration_at(const location_tuple& location_info)
 {
     static std::string vimson;
 

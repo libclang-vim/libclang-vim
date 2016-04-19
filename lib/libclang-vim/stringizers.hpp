@@ -9,13 +9,13 @@
 
 namespace libclang_vim {
 
-inline std::string stringize_spell(CXCursor const& cursor)
+std::string stringize_spell(CXCursor const& cursor)
 {
     auto const spell = owned(clang_getCursorSpelling(cursor));
     return stringize_key_value("spell", spell);
 }
 
-inline std::string stringize_extra_type_info(CXType const& type)
+std::string stringize_extra_type_info(CXType const& type)
 {
     std::string result = "";
 
@@ -49,7 +49,7 @@ inline std::string stringize_extra_type_info(CXType const& type)
     return result;
 }
 
-inline std::string stringize_type(CXType const& type)
+std::string stringize_type(CXType const& type)
 {
     CXTypeKind const type_kind = type.kind;
     auto const type_name = owned(clang_getTypeSpelling(type));
@@ -59,7 +59,7 @@ inline std::string stringize_type(CXType const& type)
          + stringize_extra_type_info(type);
 }
 
-inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
+std::string stringize_linkage_kind(CXLinkageKind const& linkage)
 {
     switch (linkage) {
     case CXLinkage_Invalid: return "";
@@ -70,13 +70,13 @@ inline std::string stringize_linkage_kind(CXLinkageKind const& linkage)
     }
 }
 
-inline std::string stringize_linkage(CXCursor const& cursor)
+std::string stringize_linkage(CXCursor const& cursor)
 {
     auto const linkage_kind_name = stringize_linkage_kind(clang_getCursorLinkage(cursor));
     return stringize_key_value("linkage", linkage_kind_name);
 }
 
-inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
+std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
 {
     auto const semantic_parent = clang_getCursorSemanticParent(cursor);
     auto const lexical_parent = clang_getCursorLexicalParent(cursor);
@@ -89,7 +89,7 @@ inline std::string stringize_parent(CXCursor const& cursor, CXCursor const& pare
          + stringize_key_value("lexical_parent", lexical_parent_name);
 }
 
-inline std::string stringize_location(CXSourceLocation const& location)
+std::string stringize_location(CXSourceLocation const& location)
 {
     CXFile file;
     unsigned int line, column, offset;
@@ -102,13 +102,13 @@ inline std::string stringize_location(CXSourceLocation const& location)
         + stringize_key_value("file", file_name);
 }
 
-inline std::string stringize_cursor_location(CXCursor const& cursor)
+std::string stringize_cursor_location(CXCursor const& cursor)
 {
     CXSourceLocation const location = clang_getCursorLocation(cursor);
     return stringize_location(location);
 }
 
-inline std::string stringize_cursor_kind_type(CXCursorKind const& kind)
+std::string stringize_cursor_kind_type(CXCursorKind const& kind)
 {
     if (clang_isAttribute(kind)) {
         return "Attribute";
@@ -133,7 +133,7 @@ inline std::string stringize_cursor_kind_type(CXCursorKind const& kind)
     }
 }
 
-inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
+std::string stringize_cursor_extra_info(CXCursor const& cursor)
 {
     std::string result = "";
 
@@ -167,7 +167,7 @@ inline std::string stringize_cursor_extra_info(CXCursor const& cursor)
     return result;
 }
 
-inline std::string stringize_cursor_kind(CXCursor const& cursor)
+std::string stringize_cursor_kind(CXCursor const& cursor)
 {
     CXCursorKind const kind = clang_getCursorKind(cursor);
     auto const kind_name = owned(clang_getCursorKindSpelling(kind));
@@ -178,7 +178,7 @@ inline std::string stringize_cursor_kind(CXCursor const& cursor)
          + stringize_cursor_extra_info(cursor);
 }
 
-inline std::string stringize_included_file(CXCursor const& cursor)
+std::string stringize_included_file(CXCursor const& cursor)
 {
     CXFile const included_file = clang_getIncludedFile(cursor);
     if (included_file == NULL) {
@@ -189,7 +189,7 @@ inline std::string stringize_included_file(CXCursor const& cursor)
     return "'included_file':'"_str + to_c_str(included_file_name) + "',";
 }
 
-inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& parent)
+std::string stringize_cursor(CXCursor const& cursor, CXCursor const& parent)
 {
     return stringize_spell(cursor)
         + stringize_type(clang_getCursorType(cursor))
@@ -200,7 +200,7 @@ inline std::string stringize_cursor(CXCursor const& cursor, CXCursor const& pare
         + stringize_included_file(cursor);
 }
 
-inline std::string stringize_range(CXSourceRange const& range)
+std::string stringize_range(CXSourceRange const& range)
 {
     if (clang_Range_isNull(range)) {
         return "";
@@ -209,7 +209,7 @@ inline std::string stringize_range(CXSourceRange const& range)
          + "},'end':{" + stringize_location(clang_getRangeEnd(range)) + "}},";
 }
 
-inline std::string stringize_extent(CXCursor const& cursor)
+std::string stringize_extent(CXCursor const& cursor)
 {
     auto const r = clang_getCursorExtent(cursor);
     if (clang_Range_isNull(r)) {

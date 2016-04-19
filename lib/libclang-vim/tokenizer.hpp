@@ -44,7 +44,7 @@ private:
     }
 
     template<class Kind>
-    inline char const* get_kind_spelling(Kind const kind) const
+    char const* get_kind_spelling(Kind const kind) const
     {
         switch (kind) {
             case CXToken_Punctuation: return "punctuation";
