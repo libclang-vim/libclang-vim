@@ -248,64 +248,62 @@ char const* get_current_function_at(const location_tuple& location_info)
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+        return "{}";
 
-    if (translation_unit)
+    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    unsigned line = location_info.line;
+    unsigned column = location_info.col;
+
+    CXCursor cursor;
+    CXCursorKind kind;
+    while (true)
     {
-        const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-        unsigned line = location_info.line;
-        unsigned column = location_info.col;
+        CXSourceLocation location = clang_getLocation(translation_unit, file, line, column);
+        cursor = clang_getCursor(translation_unit, location);
+        kind = clang_getCursorKind(cursor);
+        if (clang_getCursorKind(clang_getCursorSemanticParent(cursor)) != CXCursor_InvalidFile || column <= 1)
+            break;
 
-        CXCursor cursor;
-        CXCursorKind kind;
+        // This happens with e.g. CXCursor_TypeRef, work it around by going
+        // back till we get a sane parent, if we can.
+        --column;
+    }
+
+    while (true)
+    {
+        if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
+            break;
+        cursor = clang_getCursorSemanticParent(cursor);
+        kind = clang_getCursorKind(cursor);
+    }
+
+    if (kind != CXCursor_TranslationUnit)
+    {
+        std::stack<std::string> stack;
         while (true)
         {
-            CXSourceLocation location = clang_getLocation(translation_unit, file, line, column);
-            cursor = clang_getCursor(translation_unit, location);
-            kind = clang_getCursorKind(cursor);
-            if (clang_getCursorKind(clang_getCursorSemanticParent(cursor)) != CXCursor_InvalidFile || column <= 1)
-                break;
+            CXString aString = clang_getCursorSpelling(cursor);
+            stack.push(clang_getCString(aString));
+            clang_disposeString(aString);
 
-            // This happens with e.g. CXCursor_TypeRef, work it around by going
-            // back till we get a sane parent, if we can.
-            --column;
-        }
-
-        while (true)
-        {
-            if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
-                break;
             cursor = clang_getCursorSemanticParent(cursor);
-            kind = clang_getCursorKind(cursor);
+            if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
+                break;
         }
-
-        if (kind != CXCursor_TranslationUnit)
+        bool first = true;
+        while (!stack.empty())
         {
-            std::stack<std::string> stack;
-            while (true)
-            {
-                CXString aString = clang_getCursorSpelling(cursor);
-                stack.push(clang_getCString(aString));
-                clang_disposeString(aString);
-
-                cursor = clang_getCursorSemanticParent(cursor);
-                if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
-                    break;
-            }
-            bool first = true;
-            while (!stack.empty())
-            {
-                if (first)
-                    first = false;
-                else
-                    ss << "::";
-                ss << stack.top();
-                stack.pop();
-            }
+            if (first)
+                first = false;
+            else
+                ss << "::";
+            ss << stack.top();
+            stack.pop();
         }
     }
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     // Write the footer.
@@ -327,33 +325,31 @@ char const* get_comment_at(const location_tuple& location_info)
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+        return "{}";
 
-    if (translation_unit)
-    {
-        const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-        int line = location_info.line;
-        int column = location_info.col;
-        CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
-        CXCursor cursor = clang_getCursor(translation_unit, source_location);
-        if (clang_Cursor_isNull(cursor) || clang_isInvalid(clang_getCursorKind(cursor)))
-            return "{}";
+    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    int line = location_info.line;
+    int column = location_info.col;
+    CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
+    CXCursor cursor = clang_getCursor(translation_unit, source_location);
+    if (clang_Cursor_isNull(cursor) || clang_isInvalid(clang_getCursorKind(cursor)))
+        return "{}";
 
-        CXCursor referenced_cursor = clang_getCursorReferenced(cursor);
-        if (!clang_Cursor_isNull(referenced_cursor) && !clang_isInvalid(clang_getCursorKind(referenced_cursor)))
-            cursor = referenced_cursor;
+    CXCursor referenced_cursor = clang_getCursorReferenced(cursor);
+    if (!clang_Cursor_isNull(referenced_cursor) && !clang_isInvalid(clang_getCursorKind(referenced_cursor)))
+        cursor = referenced_cursor;
 
-        CXCursor canonical_cursor = clang_getCanonicalCursor(cursor);
-        if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
-            return "{}";
+    CXCursor canonical_cursor = clang_getCanonicalCursor(cursor);
+    if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
+        return "{}";
 
-        CXString brief = clang_Cursor_getBriefCommentText(canonical_cursor);
-        if (clang_getCString(brief))
-            ss << clang_getCString(brief);
-        clang_disposeString(brief);
-    }
+    CXString brief = clang_Cursor_getBriefCommentText(canonical_cursor);
+    if (clang_getCString(brief))
+        ss << clang_getCString(brief);
+    clang_disposeString(brief);
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     // Write the footer.
@@ -375,39 +371,37 @@ char const* get_deduced_declaration_at(const location_tuple& location_info)
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+        return "{}";
 
-    if (translation_unit)
-    {
-        const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-        int line = location_info.line;
-        int column = location_info.col;
-        CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
-        CXCursor cursor = clang_getCursor(translation_unit, source_location);
-        if (clang_Cursor_isNull(cursor) || clang_isInvalid(clang_getCursorKind(cursor)))
-            return "{}";
+    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    int line = location_info.line;
+    int column = location_info.col;
+    CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
+    CXCursor cursor = clang_getCursor(translation_unit, source_location);
+    if (clang_Cursor_isNull(cursor) || clang_isInvalid(clang_getCursorKind(cursor)))
+        return "{}";
 
-        CXCursor referenced_cursor = clang_getCursorReferenced(cursor);
-        if (clang_Cursor_isNull(referenced_cursor) && clang_isInvalid(clang_getCursorKind(referenced_cursor)))
-            return "{}";
+    CXCursor referenced_cursor = clang_getCursorReferenced(cursor);
+    if (clang_Cursor_isNull(referenced_cursor) && clang_isInvalid(clang_getCursorKind(referenced_cursor)))
+        return "{}";
 
-        CXCursor canonical_cursor = clang_getCanonicalCursor(referenced_cursor);
-        if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
-            return "{}";
+    CXCursor canonical_cursor = clang_getCanonicalCursor(referenced_cursor);
+    if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
+        return "{}";
 
-        CXSourceLocation declaration_location = clang_getCursorLocation(canonical_cursor);
-        CXFile declaration_file;
-        unsigned declaration_line;
-        unsigned declaration_col;
-        clang_getExpansionLocation(declaration_location, &declaration_file, &declaration_line, &declaration_col, nullptr);
-        CXString declaration_file_name = clang_getFileName(declaration_file);
-        ss << "'file':'" << clang_getCString(declaration_file_name)<<"',";
-        clang_disposeString(declaration_file_name);
-        ss << "'line':'" << declaration_line <<"',";
-        ss << "'col':'" << declaration_col <<"',";
-    }
+    CXSourceLocation declaration_location = clang_getCursorLocation(canonical_cursor);
+    CXFile declaration_file;
+    unsigned declaration_line;
+    unsigned declaration_col;
+    clang_getExpansionLocation(declaration_location, &declaration_file, &declaration_line, &declaration_col, nullptr);
+    CXString declaration_file_name = clang_getFileName(declaration_file);
+    ss << "'file':'" << clang_getCString(declaration_file_name)<<"',";
+    clang_disposeString(declaration_file_name);
+    ss << "'line':'" << declaration_line <<"',";
+    ss << "'col':'" << declaration_col <<"',";
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     // Write the footer.

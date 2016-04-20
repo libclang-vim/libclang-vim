@@ -13,12 +13,12 @@ namespace libclang_vim {
 
 class tokenizer {
 private:
-    CXTranslationUnit translation_unit;
+    cxtranslation_unit_ptr translation_unit;
     std::string file_name;
 
 public:
     tokenizer(std::string const& file_name)
-        : translation_unit()
+        : translation_unit(nullptr)
         , file_name(file_name)
     {}
 
@@ -85,13 +85,13 @@ public:
         CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
         translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, NULL, 0, CXTranslationUnit_Incomplete);
-        if (translation_unit == NULL) {
+        if (!translation_unit)
+        {
             clang_disposeIndex(index);
             return "{}";
         }
         auto file_range = get_range_whole_file();
         if (clang_Range_isNull(file_range)) {
-            clang_disposeTranslationUnit(translation_unit);
             clang_disposeIndex(index);
             return "{}";
         }
@@ -104,7 +104,6 @@ public:
         auto result = make_vimson_from_tokens(tokens);
 
         clang_disposeTokens(translation_unit, tokens_, num_tokens);
-        clang_disposeTranslationUnit(translation_unit);
         clang_disposeIndex(index);
 
         return result;

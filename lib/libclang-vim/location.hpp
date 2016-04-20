@@ -82,8 +82,9 @@ const char* get_all_extents(const location_tuple& location_info)
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     auto const args_ptrs = get_args_ptrs(location_info.args);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
-    if (translation_unit == NULL) {
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+    {
         clang_disposeIndex(index);
         return "[]";
     }
@@ -108,7 +109,6 @@ const char* get_all_extents(const location_tuple& location_info)
 
     vimson = "[" + vimson + "]";
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     return vimson.c_str();

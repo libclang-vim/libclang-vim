@@ -123,41 +123,39 @@ char const* get_completion_at(location_tuple const& location_info)
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete);
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+        return "[]";
 
-    if (translation_unit)
+    unsigned line = location_info.line;
+    unsigned column = location_info.col;
+    CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, nullptr, 0, clang_defaultCodeCompleteOptions());
+    std::set<std::string> matches;
+    if (results)
     {
-        unsigned line = location_info.line;
-        unsigned column = location_info.col;
-        CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, nullptr, 0, clang_defaultCodeCompleteOptions());
-        std::set<std::string> matches;
-        if (results)
+        for (unsigned i = 0; i < results->NumResults; ++i)
         {
-            for (unsigned i = 0; i < results->NumResults; ++i)
+            const CXCompletionString& completion_string = results->Results[i].CompletionString;
+            std::stringstream match;
+            for (unsigned j = 0; j < clang_getNumCompletionChunks(completion_string); ++j)
             {
-                const CXCompletionString& completion_string = results->Results[i].CompletionString;
-                std::stringstream match;
-                for (unsigned j = 0; j < clang_getNumCompletionChunks(completion_string); ++j)
-                {
-                    if (clang_getCompletionChunkKind(completion_string, j) != CXCompletionChunk_TypedText)
-                        continue;
+                if (clang_getCompletionChunkKind(completion_string, j) != CXCompletionChunk_TypedText)
+                    continue;
 
-                    const CXString& chunk_text = clang_getCompletionChunkText(completion_string, j);
-                    match << clang_getCString(chunk_text);
-                }
-                matches.insert(match.str());
+                const CXString& chunk_text = clang_getCompletionChunkText(completion_string, j);
+                match << clang_getCString(chunk_text);
             }
-            clang_disposeCodeCompleteResults(results);
+            matches.insert(match.str());
         }
-        for (std::set<std::string>::iterator it = matches.begin(); it != matches.end(); ++it)
-        {
-            if (it != matches.begin())
-                ss << "', '";
-            ss << *it;
-        }
+        clang_disposeCodeCompleteResults(results);
+    }
+    for (std::set<std::string>::iterator it = matches.begin(); it != matches.end(); ++it)
+    {
+        if (it != matches.begin())
+            ss << "', '";
+        ss << *it;
     }
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     // Write the footer.
@@ -555,8 +553,9 @@ char const* vim_clang_get_location_information(char const* location_string)
     char const* file_name = location_info.file.c_str();
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
-    if (translation_unit == NULL) {
+    libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+    {
         clang_disposeIndex(index);
         return "{}";
     }
@@ -567,7 +566,6 @@ char const* vim_clang_get_location_information(char const* location_string)
     static std::string result;
     result = "{" + libclang_vim::stringize_cursor(cursor, clang_getCursorSemanticParent(cursor)) + "}";
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     return result.c_str();
@@ -581,8 +579,9 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     char const* file_name = location_info.file.c_str();
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
-    if (translation_unit == NULL) {
+    libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+    {
         clang_disposeIndex(index);
         return "{}";
     }
@@ -593,7 +592,6 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     static std::string result;
     result = "{" + libclang_vim::stringize_extent(cursor) + "}";
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     return result.c_str();

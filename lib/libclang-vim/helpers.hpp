@@ -31,6 +31,34 @@ bool is_null_location(Location const& location)
     return clang_equalLocations(location, clang_getNullLocation());
 }
 
+/// Class to avoid the need to call clang_disposeTranslationUnit() manually.
+class cxtranslation_unit_ptr
+{
+    CXTranslationUnit _unit;
+
+public:
+    cxtranslation_unit_ptr(CXTranslationUnit unit)
+        : _unit(unit)
+    {
+    }
+
+    operator const CXTranslationUnit&() const
+    {
+        return _unit;
+    }
+
+    operator bool() const
+    {
+        return _unit != nullptr;
+    }
+
+    ~cxtranslation_unit_ptr()
+    {
+        if (_unit)
+            clang_disposeTranslationUnit(_unit);
+    }
+};
+
 struct cxstring_deleter {
     void operator()(CXString *str) const
     {
@@ -233,8 +261,9 @@ auto at_specific_location(
     auto const args_ptrs = get_args_ptrs(location_tuple.args);
 
     CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    CXTranslationUnit translation_unit = clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete);
-    if (translation_unit == NULL) {
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+    {
         clang_disposeIndex(index);
         return "{}";
     }
@@ -245,7 +274,6 @@ auto at_specific_location(
 
     vimson = predicate(cursor);
 
-    clang_disposeTranslationUnit(translation_unit);
     clang_disposeIndex(index);
 
     return vimson.c_str();
