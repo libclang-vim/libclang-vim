@@ -80,14 +80,11 @@ const char* get_all_extents(const location_tuple& location_info)
     vimson = "";
     char const* file_name = location_info.file.c_str();
 
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     auto const args_ptrs = get_args_ptrs(location_info.args);
     cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
-    {
-        clang_disposeIndex(index);
         return "[]";
-    }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
@@ -108,8 +105,6 @@ const char* get_all_extents(const location_tuple& location_info)
     }
 
     vimson = "[" + vimson + "]";
-
-    clang_disposeIndex(index);
 
     return vimson.c_str();
 }

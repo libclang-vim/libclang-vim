@@ -244,7 +244,7 @@ char const* get_current_function_at(const location_tuple& location_info)
     ss << "{'name':'";
 
     // Write the actual name.
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -303,8 +303,6 @@ char const* get_current_function_at(const location_tuple& location_info)
         }
     }
 
-    clang_disposeIndex(index);
-
     // Write the footer.
     ss << "'}";
     vimson = ss.str();
@@ -320,7 +318,7 @@ char const* get_comment_at(const location_tuple& location_info)
     ss << "{'brief':'";
 
     // Write the actual comment.
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -348,8 +346,6 @@ char const* get_comment_at(const location_tuple& location_info)
     if (clang_getCString(brief))
         ss << clang_getCString(brief);
 
-    clang_disposeIndex(index);
-
     // Write the footer.
     ss << "'}";
     vimson = ss.str();
@@ -365,7 +361,7 @@ char const* get_deduced_declaration_at(const location_tuple& location_info)
     ss << "{";
 
     // Write the actual comment.
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -398,8 +394,6 @@ char const* get_deduced_declaration_at(const location_tuple& location_info)
     ss << "'file':'" << clang_getCString(declaration_file_name)<<"',";
     ss << "'line':'" << declaration_line <<"',";
     ss << "'col':'" << declaration_col <<"',";
-
-    clang_disposeIndex(index);
 
     // Write the footer.
     ss << "}";

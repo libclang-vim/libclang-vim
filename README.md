@@ -116,7 +116,9 @@ Get brief comment for the entity referenced at a specific location.
 
 ### `libclang#deduction#declaration_at({filename}, {line}, {col} [, {compiler args}])`
 
-Get location (file name, line, col) of the declaration referenced at a specific location.
+Get location (file name, line, col) of the declaration referenced at a specific
+location. This works not only for member functions, but for other entities like
+local variables as well.
 
 ### `libclang#deduction#compile_commands({filename})`
 

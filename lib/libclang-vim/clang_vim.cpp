@@ -118,7 +118,7 @@ char const* get_completion_at(location_tuple const& location_info)
     ss << "['";
 
     // Write the completion list.
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -154,8 +154,6 @@ char const* get_completion_at(location_tuple const& location_info)
             ss << "', '";
         ss << *it;
     }
-
-    clang_disposeIndex(index);
 
     // Write the footer.
     ss << "']";
@@ -551,21 +549,16 @@ char const* vim_clang_get_location_information(char const* location_string)
     auto const location_info = libclang_vim::parse_args_with_location(location_string);
     char const* file_name = location_info.file.c_str();
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
-    {
-        clang_disposeIndex(index);
         return "{}";
-    }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
     static std::string result;
     result = "{" + libclang_vim::stringize_cursor(cursor, clang_getCursorSemanticParent(cursor)) + "}";
-
-    clang_disposeIndex(index);
 
     return result.c_str();
 }
@@ -577,21 +570,16 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     auto location_info = libclang_vim::parse_args_with_location(location_string);
     char const* file_name = location_info.file.c_str();
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
-    {
-        clang_disposeIndex(index);
         return "{}";
-    }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
     static std::string result;
     result = "{" + libclang_vim::stringize_extent(cursor) + "}";
-
-    clang_disposeIndex(index);
 
     return result.c_str();
 }

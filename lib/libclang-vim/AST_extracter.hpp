@@ -77,18 +77,13 @@ auto extract_AST_nodes(
     typedef std::tuple<std::string&, extraction_policy const, Predicate const&> callback_data_type;
     callback_data_type callback_data{vimson, policy, predicate};
 
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, parsed.first.c_str(), args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
-    {
-        clang_disposeIndex(index);
         return "{}";
-    }
 
     CXCursor cursor = clang_getTranslationUnitCursor(translation_unit);
     clang_visitChildren(cursor, detail::AST_extracter<callback_data_type>, &callback_data);
-
-    clang_disposeIndex(index);
 
     vimson = "{'root':[" + vimson + "]}";
 

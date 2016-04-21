@@ -31,6 +31,34 @@ bool is_null_location(Location const& location)
     return clang_equalLocations(location, clang_getNullLocation());
 }
 
+/// Class to avoid the need to call clang_disposeIndex() manually.
+class cxindex_ptr
+{
+    CXIndex _index;
+
+public:
+    cxindex_ptr(CXIndex index)
+        : _index(index)
+    {
+    }
+
+    operator const CXIndex&() const
+    {
+        return _index;
+    }
+
+    operator bool() const
+    {
+        return _index != nullptr;
+    }
+
+    ~cxindex_ptr()
+    {
+        if (_index)
+            clang_disposeIndex(_index);
+    }
+};
+
 /// Class to avoid the need to call clang_disposeTranslationUnit() manually.
 class cxtranslation_unit_ptr
 {
@@ -262,21 +290,16 @@ auto at_specific_location(
     char const* file_name = location_tuple.file.c_str();
     auto const args_ptrs = get_args_ptrs(location_tuple.args);
 
-    CXIndex index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
-    {
-        clang_disposeIndex(index);
         return "{}";
-    }
 
     CXFile const file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_tuple.line, location_tuple.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
 
     vimson = predicate(cursor);
-
-    clang_disposeIndex(index);
 
     return vimson.c_str();
 }
