@@ -59,34 +59,36 @@ public:
     }
 };
 
-struct cxstring_deleter {
-    void operator()(CXString *str) const
+/// Class to avoid the need to call clang_disposeString() manually.
+class cxstring_ptr
+{
+    CXString _string;
+
+public:
+    cxstring_ptr(CXString string)
+        : _string(string)
     {
-        clang_disposeString(*str);
-        delete str;
+    }
+
+    operator const CXString&() const
+    {
+        return _string;
+    }
+
+    ~cxstring_ptr()
+    {
+        clang_disposeString(_string);
     }
 };
 
-typedef std::shared_ptr<CXString> cxstring_ptr;
-
-cxstring_ptr owned(CXString const& str)
+char const* to_c_str(const cxstring_ptr& string)
 {
-    return {new CXString(str), cxstring_deleter{}};
-}
-
-char const* to_c_str(cxstring_ptr const& p)
-{
-    return clang_getCString(*p);
-}
-
-std::string operator""_str(char const* s, size_t const)
-{
-    return {s};
+    return clang_getCString(string);
 }
 
 std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
 {
-    auto const* cstring = clang_getCString(*p);
+    auto const* cstring = clang_getCString(p);
     if (!cstring || std::strcmp(cstring, "") == 0) {
         return "";
     } else {

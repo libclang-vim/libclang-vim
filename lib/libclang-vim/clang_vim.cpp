@@ -75,10 +75,9 @@ args_type parse_compilation_database(const std::string& file)
             unsigned args = clang_CompileCommand_getNumArgs(command);
             for (unsigned i = 0; i < args; ++i)
             {
-                CXString arg = clang_CompileCommand_getArg(command, i);
+                cxstring_ptr arg = clang_CompileCommand_getArg(command, i);
                 if (file != clang_getCString(arg))
                     ret.push_back(clang_getCString(arg));
-                clang_disposeString(arg);
             }
         }
         clang_CompileCommands_dispose(commands);

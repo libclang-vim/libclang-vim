@@ -11,7 +11,7 @@ namespace libclang_vim {
 
 std::string stringize_spell(CXCursor const& cursor)
 {
-    auto const spell = owned(clang_getCursorSpelling(cursor));
+    cxstring_ptr spell = clang_getCursorSpelling(cursor);
     return stringize_key_value("spell", spell);
 }
 
@@ -52,8 +52,8 @@ std::string stringize_extra_type_info(CXType const& type)
 std::string stringize_type(CXType const& type)
 {
     CXTypeKind const type_kind = type.kind;
-    auto const type_name = owned(clang_getTypeSpelling(type));
-    auto const type_kind_name = owned(clang_getTypeKindSpelling(type_kind));
+    cxstring_ptr type_name = clang_getTypeSpelling(type);
+    cxstring_ptr type_kind_name = clang_getTypeKindSpelling(type_kind);
     return stringize_key_value("type", type_name)
          + stringize_key_value("type_kind", type_kind_name)
          + stringize_extra_type_info(type);
@@ -80,9 +80,9 @@ std::string stringize_parent(CXCursor const& cursor, CXCursor const& parent)
 {
     auto const semantic_parent = clang_getCursorSemanticParent(cursor);
     auto const lexical_parent = clang_getCursorLexicalParent(cursor);
-    auto const parent_name = owned(clang_getCursorSpelling(parent));
-    auto const semantic_parent_name = owned(clang_getCursorSpelling(semantic_parent));
-    auto const lexical_parent_name = owned(clang_getCursorSpelling(lexical_parent));
+    cxstring_ptr parent_name = clang_getCursorSpelling(parent);
+    cxstring_ptr semantic_parent_name = clang_getCursorSpelling(semantic_parent);
+    cxstring_ptr lexical_parent_name = clang_getCursorSpelling(lexical_parent);
 
     return stringize_key_value("parent", parent_name)
          + stringize_key_value("semantic_parent", semantic_parent_name)
@@ -94,7 +94,7 @@ std::string stringize_location(CXSourceLocation const& location)
     CXFile file;
     unsigned int line, column, offset;
     clang_getSpellingLocation(location, &file, &line, &column, &offset);
-    auto const file_name = owned(clang_getFileName(file));
+    cxstring_ptr file_name = clang_getFileName(file);
 
     return "'line':" + std::to_string(line)
         + ",'column':" + std::to_string(column)
@@ -170,7 +170,7 @@ std::string stringize_cursor_extra_info(CXCursor const& cursor)
 std::string stringize_cursor_kind(CXCursor const& cursor)
 {
     CXCursorKind const kind = clang_getCursorKind(cursor);
-    auto const kind_name = owned(clang_getCursorKindSpelling(kind));
+    cxstring_ptr kind_name = clang_getCursorKindSpelling(kind);
     auto const kind_type_name = stringize_cursor_kind_type(kind);
 
     return stringize_key_value("kind", kind_name)
@@ -185,8 +185,8 @@ std::string stringize_included_file(CXCursor const& cursor)
         return "";
     }
 
-    auto included_file_name = owned(clang_getFileName(included_file));
-    return "'included_file':'"_str + to_c_str(included_file_name) + "',";
+    cxstring_ptr included_file_name = clang_getFileName(included_file);
+    return std::string("'included_file':'") + to_c_str(included_file_name) + "',";
 }
 
 std::string stringize_cursor(CXCursor const& cursor, CXCursor const& parent)

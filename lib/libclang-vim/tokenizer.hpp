@@ -60,18 +60,18 @@ private:
     {
         return "[" + std::accumulate(std::begin(tokens), std::end(tokens), std::string{}, [&](std::string const& acc, Token const& token){
             auto const kind = clang_getTokenKind(token);
-            auto const spell = owned(clang_getTokenSpelling(translation_unit, token));
+            cxstring_ptr spell = clang_getTokenSpelling(translation_unit, token);
             auto const location = clang_getTokenLocation(translation_unit, token);
 
             CXFile file;
             unsigned int line, column, offset;
             clang_getFileLocation(location, &file, &line, &column, &offset);
-            auto const source_name = owned(clang_getFileName(file));
+            cxstring_ptr source_name = clang_getFileName(file);
 
             return acc
-                + "{'spell':'" + clang_getCString(*spell)
+                + "{'spell':'" + to_c_str(spell)
                 + "','kind':'" + get_kind_spelling(kind)
-                + "','file':'" + clang_getCString(*source_name)
+                + "','file':'" + clang_getCString(source_name)
                 + "','line':" + std::to_string(line)
                 + ",'column':" + std::to_string(column)
                 + ",'offset':" + std::to_string(offset)

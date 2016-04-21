@@ -40,7 +40,7 @@ bool is_auto_type(std::string const& type_name)
 CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
-    auto const type_name = owned(clang_getTypeSpelling(type));
+    cxstring_ptr type_name = clang_getTypeSpelling(type);
     if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
         clang_visitChildren(cursor, unexposed_type_deducer, data);
         return CXChildVisit_Continue;
@@ -53,7 +53,7 @@ CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientDat
 CXType deduce_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
-    auto const type_name = owned(clang_getTypeSpelling(type));
+    cxstring_ptr type_name = clang_getTypeSpelling(type);
     if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
         CXType deduced_type;
         deduced_type.kind = CXType_Invalid;
@@ -100,7 +100,7 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 
     switch (result_type.kind) {
         case CXType_Unexposed: {
-            auto const type_name = owned(clang_getTypeSpelling(result_type));
+            cxstring_ptr type_name = clang_getTypeSpelling(result_type);
             if (std::strcmp(to_c_str(type_name), "auto") != 0) {
                 return result_type;
             }
@@ -284,9 +284,8 @@ char const* get_current_function_at(const location_tuple& location_info)
         std::stack<std::string> stack;
         while (true)
         {
-            CXString aString = clang_getCursorSpelling(cursor);
+            cxstring_ptr aString = clang_getCursorSpelling(cursor);
             stack.push(clang_getCString(aString));
-            clang_disposeString(aString);
 
             cursor = clang_getCursorSemanticParent(cursor);
             if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
@@ -345,10 +344,9 @@ char const* get_comment_at(const location_tuple& location_info)
     if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
         return "{}";
 
-    CXString brief = clang_Cursor_getBriefCommentText(canonical_cursor);
+    cxstring_ptr brief = clang_Cursor_getBriefCommentText(canonical_cursor);
     if (clang_getCString(brief))
         ss << clang_getCString(brief);
-    clang_disposeString(brief);
 
     clang_disposeIndex(index);
 
@@ -396,9 +394,8 @@ char const* get_deduced_declaration_at(const location_tuple& location_info)
     unsigned declaration_line;
     unsigned declaration_col;
     clang_getExpansionLocation(declaration_location, &declaration_file, &declaration_line, &declaration_col, nullptr);
-    CXString declaration_file_name = clang_getFileName(declaration_file);
+    cxstring_ptr declaration_file_name = clang_getFileName(declaration_file);
     ss << "'file':'" << clang_getCString(declaration_file_name)<<"',";
-    clang_disposeString(declaration_file_name);
     ss << "'line':'" << declaration_line <<"',";
     ss << "'col':'" << declaration_col <<"',";
 
