@@ -27,3 +27,6 @@ check: qa/test $(TARGET)
 
 tags:
 	ctags --c++-kinds=+p --fields=+iaS --extra=+q -R --totals=yes *
+
+clang-tidy-modernize:
+	clang-tidy -checks=*modernize*,-modernize-raw-string-literal -header-filter=.* $(CPPSRC)

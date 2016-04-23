@@ -78,7 +78,7 @@ auto extract_AST_nodes(
     callback_data_type callback_data{vimson, policy, predicate};
 
     cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, parsed.first.c_str(), args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, parsed.first.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
         return "{}";
 

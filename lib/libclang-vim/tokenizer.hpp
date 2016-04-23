@@ -17,9 +17,9 @@ private:
     std::string file_name;
 
 public:
-    tokenizer(std::string const& file_name)
+    tokenizer(std::string file_name)
         : translation_unit(nullptr)
-        , file_name(file_name)
+        , file_name(std::move(file_name))
     {}
 
 private:
@@ -84,7 +84,7 @@ public:
     {
         cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-        translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, NULL, 0, CXTranslationUnit_Incomplete);
+        translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, nullptr, 0, CXTranslationUnit_Incomplete);
         if (!translation_unit)
             return "{}";
 

@@ -181,7 +181,7 @@ std::string stringize_cursor_kind(CXCursor const& cursor)
 std::string stringize_included_file(CXCursor const& cursor)
 {
     CXFile const included_file = clang_getIncludedFile(cursor);
-    if (included_file == NULL) {
+    if (included_file == nullptr) {
         return "";
     }
 

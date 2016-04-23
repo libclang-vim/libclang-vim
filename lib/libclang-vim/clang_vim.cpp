@@ -148,7 +148,7 @@ char const* get_completion_at(location_tuple const& location_info)
         }
         clang_disposeCodeCompleteResults(results);
     }
-    for (std::set<std::string>::iterator it = matches.begin(); it != matches.end(); ++it)
+    for (auto it = matches.begin(); it != matches.end(); ++it)
     {
         if (it != matches.begin())
             ss << "', '";
@@ -550,7 +550,7 @@ char const* vim_clang_get_location_information(char const* location_string)
     char const* file_name = location_info.file.c_str();
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
         return "{}";
 
@@ -571,7 +571,7 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     char const* file_name = location_info.file.c_str();
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), NULL, 0, CXTranslationUnit_Incomplete));
+    libclang_vim::cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
         return "{}";
 
