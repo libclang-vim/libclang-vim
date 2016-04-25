@@ -401,6 +401,43 @@ char const* get_deduced_declaration_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
+char const* get_include_at(const location_tuple& location_info)
+{
+    static std::string vimson;
+
+    // Write the header.
+    std::stringstream ss;
+    ss << "{'file':'";
+
+    // Write the actual comment.
+    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+
+    std::string file_name = location_info.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
+    unsigned options = CXTranslationUnit_Incomplete | CXTranslationUnit_DetailedPreprocessingRecord;
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, options));
+    if (!translation_unit)
+        return "{}";
+
+    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    int line = location_info.line;
+    int column = location_info.col;
+    CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
+    CXCursor cursor = clang_getCursor(translation_unit, source_location);
+    if (clang_getCursorKind(cursor) != CXCursor_InclusionDirective)
+        return "{}";
+
+    CXFile included_file = clang_getIncludedFile(cursor);
+    cxstring_ptr included_name = clang_getFileName(included_file);
+
+        ss << clang_getCString(included_name);
+
+    // Write the footer.
+    ss << "'}";
+    vimson = ss.str();
+    return vimson.c_str();
+}
+
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED

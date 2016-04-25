@@ -62,6 +62,19 @@ function! ClangJumpDeclaration()
     normal! zz
 endfunction
 
+" Example for libclang#deduction#include_at().
+" See ':help jumplist', e.g. use Ctrl-O to jump back.
+function! ClangJumpInclude()
+    let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let file_name = ClangTempFile()
+    let info = libclang#deduction#include_at(file_name, line('.'), col('.'), compiler_args.commands)
+    call delete(file_name)
+
+    " Add an entry to the jump list.
+    normal! m'
+    execute "edit " . info.file
+endfunction
+
 " Example for libclang#deduction#completion_at().
 function! ClangInspectCompletion(findstart, base)
     if a:findstart == 1

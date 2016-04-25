@@ -22,6 +22,9 @@ endfunction
 function! libclang#deduction#declaration_at(filename, line, col, ...)
     return libclang#call_at('vim_clang_get_deduced_declaration_at', a:filename, a:line, a:col, a:000)
 endfunction
+function! libclang#deduction#include_at(filename, line, col, ...)
+    return libclang#call_at('vim_clang_get_include_at', a:filename, a:line, a:col, a:000)
+endfunction
 function! libclang#deduction#compile_commands(filename)
     return libclang#call('vim_clang_get_compile_commands', a:filename, "")
 endfunction

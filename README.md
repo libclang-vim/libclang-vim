@@ -19,7 +19,7 @@ You can
 - deduce type of variable declaration and return value of function
 - get the information for completion.
 - get diagnostic information. *(not implemented yet)*
-- get preprocessing information. *(not implemented yet)*
+- get preprocessing information.
 - get comment information.
 
 
@@ -119,6 +119,10 @@ Get brief comment for the entity referenced at a specific location.
 Get location (file name, line, col) of the declaration referenced at a specific
 location. This works not only for member functions, but for other entities like
 local variables as well.
+
+### `libclang#deduction#include_at({filename}, {line}, {col} [, {compiler args}])`
+
+Get file name of the include referenced at a specific location.
 
 ### `libclang#deduction#compile_commands({filename})`
 

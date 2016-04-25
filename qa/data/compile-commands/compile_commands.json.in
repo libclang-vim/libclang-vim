@@ -1,7 +1,7 @@
 [
 {
   "directory": "@SRC_ROOT@/qa/data/compile-commands",
-  "command": "clang++ -DFOO -o test.o -c @SRC_ROOT@/qa/data/compile-commands/test.cpp",
+  "command": "clang++ -DFOO -I@SRC_ROOT@/qa/data/compile-commands -o test.o -c @SRC_ROOT@/qa/data/compile-commands/test.cpp",
   "file": "@SRC_ROOT@/qa/data/compile-commands/test.cpp"
 }
 ]
