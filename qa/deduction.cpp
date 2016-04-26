@@ -128,10 +128,7 @@ void deduction_test::test_compile_commands()
     CPPUNIT_ASSERT(vim_clang_get_compile_commands);
 
     std::string expected("{'commands':'clang++ -DFOO -I" SRC_ROOT "/qa/data/compile-commands -o test.o -c'}");
-    std::stringstream ss;
-    ss << getenv("PWD");
-    ss << "/qa/data/compile-commands/test.cpp:";
-    std::string actual(vim_clang_get_compile_commands(ss.str().c_str()));
+    std::string actual(vim_clang_get_compile_commands(SRC_ROOT "/qa/data/compile-commands/test.cpp:"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
