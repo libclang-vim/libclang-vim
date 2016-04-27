@@ -1,32 +1,50 @@
 include config.mak
-
-TARGET=lib/libclang-vim.so
-SRC=lib/libclang-vim/clang_vim.cpp lib/libclang-vim/AST_extracter.hpp lib/libclang-vim/helpers.hpp lib/libclang-vim/location.hpp lib/libclang-vim/stringizers.hpp lib/libclang-vim/tokenizer.hpp lib/libclang-vim/deduction.hpp
-CPPSRC=lib/libclang-vim/clang_vim.cpp
 CXXFLAGS+=-Wall -Wextra -std=c++11 -pedantic -fPIC
-
 # For LLVM installed in a custom location
 LDFLAGS+=-rpath $(LLVM_LIBDIR)
 
-all: $(TARGET)
+DEPDIR := .d
+COMPILE.cc = $(CXX) $(CXXFLAGS) -c
+
+all: lib/libclang-vim.so qa/test
+
+lib_objects = lib/libclang-vim/clang_vim.o
+lib/libclang-vim.so: $(lib_objects)
+	$(LINK.cpp) $^ $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $@
+
+qa_objects = qa/test.o qa/deduction.o
+qa/test: $(qa_objects)
+	$(LINK.cpp) $^ $(CPPUNIT_LIBS) -ldl -o $@
+
+all_objects = $(lib_objects) $(qa_objects)
+
+lib/libclang-vim/%.o : lib/libclang-vim/%.cpp
+	mkdir -p $(DEPDIR)/lib/libclang-vim
+	$(COMPILE.cc) -MT $@ -MMD -MP -MF $(DEPDIR)/lib/libclang-vim/$*.d_ $(LLVM_CXXFLAGS) $(OUTPUT_OPTION) $<
+	mv $(DEPDIR)/lib/libclang-vim/$*.d_ $(DEPDIR)/lib/libclang-vim/$*.d
+
+qa/%.o : qa/%.cpp
+	mkdir -p $(DEPDIR)/qa
+	$(COMPILE.cc) -MT $@ -MMD -MP -MF $(DEPDIR)/qa/$*.d_ $(CPPUNIT_CFLAGS) -DSRC_ROOT=\"$(SRC_ROOT)\" $(OUTPUT_OPTION) $<
+	mv $(DEPDIR)/qa/$*.d_ $(DEPDIR)/qa/$*.d
+
+SRCS = $(patsubst %.o,%.cpp,$(all_objects))
+$(DEPDIR)/%.d: ;
+.PRECIOUS: $(DEPDIR)/%.d
+
+-include $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS)))
 
 config.mak: configure.ac config.mak.in qa/data/compile-commands/compile_commands.json.in
 	./autogen.sh
 
-$(TARGET): $(SRC) config.mak
-	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) $(CPPSRC) $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $(TARGET)
-
 clean:
-	rm -f $(TARGET)
+	rm -f lib/libclang-vim.so qa/test $(all_objects)
 
-qa/test: qa/test.cpp qa/deduction.cpp config.mak
-	$(CXX) $(CXXFLAGS) $(CPPUNIT_CFLAGS) -DSRC_ROOT=\"$(SRC_ROOT)\" qa/test.cpp qa/deduction.cpp $(CPPUNIT_LIBS) -ldl -o qa/test
-
-check: qa/test $(TARGET)
+check: all
 	qa/test
 
 tags:
 	ctags --c++-kinds=+p --fields=+iaS --extra=+q -R --totals=yes *
 
 clang-tidy-modernize:
-	clang-tidy -checks=*modernize*,-modernize-raw-string-literal -header-filter=.* $(CPPSRC)
+	clang-tidy -checks=*modernize*,-modernize-raw-string-literal -header-filter=.* $(SRCS)
