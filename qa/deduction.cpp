@@ -1,5 +1,6 @@
 #include <iostream>
 #include <dlfcn.h>
+#include <cassert>
 #include <cppunit/extensions/HelperMacros.h>
 
 class deduction_test : public CPPUNIT_NS::TestFixture
@@ -31,8 +32,8 @@ public:
     deduction_test(const deduction_test&) = delete;
     deduction_test& operator=(const deduction_test&) = delete;
 
-    virtual void setUp() override;
-    virtual void tearDown() override;
+    void setUp() override;
+    void tearDown() override;
 };
 
 deduction_test::deduction_test()
@@ -61,7 +62,7 @@ void deduction_test::tearDown()
 void deduction_test::test_current_function_at()
 {
     auto vim_clang_get_current_function_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_current_function_at"));
-    CPPUNIT_ASSERT(vim_clang_get_current_function_at);
+    assert(vim_clang_get_current_function_at);
 
     std::string expected("{'name':'ns::C::foo'}");
     std::string actual(vim_clang_get_current_function_at("qa/data/current-function.cpp:-std=c++1y:13:1"));
@@ -71,7 +72,7 @@ void deduction_test::test_current_function_at()
 void deduction_test::test_current_function_at_ctor_dtor()
 {
     auto vim_clang_get_current_function_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_current_function_at"));
-    CPPUNIT_ASSERT(vim_clang_get_current_function_at);
+    assert(vim_clang_get_current_function_at);
 
     std::string expected("{'name':'D::D'}");
     std::string actual(vim_clang_get_current_function_at("qa/data/current-function.cpp:-std=c++1y:26:1"));
@@ -85,7 +86,7 @@ void deduction_test::test_current_function_at_ctor_dtor()
 void deduction_test::test_current_function_at_incomplete_type()
 {
     auto vim_clang_get_current_function_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_current_function_at"));
-    CPPUNIT_ASSERT(vim_clang_get_current_function_at);
+    assert(vim_clang_get_current_function_at);
 
     std::string expected("{'name':'func'}");
     std::string actual(vim_clang_get_current_function_at("qa/data/current-function.cpp:-std=c++1y:38:7"));
@@ -95,7 +96,7 @@ void deduction_test::test_current_function_at_incomplete_type()
 void deduction_test::test_completion_at()
 {
     auto vim_clang_get_completion_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_completion_at"));
-    CPPUNIT_ASSERT(vim_clang_get_completion_at);
+    assert(vim_clang_get_completion_at);
 
     std::string expected("['C', 'bar', 'foo', 'operator=', '~C']");
     std::string actual(vim_clang_get_completion_at("qa/data/completion.cpp:-std=c++1y:25:7"));
@@ -105,7 +106,7 @@ void deduction_test::test_completion_at()
 void deduction_test::test_comment_at()
 {
     auto vim_clang_get_completion_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_comment_at"));
-    CPPUNIT_ASSERT(vim_clang_get_completion_at);
+    assert(vim_clang_get_completion_at);
 
     std::string expected("{'brief':'This is foo.'}");
     std::string actual(vim_clang_get_completion_at("qa/data/current-function.cpp:-std=c++1y:54:8"));
@@ -115,7 +116,7 @@ void deduction_test::test_comment_at()
 void deduction_test::test_declaration_at()
 {
     auto vim_clang_get_deduced_declaration_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_deduced_declaration_at"));
-    CPPUNIT_ASSERT(vim_clang_get_deduced_declaration_at);
+    assert(vim_clang_get_deduced_declaration_at);
 
     std::string expected("{'file':'qa/data/declaration.cpp','line':'7','col':'10',}");
     std::string actual(vim_clang_get_deduced_declaration_at("qa/data/declaration.cpp:-std=c++1y:17:8"));
@@ -125,7 +126,7 @@ void deduction_test::test_declaration_at()
 void deduction_test::test_compile_commands()
 {
     auto vim_clang_get_compile_commands = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_compile_commands"));
-    CPPUNIT_ASSERT(vim_clang_get_compile_commands);
+    assert(vim_clang_get_compile_commands);
 
     std::string expected("{'commands':'clang++ -DFOO -I" SRC_ROOT "/qa/data/compile-commands -o test.o -c'}");
     std::string actual(vim_clang_get_compile_commands(SRC_ROOT "/qa/data/compile-commands/test.cpp:"));
@@ -135,7 +136,7 @@ void deduction_test::test_compile_commands()
 void deduction_test::test_include_at()
 {
     auto vim_clang_get_include_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_include_at"));
-    CPPUNIT_ASSERT(vim_clang_get_include_at);
+    assert(vim_clang_get_include_at);
 
     std::string expected("{'file':'" SRC_ROOT "/qa/data/compile-commands/test.hpp'}");
     std::string actual(vim_clang_get_include_at("qa/data/compile-commands/test.cpp:-std=c++1y -I" SRC_ROOT "/qa/data/compile-commands/:1:2"));
