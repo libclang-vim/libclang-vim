@@ -8,7 +8,7 @@ COMPILE.cc = $(CXX) $(CXXFLAGS) -c
 
 all: lib/libclang-vim.so qa/test
 
-lib_objects = lib/libclang-vim/clang_vim.o
+lib_objects = lib/libclang-vim/clang_vim.o lib/libclang-vim/deduction.o
 lib/libclang-vim.so: $(lib_objects)
 	$(LINK.cpp) $^ $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $@
 

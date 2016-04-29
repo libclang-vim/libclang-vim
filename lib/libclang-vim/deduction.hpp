@@ -13,7 +13,7 @@ namespace libclang_vim {
 
 namespace detail {
 
-bool is_auto_type(std::string const& type_name)
+inline bool is_auto_type(std::string const& type_name)
 {
     for ( auto pos = type_name.find("auto")
         ; pos != std::string::npos
@@ -37,7 +37,7 @@ bool is_auto_type(std::string const& type_name)
     return false;
 }
 
-CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientData data)
+inline CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
     cxstring_ptr type_name = clang_getTypeSpelling(type);
@@ -50,7 +50,7 @@ CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientDat
     }
 }
 
-CXType deduce_type_at_cursor(CXCursor const& cursor)
+inline CXType deduce_type_at_cursor(CXCursor const& cursor)
 {
     auto const type = clang_getCursorType(cursor);
     cxstring_ptr type_name = clang_getTypeSpelling(type);
@@ -66,7 +66,7 @@ CXType deduce_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-char const* deduce_var_decl_type(const location_tuple& location_info)
+inline char const* deduce_var_decl_type(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -93,7 +93,7 @@ char const* deduce_var_decl_type(const location_tuple& location_info)
 
 namespace detail {
 
-CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
+inline CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 {
     auto const func_type = clang_getCursorType(cursor);
     auto const result_type = clang_getResultType(func_type);
@@ -125,7 +125,7 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-char const* deduce_func_return_type(const location_tuple& location_info)
+inline char const* deduce_func_return_type(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -150,7 +150,7 @@ char const* deduce_func_return_type(const location_tuple& location_info)
             );
 }
 
-char const* deduce_func_or_var_decl(const location_tuple& location_info)
+inline char const* deduce_func_or_var_decl(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -184,7 +184,7 @@ char const* deduce_func_or_var_decl(const location_tuple& location_info)
 
 namespace detail {
 
-CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientData data)
+inline CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const type = clang_getCursorType(cursor);
     if (type.kind != CXType_Invalid) {
@@ -194,14 +194,14 @@ CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientD
     return CXChildVisit_Recurse;
 }
 
-bool is_invalid_type_cursor(CXCursor const& cursor)
+inline bool is_invalid_type_cursor(CXCursor const& cursor)
 {
     return clang_getCursorType(cursor).kind == CXType_Invalid;
 }
 
 } // namespace detail
 
-char const* deduce_type_at(const location_tuple& location_info)
+inline char const* deduce_type_at(const location_tuple& location_info)
 {
     return at_specific_location(
                 location_info,
@@ -235,7 +235,7 @@ char const* deduce_type_at(const location_tuple& location_info)
             );
 }
 
-char const* get_current_function_at(const location_tuple& location_info)
+inline char const* get_current_function_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -309,7 +309,7 @@ char const* get_current_function_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-char const* get_comment_at(const location_tuple& location_info)
+inline char const* get_comment_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -352,7 +352,7 @@ char const* get_comment_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-char const* get_deduced_declaration_at(const location_tuple& location_info)
+inline char const* get_deduced_declaration_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -401,7 +401,7 @@ char const* get_deduced_declaration_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-char const* get_include_at(const location_tuple& location_info)
+inline char const* get_include_at(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -437,6 +437,12 @@ char const* get_include_at(const location_tuple& location_info)
     vimson = ss.str();
     return vimson.c_str();
 }
+
+/// Wrapper around clang_codeCompleteAt().
+char const* get_completion_at(location_tuple const& location_info);
+
+/// Wrapper around clang_CompilationDatabase_getCompileCommands().
+char const* get_compile_commands(const std::string& file);
 
 } // namespace libclang_vim
 

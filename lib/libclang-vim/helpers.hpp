@@ -19,7 +19,7 @@ namespace libclang_vim {
 using std::size_t;
 
 // Note: boost::filesystem
-size_t get_file_size(char const* filename)
+inline size_t get_file_size(char const* filename)
 {
     std::ifstream input(filename);
     return input.seekg(0, std::ios::end).tellg();
@@ -109,12 +109,12 @@ public:
     }
 };
 
-char const* to_c_str(const cxstring_ptr& string)
+inline char const* to_c_str(const cxstring_ptr& string)
 {
     return clang_getCString(string);
 }
 
-std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
+inline std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
 {
     auto const* cstring = clang_getCString(p);
     if (!cstring || std::strcmp(cstring, "") == 0) {
@@ -124,7 +124,7 @@ std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
     }
 }
 
-std::string stringize_key_value(char const* key_name, std::string const& s)
+inline std::string stringize_key_value(char const* key_name, std::string const& s)
 {
     if (s.empty()) {
         return "";
@@ -133,7 +133,7 @@ std::string stringize_key_value(char const* key_name, std::string const& s)
     }
 }
 
-bool is_class_decl_kind(CXCursorKind const& kind)
+inline bool is_class_decl_kind(CXCursorKind const& kind)
 {
     switch(kind) {
     case CXCursor_StructDecl:
@@ -147,12 +147,12 @@ bool is_class_decl_kind(CXCursorKind const& kind)
     }
 }
 
-bool is_class_decl(CXCursor const& cursor)
+inline bool is_class_decl(CXCursor const& cursor)
 {
     return is_class_decl_kind(clang_getCursorKind(cursor));
 }
 
-bool is_function_decl_kind(CXCursorKind const& kind)
+inline bool is_function_decl_kind(CXCursorKind const& kind)
 {
     switch(kind) {
     case CXCursor_FunctionDecl:
@@ -169,12 +169,12 @@ bool is_function_decl_kind(CXCursorKind const& kind)
     }
 }
 
-bool is_function_decl(CXCursor const& cursor)
+inline bool is_function_decl(CXCursor const& cursor)
 {
     return is_function_decl_kind(clang_getCursorKind(cursor));
 }
 
-bool is_parameter_kind(CXCursorKind const& kind)
+inline bool is_parameter_kind(CXCursorKind const& kind)
 {
     switch(kind) {
     case CXCursor_ParmDecl:
@@ -187,7 +187,7 @@ bool is_parameter_kind(CXCursorKind const& kind)
     }
 }
 
-bool is_parameter(CXCursor const& cursor)
+inline bool is_parameter(CXCursor const& cursor)
 {
     return is_parameter_kind(clang_getCursorKind(cursor));
 }
@@ -196,7 +196,7 @@ using args_type = std::vector<std::string>;
 
 namespace detail {
 
-    args_type parse_compiler_args(std::string const& s)
+    inline args_type parse_compiler_args(std::string const& s)
     {
         using iterator = std::istream_iterator<std::string>;
         args_type result;
@@ -208,7 +208,7 @@ namespace detail {
 } // namespace detail
 
 // Parse "file:args"
-auto parse_default_args(std::string const& args_string)
+inline auto parse_default_args(std::string const& args_string)
     -> std::pair<std::string, args_type>
 {
     auto const end = std::end(args_string);
@@ -241,7 +241,7 @@ public:
 };
 
 // Parse "file:args:line:col"
-location_tuple parse_args_with_location(std::string const& args_string)
+inline location_tuple parse_args_with_location(std::string const& args_string)
 {
     auto const end = std::end(args_string);
 
@@ -273,7 +273,7 @@ location_tuple parse_args_with_location(std::string const& args_string)
     return ret;
 }
 
-std::vector<char const *> get_args_ptrs(args_type const& args)
+inline std::vector<char const *> get_args_ptrs(args_type const& args)
 {
     std::vector<char const*> args_ptrs{args.size()};
     std::transform(std::begin(args), std::end(args), std::begin(args_ptrs), [](std::string const& s){ return s.c_str(); });
