@@ -28,4 +28,7 @@ endfunction
 function! libclang#deduction#compile_commands(filename)
     return libclang#call('vim_clang_get_compile_commands', a:filename, "")
 endfunction
+function! libclang#deduction#diagnostics(filename, ...)
+    return libclang#call('vim_clang_get_diagnostics', a:filename, a:000)
+endfunction
 

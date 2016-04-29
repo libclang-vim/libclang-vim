@@ -134,4 +134,64 @@ char const* libclang_vim::get_completion_at(location_tuple const& location_info)
     return vimson.c_str();
 }
 
+const char* libclang_vim::get_diagnostics(const std::pair<std::string, args_type>& file_and_args)
+{
+    static std::string vimson;
+
+    // Write the header.
+    std::stringstream ss;
+    ss << "[";
+
+    // Write the diagnostic list.
+    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+
+    std::string file_name = file_and_args.first;
+    std::vector<const char*> args_ptrs = get_args_ptrs(file_and_args.second);
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    if (!translation_unit)
+        return "[]";
+
+    unsigned num_diagnostics = clang_getNumDiagnostics(translation_unit);
+    for (unsigned i = 0; i < num_diagnostics; ++i)
+    {
+        CXDiagnostic diagnostic = clang_getDiagnostic(translation_unit, i);
+        if (diagnostic)
+        {
+            std::string severity;
+            switch (clang_getDiagnosticSeverity(diagnostic))
+            {
+            case CXDiagnostic_Ignored:
+                severity = "ignored";
+                break;
+            case CXDiagnostic_Note:
+                severity = "note";
+                break;
+            case CXDiagnostic_Warning:
+                severity = "warning";
+                break;
+            case CXDiagnostic_Error:
+                severity = "error";
+                break;
+            case CXDiagnostic_Fatal:
+                severity = "fatal";
+                break;
+            }
+            ss << "{'severity': '" << severity << "', ";
+
+            CXSourceLocation location = clang_getDiagnosticLocation(diagnostic);
+            CXFile location_file;
+            unsigned location_line;
+            unsigned location_column;
+            clang_getExpansionLocation(location, &location_file, &location_line, &location_column, nullptr);
+            libclang_vim::cxstring_ptr location_file_name = clang_getFileName(location_file);
+            ss << libclang_vim::stringize_location(location) << "}, ";
+        }
+        clang_disposeDiagnostic(diagnostic);
+    }
+
+    // Write the footer.
+    ss << "]";
+    vimson = ss.str();
+    return vimson.c_str();
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

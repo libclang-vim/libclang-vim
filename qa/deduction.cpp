@@ -14,6 +14,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_declaration_at);
     CPPUNIT_TEST(test_compile_commands);
     CPPUNIT_TEST(test_include_at);
+    CPPUNIT_TEST(test_diagnostics);
     CPPUNIT_TEST_SUITE_END();
 
     void test_current_function_at();
@@ -24,6 +25,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     void test_declaration_at();
     void test_compile_commands();
     void test_include_at();
+    void test_diagnostics();
 
     void* m_handle;
 
@@ -140,6 +142,16 @@ void deduction_test::test_include_at()
 
     std::string expected("{'file':'" SRC_ROOT "/qa/data/compile-commands/test.hpp'}");
     std::string actual(vim_clang_get_include_at("qa/data/compile-commands/test.cpp:-std=c++1y -I" SRC_ROOT "/qa/data/compile-commands/:1:2"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_diagnostics()
+{
+    auto vim_clang_get_diagnostics = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_diagnostics"));
+    assert(vim_clang_get_diagnostics);
+
+    std::string expected("[{'severity': 'warning', 'line':3,'column':9,'offset':21,'file':'qa/data/diagnostics.cpp',}, ]");
+    std::string actual(vim_clang_get_diagnostics("qa/data/diagnostics.cpp:-Wunused-variable"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

@@ -661,6 +661,14 @@ char const* vim_clang_get_compile_commands(char const* file)
     return ret;
 }
 
+char const* vim_clang_get_diagnostics(const char* file_and_args)
+{
+    stderr_guard g;
+
+    const char* ret = libclang_vim::get_diagnostics(libclang_vim::parse_default_args(file_and_args));
+    return ret;
+}
+
 } // extern "C"
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -444,6 +444,9 @@ char const* get_completion_at(location_tuple const& location_info);
 /// Wrapper around clang_CompilationDatabase_getCompileCommands().
 char const* get_compile_commands(const std::string& file);
 
+/// Wrapper around clang_getDiagnostic().
+const char* get_diagnostics(const std::pair<std::string, args_type>& file_and_args);
+
 } // namespace libclang_vim
 
 #endif    // LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED

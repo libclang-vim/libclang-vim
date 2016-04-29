@@ -18,7 +18,7 @@ You can
 - get pointee type, result type, canonical type at specific location
 - deduce type of variable declaration and return value of function
 - get the information for completion.
-- get diagnostic information. *(not implemented yet)*
+- get diagnostic information.
 - get preprocessing information.
 - get comment information.
 
@@ -123,6 +123,10 @@ local variables as well.
 ### `libclang#deduction#include_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get file name of the include referenced at a specific location.
+
+### `libclang#deduction#diagnostics({filename}, [, {compiler args}])`
+
+Get diagnostics (errors, warnings, etc) for a specific file.
 
 ### `libclang#deduction#compile_commands({filename})`
 
