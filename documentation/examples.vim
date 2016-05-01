@@ -75,6 +75,34 @@ function! ClangJumpInclude()
     execute "edit " . info.file
 endfunction
 
+" Example for libclang#deduction#diagnostics().
+sign define ClangError text=EE
+sign define ClangWarning text=WW
+function! ClangShowDiagnostics()
+    let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let l:file_name = ClangTempFile()
+    let l:diagnostics = libclang#deduction#diagnostics(l:file_name, l:compiler_args.commands)
+    call delete(l:file_name)
+
+    " Delete previous diagnostics.
+    sign unplace *
+    let l:counter = 1
+    for l:diagnostic in l:diagnostics
+        if has_key(l:diagnostic, "file")
+            if l:diagnostic.file == l:file_name
+                " This diagnostic is for the current file.
+                if l:diagnostic.severity == "warning"
+                    execute "sign place " . l:counter . " line=" . l:diagnostic.line . " name=ClangWarning file=" . expand("%:p")
+                    let l:counter += 1
+                elseif l:diagnostic.severity == "error"
+                    execute "sign place " . l:counter . " line=" . l:diagnostic.line . " name=ClangError file=" . expand("%:p")
+                    let l:counter += 1
+                endif
+            endif
+        endif
+    endfor
+endfunction
+
 " Example for libclang#deduction#completion_at().
 function! ClangInspectCompletion(findstart, base)
     if a:findstart == 1
