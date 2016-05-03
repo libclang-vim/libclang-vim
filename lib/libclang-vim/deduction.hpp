@@ -352,54 +352,8 @@ inline char const* get_comment_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-inline char const* get_deduced_declaration_at(const location_tuple& location_info)
-{
-    static std::string vimson;
-
-    // Write the header.
-    std::stringstream ss;
-    ss << "{";
-
-    // Write the actual comment.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
-
-    std::string file_name = location_info.file;
-    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
-    if (!translation_unit)
-        return "{}";
-
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-    int line = location_info.line;
-    int column = location_info.col;
-    CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
-    CXCursor cursor = clang_getCursor(translation_unit, source_location);
-    if (clang_Cursor_isNull(cursor) || clang_isInvalid(clang_getCursorKind(cursor)))
-        return "{}";
-
-    CXCursor referenced_cursor = clang_getCursorReferenced(cursor);
-    if (clang_Cursor_isNull(referenced_cursor) && clang_isInvalid(clang_getCursorKind(referenced_cursor)))
-        return "{}";
-
-    CXCursor canonical_cursor = clang_getCanonicalCursor(referenced_cursor);
-    if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
-        return "{}";
-
-    CXSourceLocation declaration_location = clang_getCursorLocation(canonical_cursor);
-    CXFile declaration_file;
-    unsigned declaration_line;
-    unsigned declaration_col;
-    clang_getExpansionLocation(declaration_location, &declaration_file, &declaration_line, &declaration_col, nullptr);
-    cxstring_ptr declaration_file_name = clang_getFileName(declaration_file);
-    ss << "'file':'" << clang_getCString(declaration_file_name)<<"',";
-    ss << "'line':'" << declaration_line <<"',";
-    ss << "'col':'" << declaration_col <<"',";
-
-    // Write the footer.
-    ss << "}";
-    vimson = ss.str();
-    return vimson.c_str();
-}
+/// Get location of declaration referenced by location_info.
+const char* get_deduced_declaration_at(const location_tuple& location_info);
 
 /// Wrapper around clang_getIncludedFile().
 const char* get_include_at(const location_tuple& location_info);
