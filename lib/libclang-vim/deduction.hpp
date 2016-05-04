@@ -309,48 +309,8 @@ inline char const* get_current_function_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-inline char const* get_comment_at(const location_tuple& location_info)
-{
-    static std::string vimson;
-
-    // Write the header.
-    std::stringstream ss;
-    ss << "{'brief':'";
-
-    // Write the actual comment.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
-
-    std::string file_name = location_info.file;
-    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
-    if (!translation_unit)
-        return "{}";
-
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-    int line = location_info.line;
-    int column = location_info.col;
-    CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
-    CXCursor cursor = clang_getCursor(translation_unit, source_location);
-    if (clang_Cursor_isNull(cursor) || clang_isInvalid(clang_getCursorKind(cursor)))
-        return "{}";
-
-    CXCursor referenced_cursor = clang_getCursorReferenced(cursor);
-    if (!clang_Cursor_isNull(referenced_cursor) && !clang_isInvalid(clang_getCursorKind(referenced_cursor)))
-        cursor = referenced_cursor;
-
-    CXCursor canonical_cursor = clang_getCanonicalCursor(cursor);
-    if (clang_Cursor_isNull(canonical_cursor) || clang_isInvalid(clang_getCursorKind(canonical_cursor)))
-        return "{}";
-
-    cxstring_ptr brief = clang_Cursor_getBriefCommentText(canonical_cursor);
-    if (clang_getCString(brief))
-        ss << clang_getCString(brief);
-
-    // Write the footer.
-    ss << "'}";
-    vimson = ss.str();
-    return vimson.c_str();
-}
+/// Wrapper around clang_Cursor_getBriefCommentText().
+const char* get_comment_at(const location_tuple& location_info);
 
 /// Get location of declaration referenced by location_info.
 const char* get_deduced_declaration_at(const location_tuple& location_info);
