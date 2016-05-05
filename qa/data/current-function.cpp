@@ -10,7 +10,7 @@ class C
 
 int C::foo(int x)
 {
-    int y = 0;
+    int y = 0; return y;
 }
 
 }
@@ -19,7 +19,7 @@ class D
 {
     D();
     ~D();
-}
+};
 
 D::D()
 {
@@ -35,16 +35,16 @@ class Buffer;
 
 static void func()
 {
-    Buffer buf;
+    Buffer* buf;
 }
 
-class E
+struct E
 {
     /// This is foo.
     void foo();
 };
 
-E::foo()
+void E::foo()
 {
 }
 
