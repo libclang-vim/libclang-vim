@@ -235,79 +235,8 @@ inline char const* deduce_type_at(const location_tuple& location_info)
             );
 }
 
-inline char const* get_current_function_at(const location_tuple& location_info)
-{
-    static std::string vimson;
-
-    // Write the header.
-    std::stringstream ss;
-    ss << "{'name':'";
-
-    // Write the actual name.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
-
-    std::string file_name = location_info.file;
-    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
-    if (!translation_unit)
-        return "{}";
-
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
-    unsigned line = location_info.line;
-    unsigned column = location_info.col;
-
-    CXCursor cursor;
-    CXCursorKind kind;
-    while (true)
-    {
-        CXSourceLocation location = clang_getLocation(translation_unit, file, line, column);
-        cursor = clang_getCursor(translation_unit, location);
-        kind = clang_getCursorKind(cursor);
-        if (clang_getCursorKind(clang_getCursorSemanticParent(cursor)) != CXCursor_InvalidFile || column <= 1)
-            break;
-
-        // This happens with e.g. CXCursor_TypeRef, work it around by going
-        // back till we get a sane parent, if we can.
-        --column;
-    }
-
-    while (true)
-    {
-        if (is_function_decl_kind(kind) || kind == CXCursor_TranslationUnit)
-            break;
-        cursor = clang_getCursorSemanticParent(cursor);
-        kind = clang_getCursorKind(cursor);
-    }
-
-    if (kind != CXCursor_TranslationUnit)
-    {
-        std::stack<std::string> stack;
-        while (true)
-        {
-            cxstring_ptr aString = clang_getCursorSpelling(cursor);
-            stack.push(clang_getCString(aString));
-
-            cursor = clang_getCursorSemanticParent(cursor);
-            if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
-                break;
-        }
-        bool first = true;
-        while (!stack.empty())
-        {
-            if (first)
-                first = false;
-            else
-                ss << "::";
-            ss << stack.top();
-            stack.pop();
-        }
-    }
-
-    // Write the footer.
-    ss << "'}";
-    vimson = ss.str();
-    return vimson.c_str();
-}
+/// Wrapper around clang_getCursorSpelling().
+const char* get_current_function_at(const location_tuple& location_info);
 
 /// Wrapper around clang_Cursor_getBriefCommentText().
 const char* get_comment_at(const location_tuple& location_info);
