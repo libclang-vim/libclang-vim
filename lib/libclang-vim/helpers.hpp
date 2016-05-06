@@ -280,11 +280,10 @@ inline std::vector<char const *> get_args_ptrs(args_type const& args)
     return args_ptrs;
 }
 
-template<class Predicate>
-auto at_specific_location(
+inline const char* at_specific_location(
         const location_tuple& location_tuple,
-        Predicate const& predicate
-    ) -> char const*
+        const std::function<std::string(CXCursor const&)>& predicate
+    )
 {
     static std::string vimson;
     char const* file_name = location_tuple.file.c_str();
