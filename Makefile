@@ -6,7 +6,7 @@ LDFLAGS+=-rpath $(LLVM_LIBDIR)
 DEPDIR := .d
 COMPILE.cc = $(CXX) $(CXXFLAGS) -c
 
-all: lib/libclang-vim.so qa/test
+all: lib/libclang-vim.so qa/test qa/tool
 
 lib_objects = lib/libclang-vim/clang_vim.o lib/libclang-vim/deduction.o
 lib/libclang-vim.so: $(lib_objects)
@@ -16,7 +16,11 @@ qa_objects = qa/test.o qa/deduction.o
 qa/test: $(qa_objects)
 	$(LINK.cpp) $^ $(CPPUNIT_LIBS) -ldl -o $@
 
-all_objects = $(lib_objects) $(qa_objects)
+tool_objects = qa/tool.o
+qa/tool: $(tool_objects)
+	$(LINK.cpp) $^ -ldl -o $@
+
+all_objects = $(lib_objects) $(qa_objects) $(tool_objects)
 
 lib/libclang-vim/%.o : lib/libclang-vim/%.cpp
 	mkdir -p $(DEPDIR)/lib/libclang-vim
