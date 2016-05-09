@@ -58,6 +58,58 @@ libclang_vim::args_type parse_compilation_database(const std::string& file)
     return ret;
 }
 
+CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientData data)
+{
+    auto const type = clang_getCursorType(cursor);
+    if (type.kind != CXType_Invalid) {
+        *(reinterpret_cast<CXCursor *>(data)) = cursor;
+        return CXChildVisit_Break;
+    }
+    return CXChildVisit_Recurse;
+}
+
+bool is_invalid_type_cursor(CXCursor const& cursor)
+{
+    return clang_getCursorType(cursor).kind == CXType_Invalid;
+}
+
+}
+
+const char* libclang_vim::deduce_type_at(const location_tuple& location_info)
+{
+    return at_specific_location(
+                location_info,
+                [](CXCursor const& cursor)
+                    -> std::string
+                {
+                    CXCursor valid_cursor = cursor;
+                    if (is_invalid_type_cursor(valid_cursor))
+                    {
+                        clang_visitChildren(cursor, valid_type_cursor_getter, &valid_cursor);
+                    }
+                    if (is_invalid_type_cursor(valid_cursor))
+                    {
+                        return "{}";
+                    }
+
+                    CXCursorKind const kind = clang_getCursorKind(valid_cursor);
+                    CXType const result_type =
+                        kind == CXCursor_VarDecl ?
+                            detail::deduce_type_at_cursor(valid_cursor) :
+                            is_function_decl_kind(kind) ?
+                                detail::deduce_func_decl_type_at_cursor(valid_cursor) :
+                                clang_getCursorType(valid_cursor);
+                    if (result_type.kind == CXType_Invalid)
+                    {
+                        return "{}";
+                    }
+
+                    std::string result;
+                    result += stringize_type(result_type);
+                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
+                    return "{" + result + "}";
+                }
+            );
 }
 
 const char* libclang_vim::get_compile_commands(const std::string& file)

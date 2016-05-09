@@ -182,58 +182,8 @@ inline char const* deduce_func_or_var_decl(const location_tuple& location_info)
             );
 }
 
-namespace detail {
-
-inline CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor, CXClientData data)
-{
-    auto const type = clang_getCursorType(cursor);
-    if (type.kind != CXType_Invalid) {
-        *(reinterpret_cast<CXCursor *>(data)) = cursor;
-        return CXChildVisit_Break;
-    }
-    return CXChildVisit_Recurse;
-}
-
-inline bool is_invalid_type_cursor(CXCursor const& cursor)
-{
-    return clang_getCursorType(cursor).kind == CXType_Invalid;
-}
-
-} // namespace detail
-
-inline char const* deduce_type_at(const location_tuple& location_info)
-{
-    return at_specific_location(
-                location_info,
-                [](CXCursor const& cursor)
-                    -> std::string
-                {
-                    CXCursor valid_cursor = cursor;
-                    if (detail::is_invalid_type_cursor(valid_cursor)) {
-                        clang_visitChildren(cursor, detail::valid_type_cursor_getter, &valid_cursor);
-                    }
-                    if (detail::is_invalid_type_cursor(valid_cursor)) {
-                        return "{}";
-                    }
-
-                    CXCursorKind const kind = clang_getCursorKind(valid_cursor);
-                    CXType const result_type =
-                        kind == CXCursor_VarDecl ?
-                            detail::deduce_type_at_cursor(valid_cursor) :
-                            is_function_decl_kind(kind) ?
-                                detail::deduce_func_decl_type_at_cursor(valid_cursor) :
-                                clang_getCursorType(valid_cursor);
-                    if (result_type.kind == CXType_Invalid) {
-                        return "{}";
-                    }
-
-                    std::string result;
-                    result += stringize_type(result_type);
-                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
-                    return "{" + result + "}";
-                }
-            );
-}
+/// Get type at specific location with auto-deduction described above.
+const char* deduce_type_at(const location_tuple& location_info);
 
 /// Wrapper around clang_getCursorSpelling().
 const char* get_current_function_at(const location_tuple& location_info);
