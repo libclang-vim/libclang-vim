@@ -5,7 +5,7 @@ compiler:
 before_install:
     - export PATH=/usr/lib/llvm-3.7/bin:$PATH
 script:
-    - ./autogen.sh --enable-werror
+    - ./autogen.sh --enable-werror --enable-debug
     - make
     - make check
 addons:

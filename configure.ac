@@ -7,15 +7,19 @@ AC_ARG_ENABLE(tests,
 
 AC_ARG_ENABLE(werror,
     AS_HELP_STRING([--enable-werror],
-        [Turn warnings to errors. (Has no effect in modules where the treating
-         of warnings as errors is disabled explicitly.)]),
+        [Handle warnings as errors.]),
+,)
+AC_ARG_ENABLE(debug,
+    AS_HELP_STRING([--enable-debug],
+        [Include debugging information, disable compiler optimization and
+         enable assertions.]),
 ,)
 
 AC_CHECK_PROGS(LLVMCONFIG, llvm-config llvm-config-3.5 llvm-config-3.4)
 if test -z "$LLVMCONFIG"; then
     AC_MSG_ERROR([llvm-config not found])
 fi
-LLVM_CXXFLAGS=`$LLVMCONFIG --cxxflags`
+LLVM_CXXFLAGS=`$LLVMCONFIG --cxxflags|sed 's/-O. //;s/-g //;s/-DNDEBUG //'`
 AC_SUBST(LLVM_CXXFLAGS)
 LLVM_LDFLAGS=`$LLVMCONFIG --ldflags`
 AC_SUBST(LLVM_LDFLAGS)
@@ -34,13 +38,26 @@ fi
 AC_SUBST([CPPUNIT_CFLAGS])
 AC_SUBST([CPPUNIT_LIBS])
 
-AC_MSG_CHECKING([whether to turn warnings to errors])
+AC_MSG_CHECKING([whether to enable debugging])
+if test -n "$enable_debug" -a "$enable_debug" != "no"; then
+    CXXFLAGS="$CXXFLAGS -O0 -g"
+    AC_MSG_RESULT([yes])
+else
+    if test -z "$CXXFLAGS"; then
+        CXXFLAGS="-O2"
+    fi
+    CXXFLAGS="$CXXFLAGS -DNDEBUG"
+    AC_MSG_RESULT([no])
+fi
+
+AC_MSG_CHECKING([whether to handle warnings as errors])
 if test -n "$enable_werror" -a "$enable_werror" != "no"; then
     CXXFLAGS="$CXXFLAGS -Werror"
     AC_MSG_RESULT([yes])
 else
     AC_MSG_RESULT([no])
 fi
+
 AC_SUBST(CXXFLAGS)
 
 SRC_ROOT=`pwd`
