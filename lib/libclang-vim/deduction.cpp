@@ -75,6 +75,38 @@ bool is_invalid_type_cursor(CXCursor const& cursor)
 
 }
 
+const char* libclang_vim::deduce_func_or_var_decl(const location_tuple& location_info)
+{
+    return at_specific_location(
+                location_info,
+                [](const CXCursor& cursor)
+                    -> std::string
+                {
+                    const CXCursor func_or_var_decl = search_kind(
+                            cursor,
+                            [](const CXCursorKind& kind){
+                                return kind == CXCursor_VarDecl || is_function_decl_kind(kind);
+                            });
+                    if (clang_Cursor_isNull(func_or_var_decl)) {
+                        return "{}";
+                    }
+
+                    const CXType result_type =
+                        clang_getCursorKind(cursor) == CXCursor_VarDecl ?
+                            detail::deduce_type_at_cursor(func_or_var_decl) :
+                            detail::deduce_func_decl_type_at_cursor(func_or_var_decl);
+                    if (result_type.kind == CXType_Invalid) {
+                        return "{}";
+                    }
+
+                    std::string result;
+                    result += stringize_type(result_type);
+                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(result_type)) + "},";
+                    return "{" + result + "}";
+                }
+            );
+}
+
 const char* libclang_vim::deduce_type_at(const location_tuple& location_info)
 {
     return at_specific_location(
