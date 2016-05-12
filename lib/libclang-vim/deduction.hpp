@@ -125,30 +125,7 @@ inline CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 
 } // namespace detail
 
-inline char const* deduce_func_return_type(const location_tuple& location_info)
-{
-    return at_specific_location(
-                location_info,
-                [](CXCursor const& cursor)
-                    -> std::string
-                {
-                    CXCursor const func_decl_cursor = search_kind(cursor, [](CXCursorKind const& kind){ return is_function_decl_kind(kind); });
-                    if (clang_Cursor_isNull(func_decl_cursor)) {
-                        return "{}";
-                    }
-
-                    CXType const func_type = detail::deduce_func_decl_type_at_cursor(func_decl_cursor);
-                    if (func_type.kind == CXType_Invalid) {
-                        return "{}";
-                    }
-
-                    std::string result;
-                    result += stringize_type(func_type);
-                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(func_type)) + "},";
-                    return "{" + result + "}";
-                }
-            );
-}
+const char* deduce_func_return_type(const location_tuple& location_info);
 
 const char* deduce_func_or_var_decl(const location_tuple& location_info);
 
