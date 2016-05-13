@@ -73,6 +73,41 @@ bool is_invalid_type_cursor(CXCursor const& cursor)
     return clang_getCursorType(cursor).kind == CXType_Invalid;
 }
 
+CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
+{
+    auto const func_type = clang_getCursorType(cursor);
+    auto const result_type = clang_getResultType(func_type);
+
+    switch (result_type.kind)
+    {
+        case CXType_Unexposed:
+            {
+            libclang_vim::cxstring_ptr type_name = clang_getTypeSpelling(result_type);
+            if (std::strcmp(to_c_str(type_name), "auto") != 0)
+            {
+                return result_type;
+            }
+        }
+        case CXType_Invalid:
+            {
+            // When (unexposed and "auto") or invalid
+
+            // Get cursor at a return statement
+            CXCursor const return_stmt_cursor = libclang_vim::search_kind(cursor, [](CXCursorKind const& kind){ return kind == CXCursor_ReturnStmt; });
+            if (clang_Cursor_isNull(return_stmt_cursor))
+            {
+                return clang_getCursorType(return_stmt_cursor);
+            }
+
+            CXType deduced_type;
+            deduced_type.kind = CXType_Invalid;
+            clang_visitChildren(return_stmt_cursor, libclang_vim::detail::unexposed_type_deducer, &deduced_type);
+            return deduced_type;
+        }
+        default: return result_type;
+    }
+}
+
 }
 
 const char* libclang_vim::deduce_func_or_var_decl(const location_tuple& location_info)
@@ -94,7 +129,7 @@ const char* libclang_vim::deduce_func_or_var_decl(const location_tuple& location
                     const CXType result_type =
                         clang_getCursorKind(cursor) == CXCursor_VarDecl ?
                             detail::deduce_type_at_cursor(func_or_var_decl) :
-                            detail::deduce_func_decl_type_at_cursor(func_or_var_decl);
+                            deduce_func_decl_type_at_cursor(func_or_var_decl);
                     if (result_type.kind == CXType_Invalid) {
                         return "{}";
                     }
@@ -119,7 +154,7 @@ const char* libclang_vim::deduce_func_return_type(const location_tuple& location
                         return "{}";
                     }
 
-                    CXType const func_type = detail::deduce_func_decl_type_at_cursor(func_decl_cursor);
+                    CXType const func_type = deduce_func_decl_type_at_cursor(func_decl_cursor);
                     if (func_type.kind == CXType_Invalid) {
                         return "{}";
                     }
@@ -154,7 +189,7 @@ const char* libclang_vim::deduce_type_at(const location_tuple& location_info)
                         kind == CXCursor_VarDecl ?
                             detail::deduce_type_at_cursor(valid_cursor) :
                             is_function_decl_kind(kind) ?
-                                detail::deduce_func_decl_type_at_cursor(valid_cursor) :
+                                deduce_func_decl_type_at_cursor(valid_cursor) :
                                 clang_getCursorType(valid_cursor);
                     if (result_type.kind == CXType_Invalid)
                     {

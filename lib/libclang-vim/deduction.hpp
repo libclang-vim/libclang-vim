@@ -91,40 +91,6 @@ inline char const* deduce_var_decl_type(const location_tuple& location_info)
             );
 }
 
-namespace detail {
-
-inline CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
-{
-    auto const func_type = clang_getCursorType(cursor);
-    auto const result_type = clang_getResultType(func_type);
-
-    switch (result_type.kind) {
-        case CXType_Unexposed: {
-            cxstring_ptr type_name = clang_getTypeSpelling(result_type);
-            if (std::strcmp(to_c_str(type_name), "auto") != 0) {
-                return result_type;
-            }
-        }
-        case CXType_Invalid: {
-            // When (unexposed and "auto") or invalid
-
-            // Get cursor at a return statement
-            CXCursor const return_stmt_cursor = search_kind(cursor, [](CXCursorKind const& kind){ return kind == CXCursor_ReturnStmt; });
-            if (clang_Cursor_isNull(return_stmt_cursor)) {
-                return clang_getCursorType(return_stmt_cursor);
-            }
-
-            CXType deduced_type;
-            deduced_type.kind = CXType_Invalid;
-            clang_visitChildren(return_stmt_cursor, unexposed_type_deducer, &deduced_type);
-            return deduced_type;
-        }
-        default: return result_type;
-    }
-}
-
-} // namespace detail
-
 const char* deduce_func_return_type(const location_tuple& location_info);
 
 const char* deduce_func_or_var_decl(const location_tuple& location_info);
