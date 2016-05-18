@@ -73,6 +73,51 @@ bool is_invalid_type_cursor(CXCursor const& cursor)
     return clang_getCursorType(cursor).kind == CXType_Invalid;
 }
 
+bool is_auto_type(const std::string& type_name)
+{
+    for ( auto pos = type_name.find("auto")
+        ; pos != std::string::npos
+        ; pos = type_name.find("auto", pos+1))
+    {
+
+        if (pos != 0)
+        {
+            if (std::isalnum(type_name[pos-1]) || type_name[pos-1] == '_')
+            {
+                continue;
+            }
+        }
+
+        if (pos + 3/*pos of 'o'*/ < type_name.size()-1)
+        {
+            if (std::isalnum(type_name[pos+3+1]) || type_name[pos+3+1] == '_')
+            {
+                continue;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor, CXClientData data)
+{
+    const auto type = clang_getCursorType(cursor);
+    libclang_vim::cxstring_ptr type_name = clang_getTypeSpelling(type);
+    if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name)))
+    {
+        clang_visitChildren(cursor, unexposed_type_deducer, data);
+        return CXChildVisit_Continue;
+    }
+    else
+    {
+        *(reinterpret_cast<CXType *>(data)) = type;
+        return CXChildVisit_Break;
+    }
+}
+
 CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 {
     auto const func_type = clang_getCursorType(cursor);
@@ -101,13 +146,55 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor)
 
             CXType deduced_type;
             deduced_type.kind = CXType_Invalid;
-            clang_visitChildren(return_stmt_cursor, libclang_vim::detail::unexposed_type_deducer, &deduced_type);
+            clang_visitChildren(return_stmt_cursor, unexposed_type_deducer, &deduced_type);
             return deduced_type;
         }
         default: return result_type;
     }
 }
 
+CXType deduce_type_at_cursor(const CXCursor& cursor)
+{
+    auto const type = clang_getCursorType(cursor);
+    libclang_vim::cxstring_ptr type_name = clang_getTypeSpelling(type);
+    if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name)))
+    {
+        CXType deduced_type;
+        deduced_type.kind = CXType_Invalid;
+        clang_visitChildren(cursor, unexposed_type_deducer, &deduced_type);
+        return deduced_type;
+    }
+    else
+    {
+        return type;
+    }
+}
+
+}
+
+const char* libclang_vim::deduce_var_decl_type(const location_tuple& location_info)
+{
+    return at_specific_location(
+                location_info,
+                [](const CXCursor& cursor)
+                    -> std::string
+                {
+                    const CXCursor var_decl_cursor = search_kind(cursor, [](const CXCursorKind& kind){ return kind == CXCursor_VarDecl; });
+                    if (clang_Cursor_isNull(var_decl_cursor)) {
+                        return "{}";
+                    }
+
+                    const CXType var_type = deduce_type_at_cursor(var_decl_cursor);
+                    if (var_type.kind == CXType_Invalid) {
+                        return "{}";
+                    }
+
+                    std::string result;
+                    result += stringize_type(var_type);
+                    result += "'canonical':{" + stringize_type(clang_getCanonicalType(var_type)) + "},";
+                    return "{" + result + "}";
+                }
+            );
 }
 
 const char* libclang_vim::deduce_func_or_var_decl(const location_tuple& location_info)
@@ -128,7 +215,7 @@ const char* libclang_vim::deduce_func_or_var_decl(const location_tuple& location
 
                     const CXType result_type =
                         clang_getCursorKind(cursor) == CXCursor_VarDecl ?
-                            detail::deduce_type_at_cursor(func_or_var_decl) :
+                            deduce_type_at_cursor(func_or_var_decl) :
                             deduce_func_decl_type_at_cursor(func_or_var_decl);
                     if (result_type.kind == CXType_Invalid) {
                         return "{}";
@@ -187,7 +274,7 @@ const char* libclang_vim::deduce_type_at(const location_tuple& location_info)
                     CXCursorKind const kind = clang_getCursorKind(valid_cursor);
                     CXType const result_type =
                         kind == CXCursor_VarDecl ?
-                            detail::deduce_type_at_cursor(valid_cursor) :
+                            deduce_type_at_cursor(valid_cursor) :
                             is_function_decl_kind(kind) ?
                                 deduce_func_decl_type_at_cursor(valid_cursor) :
                                 clang_getCursorType(valid_cursor);
