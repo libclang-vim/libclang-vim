@@ -142,6 +142,7 @@ endfunction
 " Example for libclang#deduction#compile_commands().
 " Note that this naturally can be correct when changes are necessary only
 " in the current buffer and nowhere else.
+" Requires clang-tools-extra r267855 or newer.
 function! ClangRename()
     " Save cursor position.
     let l:offset_orig = line2byte(line('.')) + col('.') - 1
@@ -154,13 +155,42 @@ function! ClangRename()
     endwhile
     let l:offset = line2byte(line('.')) + l:start + 1
 
+    " Ask for the new name.
     let l:to = input('Rename to: ')
 
+    " Look up compiler arguments.
     let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
 
+    " Call clang-rename to get the old name and positions.
     let l:file_name = ClangTempFile()
-    let l:command = 'clang-rename -offset ' . l:offset . ' -new-name ' . l:to . ' ' . l:file_name . ' -- ' . l:compiler_args.commands . ' 2>/dev/null'
-    execute "% !" . l:command
+    let l:command = 'clang-rename -pl -pn -offset ' . l:offset . ' -new-name ' . l:to . ' ' . l:file_name . ' -- ' . l:compiler_args.commands . ' 2>&1'
+    let l:out = split(system(l:command), "\n")
+    let l:positions = []
+    for l:line in l:out
+        if l:line[:13] == 'clang-rename: '
+            let l:line = l:line[14:]
+            if l:line[:11] == 'found name: '
+                let l:old_name = l:line[12:]
+            elseif l:line[:11] == 'renamed at: '
+                let l:line = l:line[12:]
+                let l:idx = stridx(l:line, ':')
+                let l:row = l:line[ l:idx + 1 : ]
+                let l:idx = stridx(l:row, ':')
+                let l:position = {}
+                let l:position.col = l:row[ l:idx + 1 : ]
+                let l:position.row = l:row[ : l:idx - 1 ]
+                let l:positions = l:positions + [l:position]
+            endif
+        endif
+    endfor
+
+    " Finally do the rename at the found places.
+    for l:position in l:positions
+        call cursor(l:position.row, l:position.col)
+        execute "normal " . strlen(l:old_name) . "x"
+        execute "normal i" . l:to . "\<Esc>"
+    endfor
+
     call delete(file_name)
 
     execute "go " . l:offset_orig
