@@ -6,7 +6,6 @@
 #include <stack>
 #include <set>
 
-#include "helpers.hpp"
 #include "stringizers.hpp"
 
 namespace libclang_vim
