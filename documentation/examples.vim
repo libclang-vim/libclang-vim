@@ -18,9 +18,12 @@ function! ClangInspectType()
     let file_name = ClangTempFile()
     let type_info = libclang#deduction#type_at(file_name, line('.'), col('.'), compiler_args.commands)
     call delete(file_name)
-    " Use '.canonical.type' instead of '.type' if you want e.g.
-    " 'std::basic_string<char>', not 'std::string'.
-    echo type_info.type
+    if type_info.type ==# type_info.canonical.type
+        echo type_info.type
+    else
+        " E.g. std::string => std::basic_string<char>
+        echo type_info.type . ' => ' . type_info.canonical.type
+    endif
 endfunction
 
 " Example for libclang#deduction#current_function_at().
