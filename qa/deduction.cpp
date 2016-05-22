@@ -1,5 +1,6 @@
 #include <iostream>
 #include <dlfcn.h>
+#include <unistd.h>
 #include <cassert>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -12,6 +13,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_completion_at);
     CPPUNIT_TEST(test_comment_at);
     CPPUNIT_TEST(test_declaration_at);
+    CPPUNIT_TEST(test_unsaved_declaration_at);
     CPPUNIT_TEST(test_compile_commands);
     CPPUNIT_TEST(test_include_at);
     CPPUNIT_TEST(test_diagnostics);
@@ -23,6 +25,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     void test_completion_at();
     void test_comment_at();
     void test_declaration_at();
+    void test_unsaved_declaration_at();
     void test_compile_commands();
     void test_include_at();
     void test_diagnostics();
@@ -122,6 +125,19 @@ void deduction_test::test_declaration_at()
 
     std::string expected("{'file':'qa/data/declaration.cpp','line':'7','col':'10',}");
     std::string actual(vim_clang_get_deduced_declaration_at("qa/data/declaration.cpp:-std=c++1y:17:8"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_unsaved_declaration_at()
+{
+    auto vim_clang_get_deduced_declaration_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_deduced_declaration_at"));
+    assert(vim_clang_get_deduced_declaration_at);
+
+    std::string expected("{'file':'./declaration.hpp','line':'1','col':'5',}");
+    chdir("qa/data/unsaved");
+    std::string actual(vim_clang_get_deduced_declaration_at("declaration.cpp#declaration-unsaved.cpp:-std=c++1y:5:4"));
+    chdir("../../..");
+    // This was "{}", relative include broke without unsaved file support.
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

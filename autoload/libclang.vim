@@ -26,17 +26,11 @@ function! s:get_extra_string(extra)
 endfunction
 
 function! libclang#call(api, file, extra)
-    if ! filereadable(a:file)
-        return {}
-    endif
     let compiler_args = s:get_extra_string(a:extra)
     return eval(libcall(g:libclang#lib_path, a:api, a:file . ':' . compiler_args))
 endfunction
 
 function! libclang#call_at(api, file, line, col, extra)
-    if ! filereadable(a:file)
-        return {}
-    endif
     let compiler_args = s:get_extra_string(a:extra)
     return eval(libcall(g:libclang#lib_path, a:api, printf("%s:%s:%d:%d", a:file, compiler_args, a:line, a:col)))
 endfunction

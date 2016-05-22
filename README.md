@@ -27,6 +27,11 @@ You can
 
 In all below usages, `{compiler args}` means arguments passed to a compiler. (e.g. `"-std=c++1y"`)
 
+Unsaved file support means `{filename}` can be in the form of `{real
+filename}#{temp filename}`, where the previous is compiler should take the path
+of the first, and the contents of the later file. This can be useful when the
+temp file is a dump of the editor buffer.
+
 ### `libclang#version()`
 
 Get version of libclang as a string.
@@ -119,6 +124,8 @@ Get brief comment for the entity referenced at a specific location.
 Get location (file name, line, col) of the declaration referenced at a specific
 location. This works not only for member functions, but for other entities like
 local variables as well.
+
+Supports unsaved files.
 
 ### `libclang#deduction#include_at({filename}, {line}, {col} [, {compiler args}])`
 
@@ -413,7 +420,7 @@ CXXFLAGS=-I/usr/include/i386-linux-gnu/c++/4.8 make
 
 ## TODO
 
-- Use unsaved file
+- Support unsaved files everywhere. (git grep clang_parseTranslationUnit.*nullptr)
 
 ## License
 

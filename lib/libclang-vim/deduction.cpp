@@ -443,7 +443,9 @@ const char* libclang_vim::get_deduced_declaration_at(const location_tuple& locat
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(location_info);
+    CXTranslationUnit_Flags flags = CXTranslationUnit_Incomplete;
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), unsaved_files.data(), unsaved_files.size(), flags));
     if (!translation_unit)
         return "{}";
 

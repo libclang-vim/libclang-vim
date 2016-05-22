@@ -52,3 +52,9 @@ tags:
 
 clang-tidy-modernize:
 	clang-tidy -checks=*modernize*,-modernize-raw-string-literal -header-filter=.* $(SRCS)
+
+clang-tidy-performance:
+	clang-tidy -checks=*performance* -header-filter=.* $(SRCS)
+
+clang-tidy-unused:
+	clang-tidy -checks=*unused* -header-filter=.* $(SRCS)

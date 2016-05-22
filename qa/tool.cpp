@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     const char* name = argv[1];
     const char* input = argv[2];
 
-    void* handle = dlopen("lib/libclang-vim.so", RTLD_NOW);
+    void* handle = dlopen(SRC_ROOT "/lib/libclang-vim.so", RTLD_NOW);
     if (!handle)
     {
         std::cerr << "dlopen() failed: " << dlerror() << std::endl;
