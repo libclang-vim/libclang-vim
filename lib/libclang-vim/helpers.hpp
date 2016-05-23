@@ -25,8 +25,7 @@ inline size_t get_file_size(char const* filename)
     return input.seekg(0, std::ios::end).tellg();
 }
 
-template<class Location>
-bool is_null_location(Location const& location)
+inline bool is_null_location(const CXSourceLocation& location)
 {
     return clang_equalLocations(location, clang_getNullLocation());
 }
@@ -333,8 +332,8 @@ inline const char* at_specific_location(
 
 namespace detail {
 
-template<class DataType>
-CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
+using DataType = std::pair<CXCursor, const std::function<bool(const CXCursorKind&)>&>;
+inline CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
 {
     auto const kind = clang_getCursorKind(cursor);
     if ((reinterpret_cast<DataType *>(data)->second(kind))) {
@@ -342,14 +341,13 @@ CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData d
         return CXChildVisit_Break;
     }
 
-    clang_visitChildren(cursor, search_kind_visitor<DataType>, data);
+    clang_visitChildren(cursor, search_kind_visitor, data);
     return CXChildVisit_Continue;
 }
 
 } // namespace detail
 
-template<class Predicate>
-CXCursor search_kind(CXCursor const& cursor, Predicate const& predicate)
+inline CXCursor search_kind(CXCursor const& cursor, const std::function<bool(const CXCursorKind&)>& predicate)
 {
     auto const kind = clang_getCursorKind(cursor);
     if (predicate(kind)) {
@@ -357,7 +355,7 @@ CXCursor search_kind(CXCursor const& cursor, Predicate const& predicate)
     }
 
     auto kind_visitor_data = std::make_pair(clang_getNullCursor(), predicate);
-    clang_visitChildren(cursor, detail::search_kind_visitor<decltype(kind_visitor_data)>, &kind_visitor_data);
+    clang_visitChildren(cursor, detail::search_kind_visitor, &kind_visitor_data);
     return kind_visitor_data.first;
 }
 
