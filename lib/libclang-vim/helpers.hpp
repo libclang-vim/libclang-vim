@@ -330,34 +330,7 @@ inline const char* at_specific_location(
     return vimson.c_str();
 }
 
-namespace detail {
-
-using DataType = std::pair<CXCursor, const std::function<bool(const CXCursorKind&)>&>;
-inline CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData data)
-{
-    auto const kind = clang_getCursorKind(cursor);
-    if ((reinterpret_cast<DataType *>(data)->second(kind))) {
-        (reinterpret_cast<DataType *>(data))->first = cursor;
-        return CXChildVisit_Break;
-    }
-
-    clang_visitChildren(cursor, search_kind_visitor, data);
-    return CXChildVisit_Continue;
-}
-
-} // namespace detail
-
-inline CXCursor search_kind(CXCursor const& cursor, const std::function<bool(const CXCursorKind&)>& predicate)
-{
-    auto const kind = clang_getCursorKind(cursor);
-    if (predicate(kind)) {
-        return cursor;
-    }
-
-    auto kind_visitor_data = std::make_pair(clang_getNullCursor(), predicate);
-    clang_visitChildren(cursor, detail::search_kind_visitor, &kind_visitor_data);
-    return kind_visitor_data.first;
-}
+CXCursor search_kind(const CXCursor& cursor, const std::function<bool(const CXCursorKind&)>& predicate);
 
 } // namespace libclang_vim
 
