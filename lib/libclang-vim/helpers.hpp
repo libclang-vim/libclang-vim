@@ -307,28 +307,7 @@ inline std::vector<char const *> get_args_ptrs(args_type const& args)
     return args_ptrs;
 }
 
-inline const char* at_specific_location(
-        const location_tuple& location_tuple,
-        const std::function<std::string(CXCursor const&)>& predicate
-    )
-{
-    static std::string vimson;
-    char const* file_name = location_tuple.file.c_str();
-    auto const args_ptrs = get_args_ptrs(location_tuple.args);
-
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
-    if (!translation_unit)
-        return "{}";
-
-    CXFile const file = clang_getFile(translation_unit, file_name);
-    auto const location = clang_getLocation(translation_unit, file, location_tuple.line, location_tuple.col);
-    CXCursor const cursor = clang_getCursor(translation_unit, location);
-
-    vimson = predicate(cursor);
-
-    return vimson.c_str();
-}
+const char* at_specific_location(const location_tuple& location_tuple, const std::function<std::string(CXCursor const&)>& predicate);
 
 CXCursor search_kind(const CXCursor& cursor, const std::function<bool(const CXCursorKind&)>& predicate);
 
