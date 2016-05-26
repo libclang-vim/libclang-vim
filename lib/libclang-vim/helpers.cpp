@@ -20,6 +20,13 @@ CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData d
 
 }
 
+std::vector<const char*> libclang_vim::get_args_ptrs(const args_type& args)
+{
+    std::vector<const char*> args_ptrs{args.size()};
+    std::transform(std::begin(args), std::end(args), std::begin(args_ptrs), [](const std::string& s){ return s.c_str(); });
+    return args_ptrs;
+}
+
 const char* libclang_vim::at_specific_location(const location_tuple& location_tuple, const std::function<std::string(CXCursor const&)>& predicate)
 {
     static std::string vimson;

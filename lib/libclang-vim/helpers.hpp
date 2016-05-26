@@ -300,12 +300,7 @@ inline location_tuple parse_args_with_location(std::string const& args_string)
     return ret;
 }
 
-inline std::vector<char const *> get_args_ptrs(args_type const& args)
-{
-    std::vector<char const*> args_ptrs{args.size()};
-    std::transform(std::begin(args), std::end(args), std::begin(args_ptrs), [](std::string const& s){ return s.c_str(); });
-    return args_ptrs;
-}
+std::vector<const char*> get_args_ptrs(const args_type& args);
 
 const char* at_specific_location(const location_tuple& location_tuple, const std::function<std::string(CXCursor const&)>& predicate);
 
