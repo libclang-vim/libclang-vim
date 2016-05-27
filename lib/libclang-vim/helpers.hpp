@@ -256,49 +256,8 @@ inline std::vector<CXUnsavedFile> create_unsaved_files(const location_tuple& loc
     return unsaved_files;
 }
 
-// Parse "file:args:line:col"
-inline location_tuple parse_args_with_location(std::string const& args_string)
-{
-    auto const end = std::end(args_string);
-
-    auto second_colon = std::find(std::begin(args_string), end, ':');
-    if (second_colon == end || second_colon + 1 == end) {
-        return location_tuple();
-    }
-    second_colon = std::find(second_colon + 1, end, ':');
-    if (second_colon == end || second_colon + 1 == end) {
-        return location_tuple();
-    }
-
-    auto const default_args = parse_default_args({std::begin(args_string), second_colon});
-    if (default_args.first == "") {
-        return location_tuple();
-    }
-
-    size_t line, col;
-    auto const num_input = std::sscanf(std::string{second_colon+1, end}.c_str(), "%zu:%zu", &line, &col);
-    if (num_input != 2) {
-        return location_tuple();
-    }
-
-    location_tuple ret;
-    ret.file = default_args.first;
-
-    /// Recognize "real filename#temp file" syntax, in which case assume the later is the unsaved version of the previous.
-    std::size_t pos = ret.file.find('#');
-    if (pos != std::string::npos)
-    {
-        std::string unsaved_path = ret.file.substr(pos + 1);
-        ret.file = ret.file.substr(0, pos);
-        std::ifstream unsaved_stream(unsaved_path, std::ios::in | std::ios::binary);
-        ret.unsaved_file = std::vector<char>((std::istreambuf_iterator<char>(unsaved_stream)), std::istreambuf_iterator<char>());
-    }
-
-    ret.args = default_args.second;
-    ret.line = line;
-    ret.col = col;
-    return ret;
-}
+/// Parse "file:args:line:col".
+location_tuple parse_args_with_location(const std::string& args_string);
 
 std::vector<const char*> get_args_ptrs(const args_type& args);
 
