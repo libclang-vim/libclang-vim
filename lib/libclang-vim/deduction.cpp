@@ -495,7 +495,8 @@ const char* libclang_vim::get_include_at(const location_tuple& location_info)
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
     unsigned options = CXTranslationUnit_Incomplete | CXTranslationUnit_DetailedPreprocessingRecord;
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, options));
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(location_info);
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), unsaved_files.data(), unsaved_files.size(), options));
     if (!translation_unit)
         return "{}";
 

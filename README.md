@@ -131,6 +131,8 @@ Supports unsaved files.
 
 Get file name of the include referenced at a specific location.
 
+Supports unsaved files.
+
 ### `libclang#deduction#diagnostics({filename}, [, {compiler args}])`
 
 Get diagnostics (errors, warnings, etc) for a specific file.

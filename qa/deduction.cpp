@@ -16,6 +16,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_unsaved_declaration_at);
     CPPUNIT_TEST(test_compile_commands);
     CPPUNIT_TEST(test_include_at);
+    CPPUNIT_TEST(test_unsaved_include_at);
     CPPUNIT_TEST(test_diagnostics);
     CPPUNIT_TEST_SUITE_END();
 
@@ -28,6 +29,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     void test_unsaved_declaration_at();
     void test_compile_commands();
     void test_include_at();
+    void test_unsaved_include_at();
     void test_diagnostics();
 
     void* m_handle;
@@ -158,6 +160,19 @@ void deduction_test::test_include_at()
 
     std::string expected("{'file':'" SRC_ROOT "/qa/data/compile-commands/test.hpp'}");
     std::string actual(vim_clang_get_include_at("qa/data/compile-commands/test.cpp:-std=c++1y -I" SRC_ROOT "/qa/data/compile-commands/:1:2"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_unsaved_include_at()
+{
+    auto vim_clang_get_include_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_include_at"));
+    assert(vim_clang_get_include_at);
+
+    std::string expected("{'file':'./include.hpp'}");
+    chdir("qa/data/unsaved");
+    std::string actual(vim_clang_get_include_at("include.cpp#include-unsaved.cpp:-std=c++1y:1:14"));
+    chdir("../../..");
+    // This was "{}", relative include broke without unsaved file support.
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

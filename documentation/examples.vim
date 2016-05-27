@@ -69,7 +69,7 @@ endfunction
 " See ':help jumplist', e.g. use Ctrl-O to jump back.
 function! ClangJumpInclude()
     let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
-    let file_name = ClangTempFile()
+    let file_name = expand('%:p') . '#' . ClangTempFile()
     let info = libclang#deduction#include_at(file_name, line('.'), col('.'), compiler_args.commands)
     call delete(file_name)
 
