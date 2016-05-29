@@ -93,7 +93,7 @@ class cxstring_ptr
 
 public:
     cxstring_ptr(CXString string)
-        : _string(std::move(string))
+        : _string(string)
     {
     }
 

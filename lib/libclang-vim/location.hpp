@@ -74,7 +74,7 @@ const char* get_type_related_to(const location_tuple& location_info, JumpFunc co
             });
 }
 
-const char* get_all_extents(const location_tuple& location_info)
+inline const char* get_all_extents(const location_tuple& location_info)
 {
     static std::string vimson;
     vimson = "";

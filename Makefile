@@ -50,14 +50,5 @@ check: all
 tags:
 	ctags --c++-kinds=+p --fields=+iaS --extra=+q -R --totals=yes *
 
-clang-tidy-performance:
-	clang-tidy -checks=*performance* -header-filter=.* $(SRCS)
-
-clang-tidy-modernize:
-	clang-tidy -checks=*modernize*,-modernize-raw-string-literal -header-filter=.* $(SRCS)
-
-clang-tidy-unused:
-	clang-tidy -checks=*unused* -header-filter=.* $(SRCS)
-
-clang-tidy-misc:
-	clang-tidy -checks=*misc* -header-filter=.* $(SRCS)
+clang-tidy:
+	clang-tidy -header-filter=.* $(SRCS)

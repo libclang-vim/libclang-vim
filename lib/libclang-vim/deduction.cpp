@@ -322,7 +322,7 @@ const char* libclang_vim::get_current_function_at(const location_tuple& location
     ss << "{'name':'";
 
     // Write the actual name.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -396,7 +396,7 @@ const char* libclang_vim::get_comment_at(const location_tuple& location_info)
     ss << "{'brief':'";
 
     // Write the actual comment.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -439,7 +439,7 @@ const char* libclang_vim::get_deduced_declaration_at(const location_tuple& locat
     ss << "{";
 
     // Write the actual comment.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -490,7 +490,7 @@ const char* libclang_vim::get_include_at(const location_tuple& location_info)
     ss << "{'file':'";
 
     // Write the actual comment.
-    cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -527,7 +527,7 @@ const char* libclang_vim::get_completion_at(const location_tuple& location_info)
     ss << "['";
 
     // Write the completion list.
-    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
@@ -579,7 +579,7 @@ const char* libclang_vim::get_diagnostics(const std::pair<std::string, args_type
     ss << "[";
 
     // Write the diagnostic list.
-    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH=*/1, /*displayDiagnostics=*/0);
+    libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
     std::string file_name = file_and_args.first;
     std::vector<const char*> args_ptrs = get_args_ptrs(file_and_args.second);
