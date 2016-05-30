@@ -18,6 +18,201 @@ CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor, CXClientData d
     return CXChildVisit_Continue;
 }
 
+libclang_vim::args_type parse_compiler_args(const std::string& s)
+{
+    using iterator = std::istream_iterator<std::string>;
+    libclang_vim::args_type result;
+    std::istringstream iss(s);
+    std::copy(iterator(iss), iterator{}, std::back_inserter(result));
+    return result;
+}
+
+}
+
+size_t libclang_vim::get_file_size(const char* filename)
+{
+    std::ifstream input(filename);
+    return input.seekg(0, std::ios::end).tellg();
+}
+
+bool libclang_vim::is_null_location(const CXSourceLocation& location)
+{
+    return clang_equalLocations(location, clang_getNullLocation());
+}
+
+libclang_vim::cxindex_ptr::cxindex_ptr(CXIndex index)
+    : _index(index)
+{
+}
+
+libclang_vim::cxindex_ptr::operator const CXIndex&() const
+{
+    return _index;
+}
+
+libclang_vim::cxindex_ptr::operator bool() const
+{
+    return _index != nullptr;
+}
+
+libclang_vim::cxindex_ptr::~cxindex_ptr()
+{
+    if (_index)
+        clang_disposeIndex(_index);
+}
+
+libclang_vim::cxtranslation_unit_ptr::cxtranslation_unit_ptr(CXTranslationUnit unit)
+    : _unit(unit)
+{
+}
+
+libclang_vim::cxtranslation_unit_ptr::operator const CXTranslationUnit&() const
+{
+    return _unit;
+}
+
+libclang_vim::cxtranslation_unit_ptr::operator bool() const
+{
+    return _unit != nullptr;
+}
+
+libclang_vim::cxtranslation_unit_ptr::~cxtranslation_unit_ptr()
+{
+    if (_unit)
+        clang_disposeTranslationUnit(_unit);
+}
+
+libclang_vim::cxstring_ptr::cxstring_ptr(CXString string)
+    : _string(string)
+{
+}
+
+libclang_vim::cxstring_ptr::operator const CXString&() const
+{
+    return _string;
+}
+
+libclang_vim::cxstring_ptr::~cxstring_ptr()
+{
+    clang_disposeString(_string);
+}
+
+const char* libclang_vim::to_c_str(const libclang_vim::cxstring_ptr& string)
+{
+    return clang_getCString(string);
+}
+
+std::string libclang_vim::stringize_key_value(const char* key_name, const cxstring_ptr& p)
+{
+    const auto* cstring = clang_getCString(p);
+    if (!cstring || std::strcmp(cstring, "") == 0)
+        return "";
+    else
+        return "'" + std::string{key_name} + "':'" + cstring + "',";
+}
+
+std::string libclang_vim::stringize_key_value(const char* key_name, const std::string& s)
+{
+    if (s.empty())
+        return "";
+    else
+        return "'" + (key_name + ("':'" + s + "',"));
+}
+
+bool libclang_vim::is_class_decl_kind(const CXCursorKind& kind)
+{
+    switch(kind)
+    {
+    case CXCursor_StructDecl:
+    case CXCursor_ClassDecl:
+    case CXCursor_UnionDecl:
+    case CXCursor_ClassTemplate:
+    case CXCursor_ClassTemplatePartialSpecialization:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool libclang_vim::is_class_decl(const CXCursor& cursor)
+{
+    return is_class_decl_kind(clang_getCursorKind(cursor));
+}
+
+bool libclang_vim::is_function_decl_kind(const CXCursorKind& kind)
+{
+    switch(kind)
+    {
+    case CXCursor_FunctionDecl:
+    case CXCursor_FunctionTemplate:
+    case CXCursor_ConversionFunction:
+    case CXCursor_CXXMethod:
+    case CXCursor_ObjCInstanceMethodDecl:
+    case CXCursor_ObjCClassMethodDecl:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool libclang_vim::is_function_decl(const CXCursor& cursor)
+{
+    return is_function_decl_kind(clang_getCursorKind(cursor));
+}
+
+bool libclang_vim::is_parameter_kind(const CXCursorKind& kind)
+{
+    switch(kind)
+    {
+    case CXCursor_ParmDecl:
+    case CXCursor_TemplateTypeParameter:
+    case CXCursor_NonTypeTemplateParameter:
+    case CXCursor_TemplateTemplateParameter:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool libclang_vim::is_parameter(const CXCursor& cursor)
+{
+    return is_parameter_kind(clang_getCursorKind(cursor));
+}
+
+std::pair<std::string, libclang_vim::args_type> libclang_vim::parse_default_args(const std::string& args_string)
+{
+    const auto end = std::end(args_string);
+    const auto path_end = std::find(std::begin(args_string), end, ':');
+    if (path_end == end)
+        return {"", args_type{}};
+
+    const std::string file{std::begin(args_string), path_end};
+    if (path_end+1 == end)
+        return {file, {}};
+    else
+        return {file, parse_compiler_args({path_end+1, end})};
+}
+
+libclang_vim::location_tuple::location_tuple()
+    : line(0),
+    col(0)
+{
+}
+
+std::vector<CXUnsavedFile> libclang_vim::create_unsaved_files(const location_tuple& location_info)
+{
+    std::vector<CXUnsavedFile> unsaved_files;
+    if (!location_info.unsaved_file.empty())
+    {
+        CXUnsavedFile unsaved_file;
+        unsaved_file.Filename = location_info.file.c_str();
+        unsaved_file.Contents = location_info.unsaved_file.data();
+        unsaved_file.Length = location_info.unsaved_file.size();
+        unsaved_files.push_back(unsaved_file);
+    }
+    return unsaved_files;
 }
 
 libclang_vim::location_tuple libclang_vim::parse_args_with_location(const std::string& args_string)

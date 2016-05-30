@@ -18,17 +18,9 @@ namespace libclang_vim {
 
 using std::size_t;
 
-// Note: boost::filesystem
-inline size_t get_file_size(char const* filename)
-{
-    std::ifstream input(filename);
-    return input.seekg(0, std::ios::end).tellg();
-}
+size_t get_file_size(const char* filename);
 
-inline bool is_null_location(const CXSourceLocation& location)
-{
-    return clang_equalLocations(location, clang_getNullLocation());
-}
+bool is_null_location(const CXSourceLocation& location);
 
 /// Class to avoid the need to call clang_disposeIndex() manually.
 class cxindex_ptr
@@ -36,26 +28,13 @@ class cxindex_ptr
     CXIndex _index;
 
 public:
-    cxindex_ptr(CXIndex index)
-        : _index(index)
-    {
-    }
+    cxindex_ptr(CXIndex index);
 
-    operator const CXIndex&() const
-    {
-        return _index;
-    }
+    operator const CXIndex&() const;
 
-    operator bool() const
-    {
-        return _index != nullptr;
-    }
+    operator bool() const;
 
-    ~cxindex_ptr()
-    {
-        if (_index)
-            clang_disposeIndex(_index);
-    }
+    ~cxindex_ptr();
 };
 
 /// Class to avoid the need to call clang_disposeTranslationUnit() manually.
@@ -64,26 +43,13 @@ class cxtranslation_unit_ptr
     CXTranslationUnit _unit;
 
 public:
-    cxtranslation_unit_ptr(CXTranslationUnit unit)
-        : _unit(unit)
-    {
-    }
+    cxtranslation_unit_ptr(CXTranslationUnit unit);
 
-    operator const CXTranslationUnit&() const
-    {
-        return _unit;
-    }
+    operator const CXTranslationUnit&() const;
 
-    operator bool() const
-    {
-        return _unit != nullptr;
-    }
+    operator bool() const;
 
-    ~cxtranslation_unit_ptr()
-    {
-        if (_unit)
-            clang_disposeTranslationUnit(_unit);
-    }
+    ~cxtranslation_unit_ptr();
 };
 
 /// Class to avoid the need to call clang_disposeString() manually.
@@ -92,136 +58,35 @@ class cxstring_ptr
     CXString _string;
 
 public:
-    cxstring_ptr(CXString string)
-        : _string(string)
-    {
-    }
+    cxstring_ptr(CXString string);
 
-    operator const CXString&() const
-    {
-        return _string;
-    }
+    operator const CXString&() const;
 
-    ~cxstring_ptr()
-    {
-        clang_disposeString(_string);
-    }
+    ~cxstring_ptr();
 };
 
-inline char const* to_c_str(const cxstring_ptr& string)
-{
-    return clang_getCString(string);
-}
+const char* to_c_str(const cxstring_ptr& string);
 
-inline std::string stringize_key_value(char const* key_name, cxstring_ptr const& p)
-{
-    auto const* cstring = clang_getCString(p);
-    if (!cstring || std::strcmp(cstring, "") == 0) {
-        return "";
-    } else {
-        return "'" + std::string{key_name} + "':'" + cstring + "',";
-    }
-}
+std::string stringize_key_value(const char* key_name, const cxstring_ptr& p);
 
-inline std::string stringize_key_value(char const* key_name, std::string const& s)
-{
-    if (s.empty()) {
-        return "";
-    } else {
-        return "'" + (key_name + ("':'" + s + "',"));
-    }
-}
+std::string stringize_key_value(const char* key_name, const std::string& s);
 
-inline bool is_class_decl_kind(CXCursorKind const& kind)
-{
-    switch(kind) {
-    case CXCursor_StructDecl:
-    case CXCursor_ClassDecl:
-    case CXCursor_UnionDecl:
-    case CXCursor_ClassTemplate:
-    case CXCursor_ClassTemplatePartialSpecialization:
-        return true;
-    default:
-        return false;
-    }
-}
+bool is_class_decl_kind(const CXCursorKind& kind);
 
-inline bool is_class_decl(CXCursor const& cursor)
-{
-    return is_class_decl_kind(clang_getCursorKind(cursor));
-}
+bool is_class_decl(const CXCursor& cursor);
 
-inline bool is_function_decl_kind(CXCursorKind const& kind)
-{
-    switch(kind) {
-    case CXCursor_FunctionDecl:
-    case CXCursor_FunctionTemplate:
-    case CXCursor_ConversionFunction:
-    case CXCursor_CXXMethod:
-    case CXCursor_ObjCInstanceMethodDecl:
-    case CXCursor_ObjCClassMethodDecl:
-    case CXCursor_Constructor:
-    case CXCursor_Destructor:
-        return true;
-    default:
-        return false;
-    }
-}
+bool is_function_decl_kind(const CXCursorKind& kind);
 
-inline bool is_function_decl(CXCursor const& cursor)
-{
-    return is_function_decl_kind(clang_getCursorKind(cursor));
-}
+bool is_function_decl(const CXCursor& cursor);
 
-inline bool is_parameter_kind(CXCursorKind const& kind)
-{
-    switch(kind) {
-    case CXCursor_ParmDecl:
-    case CXCursor_TemplateTypeParameter:
-    case CXCursor_NonTypeTemplateParameter:
-    case CXCursor_TemplateTemplateParameter:
-        return true;
-    default:
-        return false;
-    }
-}
+bool is_parameter_kind(const CXCursorKind& kind);
 
-inline bool is_parameter(CXCursor const& cursor)
-{
-    return is_parameter_kind(clang_getCursorKind(cursor));
-}
+bool is_parameter(const CXCursor& cursor);
 
 using args_type = std::vector<std::string>;
 
-namespace detail {
-
-    inline args_type parse_compiler_args(std::string const& s)
-    {
-        using iterator = std::istream_iterator<std::string>;
-        args_type result;
-        std::istringstream iss(s);
-        std::copy(iterator(iss), iterator{}, std::back_inserter(result));
-        return result;
-    }
-
-} // namespace detail
-
-// Parse "file:args"
-inline auto parse_default_args(std::string const& args_string)
-    -> std::pair<std::string, args_type>
-{
-    auto const end = std::end(args_string);
-    auto const path_end = std::find(std::begin(args_string), end, ':');
-    if (path_end == end) {
-        return {"", args_type{}};
-    };
-    std::string const file{std::begin(args_string), path_end};
-    if (path_end+1 == end) {
-        return {file, {}};
-    } else {
-        return {file, detail::parse_compiler_args({path_end+1, end})};
-    }
-}
+/// Parse "file:args".
+std::pair<std::string, args_type> parse_default_args(const std::string& args_string);
 
 /// Stores compiler arguments with location.
 class location_tuple
@@ -234,27 +99,11 @@ public:
     size_t line;
     size_t col;
 
-    location_tuple()
-        : line(0),
-        col(0)
-    {
-    }
+    location_tuple();
 };
 
 /// Creates a CXUnsavedFile array, suitable for clang_parseTranslationUnit().
-inline std::vector<CXUnsavedFile> create_unsaved_files(const location_tuple& location_info)
-{
-    std::vector<CXUnsavedFile> unsaved_files;
-    if (!location_info.unsaved_file.empty())
-    {
-        CXUnsavedFile unsaved_file;
-        unsaved_file.Filename = location_info.file.c_str();
-        unsaved_file.Contents = location_info.unsaved_file.data();
-        unsaved_file.Length = location_info.unsaved_file.size();
-        unsaved_files.push_back(unsaved_file);
-    }
-    return unsaved_files;
-}
+std::vector<CXUnsavedFile> create_unsaved_files(const location_tuple& location_info);
 
 /// Parse "file:args:line:col".
 location_tuple parse_args_with_location(const std::string& args_string);
