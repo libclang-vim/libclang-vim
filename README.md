@@ -137,6 +137,8 @@ Supports unsaved files.
 
 Get diagnostics (errors, warnings, etc) for a specific file.
 
+Supports unsaved files.
+
 ### `libclang#deduction#compile_commands({filename})`
 
 Get the list of compile commands for a specific file name.

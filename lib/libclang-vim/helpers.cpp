@@ -181,18 +181,24 @@ bool libclang_vim::is_parameter(const CXCursor& cursor)
     return is_parameter_kind(clang_getCursorKind(cursor));
 }
 
-std::pair<std::string, libclang_vim::args_type> libclang_vim::parse_default_args(const std::string& args_string)
+libclang_vim::location_tuple libclang_vim::parse_default_args(const std::string& args_string)
 {
+    location_tuple info;
     const auto end = std::end(args_string);
     const auto path_end = std::find(std::begin(args_string), end, ':');
     if (path_end == end)
-        return {"", args_type{}};
+        return info;
 
     const std::string file{std::begin(args_string), path_end};
+    info.file = file;
+    extract_unsaved_file(info);
     if (path_end+1 == end)
-        return {file, {}};
+        return info;
     else
-        return {file, parse_compiler_args({path_end+1, end})};
+    {
+        info.args = parse_compiler_args({path_end+1, end});
+        return info;
+    }
 }
 
 libclang_vim::location_tuple::location_tuple()
@@ -215,6 +221,19 @@ std::vector<CXUnsavedFile> libclang_vim::create_unsaved_files(const location_tup
     return unsaved_files;
 }
 
+void libclang_vim::extract_unsaved_file(libclang_vim::location_tuple& info)
+{
+    // Recognize "real filename#temp file" syntax, in which case assume the later is the unsaved version of the previous.
+    std::size_t pos = info.file.find('#');
+    if (pos != std::string::npos)
+    {
+        std::string unsaved_path = info.file.substr(pos + 1);
+        info.file = info.file.substr(0, pos);
+        std::ifstream unsaved_stream(unsaved_path, std::ios::in | std::ios::binary);
+        info.unsaved_file = std::vector<char>((std::istreambuf_iterator<char>(unsaved_stream)), std::istreambuf_iterator<char>());
+    }
+}
+
 libclang_vim::location_tuple libclang_vim::parse_args_with_location(const std::string& args_string)
 {
     auto const end = std::end(args_string);
@@ -231,7 +250,7 @@ libclang_vim::location_tuple libclang_vim::parse_args_with_location(const std::s
     }
 
     auto const default_args = parse_default_args({std::begin(args_string), second_colon});
-    if (default_args.first == "")
+    if (default_args.file == "")
     {
         return location_tuple();
     }
@@ -244,19 +263,9 @@ libclang_vim::location_tuple libclang_vim::parse_args_with_location(const std::s
     }
 
     location_tuple ret;
-    ret.file = default_args.first;
-
-    // Recognize "real filename#temp file" syntax, in which case assume the later is the unsaved version of the previous.
-    std::size_t pos = ret.file.find('#');
-    if (pos != std::string::npos)
-    {
-        std::string unsaved_path = ret.file.substr(pos + 1);
-        ret.file = ret.file.substr(0, pos);
-        std::ifstream unsaved_stream(unsaved_path, std::ios::in | std::ios::binary);
-        ret.unsaved_file = std::vector<char>((std::istreambuf_iterator<char>(unsaved_stream)), std::istreambuf_iterator<char>());
-    }
-
-    ret.args = default_args.second;
+    ret.file = default_args.file;
+    ret.unsaved_file = default_args.unsaved_file;
+    ret.args = default_args.args;
     ret.line = line;
     ret.col = col;
     return ret;

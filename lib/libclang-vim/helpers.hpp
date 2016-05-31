@@ -85,9 +85,6 @@ bool is_parameter(const CXCursor& cursor);
 
 using args_type = std::vector<std::string>;
 
-/// Parse "file:args".
-std::pair<std::string, args_type> parse_default_args(const std::string& args_string);
-
 /// Stores compiler arguments with location.
 class location_tuple
 {
@@ -102,8 +99,14 @@ public:
     location_tuple();
 };
 
+/// Parse "file:args".
+location_tuple parse_default_args(const std::string& args_string);
+
 /// Creates a CXUnsavedFile array, suitable for clang_parseTranslationUnit().
 std::vector<CXUnsavedFile> create_unsaved_files(const location_tuple& location_info);
+
+/// Set info.unsaved_file if info.file is in "real filename#temp file" syntax.
+void extract_unsaved_file(libclang_vim::location_tuple& info);
 
 /// Parse "file:args:line:col".
 location_tuple parse_args_with_location(const std::string& args_string);

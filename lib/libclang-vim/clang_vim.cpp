@@ -40,8 +40,8 @@ char const* vim_clang_version()
 char const* vim_clang_tokens(char const* arguments)
 {
     auto const parsed = libclang_vim::parse_default_args(arguments);
-    auto const args_ptrs = libclang_vim::get_args_ptrs(parsed.second);
-    libclang_vim::tokenizer tokenizer{parsed.first};
+    auto const args_ptrs = libclang_vim::get_args_ptrs(parsed.args);
+    libclang_vim::tokenizer tokenizer{parsed.file};
     static auto const vimson = tokenizer.tokenize_as_vimson(args_ptrs.data(), args_ptrs.size());
     return vimson.c_str();
 }
@@ -657,7 +657,7 @@ char const* vim_clang_get_compile_commands(char const* file)
 {
     stderr_guard g;
 
-    const char* ret = libclang_vim::get_compile_commands(libclang_vim::parse_default_args(file).first);
+    const char* ret = libclang_vim::get_compile_commands(libclang_vim::parse_default_args(file).file);
     return ret;
 }
 

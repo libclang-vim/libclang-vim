@@ -72,13 +72,13 @@ auto extract_AST_nodes(
     vimson = "";
 
     auto const parsed = parse_default_args(arguments);
-    auto const args_ptrs = get_args_ptrs(parsed.second);
+    auto const args_ptrs = get_args_ptrs(parsed.args);
 
     typedef std::tuple<std::string&, extraction_policy const, Predicate const&> callback_data_type;
     callback_data_type callback_data{vimson, policy, predicate};
 
     cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, parsed.first.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, parsed.file.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
     if (!translation_unit)
         return "{}";
 

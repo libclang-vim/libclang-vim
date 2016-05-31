@@ -570,7 +570,7 @@ const char* libclang_vim::get_completion_at(const location_tuple& location_info)
     return vimson.c_str();
 }
 
-const char* libclang_vim::get_diagnostics(const std::pair<std::string, args_type>& file_and_args)
+const char* libclang_vim::get_diagnostics(const location_tuple& location_info)
 {
     static std::string vimson;
 
@@ -581,9 +581,11 @@ const char* libclang_vim::get_diagnostics(const std::pair<std::string, args_type
     // Write the diagnostic list.
     libclang_vim::cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1, /*displayDiagnostics=*/0);
 
-    std::string file_name = file_and_args.first;
-    std::vector<const char*> args_ptrs = get_args_ptrs(file_and_args.second);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    std::string file_name = location_info.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(location_info);
+    unsigned options = CXTranslationUnit_Incomplete;
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), unsaved_files.data(), unsaved_files.size(), options));
     if (!translation_unit)
         return "[]";
 

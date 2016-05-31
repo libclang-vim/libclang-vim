@@ -39,7 +39,7 @@ const char* get_completion_at(const location_tuple& location_info);
 const char* get_compile_commands(const std::string& file);
 
 /// Wrapper around clang_getDiagnostic().
-const char* get_diagnostics(const std::pair<std::string, args_type>& file_and_args);
+const char* get_diagnostics(const location_tuple& location_info);
 
 } // namespace libclang_vim
 

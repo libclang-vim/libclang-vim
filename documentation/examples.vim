@@ -48,9 +48,10 @@ endfunction
 " See ':help jumplist', e.g. use Ctrl-O to jump back.
 function! ClangJumpDeclaration()
     let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
-    let file_name = expand('%:p') . '#' . ClangTempFile()
+    let temp_file = ClangTempFile()
+    let file_name = expand('%:p') . '#' . temp_file
     let info = libclang#deduction#declaration_at(file_name, line('.'), col('.'), compiler_args.commands)
-    call delete(file_name)
+    call delete(temp_file)
 
     if info.file == file_name
         let info.file = expand('%:p')
@@ -69,9 +70,10 @@ endfunction
 " See ':help jumplist', e.g. use Ctrl-O to jump back.
 function! ClangJumpInclude()
     let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
-    let file_name = expand('%:p') . '#' . ClangTempFile()
+    let temp_file = ClangTempFile()
+    let file_name = expand('%:p') . '#' . temp_file
     let info = libclang#deduction#include_at(file_name, line('.'), col('.'), compiler_args.commands)
-    call delete(file_name)
+    call delete(temp_file)
 
     " Add an entry to the jump list.
     normal! m'
@@ -83,16 +85,17 @@ sign define ClangError text=EE
 sign define ClangWarning text=WW
 function! ClangShowDiagnostics()
     let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
-    let l:file_name = ClangTempFile()
+    let l:temp_file = ClangTempFile()
+    let l:file_name = expand('%:p') . '#' . l:temp_file
     let l:diagnostics = libclang#deduction#diagnostics(l:file_name, l:compiler_args.commands)
-    call delete(l:file_name)
+    call delete(l:temp_file)
 
     " Delete previous diagnostics.
     sign unplace *
     let l:counter = 1
     for l:diagnostic in l:diagnostics
         if has_key(l:diagnostic, "file")
-            if l:diagnostic.file == l:file_name
+            if l:diagnostic.file == expand('%:p')
                 " This diagnostic is for the current file.
                 if l:diagnostic.severity == "warning"
                     execute "sign place " . l:counter . " line=" . l:diagnostic.line . " name=ClangWarning file=" . expand("%:p")

@@ -18,6 +18,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_include_at);
     CPPUNIT_TEST(test_unsaved_include_at);
     CPPUNIT_TEST(test_diagnostics);
+    CPPUNIT_TEST(test_unsaved_diagnostics);
     CPPUNIT_TEST_SUITE_END();
 
     void test_current_function_at();
@@ -31,6 +32,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     void test_include_at();
     void test_unsaved_include_at();
     void test_diagnostics();
+    void test_unsaved_diagnostics();
 
     void* m_handle;
 
@@ -183,6 +185,19 @@ void deduction_test::test_diagnostics()
 
     std::string expected("[{'severity': 'warning', 'line':3,'column':9,'offset':21,'file':'qa/data/diagnostics.cpp',}, ]");
     std::string actual(vim_clang_get_diagnostics("qa/data/diagnostics.cpp:-Wunused-variable"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_unsaved_diagnostics()
+{
+    auto vim_clang_get_diagnostics = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_diagnostics"));
+    assert(vim_clang_get_diagnostics);
+
+    std::string expected("[{'severity': 'warning', 'line':3,'column':9,'offset':21,'file':'diagnostics.cpp',}, ]");
+    chdir("qa/data/unsaved");
+    std::string actual(vim_clang_get_diagnostics("diagnostics.cpp#diagnostics-unsaved.cpp:-Wunused-variable"));
+    chdir("../../..");
+    // This was "[]", unsaved file support was missing.
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
