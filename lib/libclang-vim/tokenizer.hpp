@@ -43,8 +43,7 @@ private:
         return file_range;
     }
 
-    template<class Kind>
-    char const* get_kind_spelling(Kind const kind) const
+    inline const char* get_kind_spelling(const CXTokenKind kind) const
     {
         switch (kind) {
             case CXToken_Punctuation: return "punctuation";
