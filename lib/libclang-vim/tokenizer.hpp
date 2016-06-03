@@ -54,10 +54,9 @@ private:
         }
     }
 
-    template<class Token>
-    std::string make_vimson_from_tokens(std::vector<Token> tokens) const
+    inline std::string make_vimson_from_tokens(std::vector<CXToken> tokens) const
     {
-        return "[" + std::accumulate(std::begin(tokens), std::end(tokens), std::string{}, [&](std::string const& acc, Token const& token){
+        return "[" + std::accumulate(std::begin(tokens), std::end(tokens), std::string{}, [&](std::string const& acc, CXToken const& token){
             auto const kind = clang_getTokenKind(token);
             cxstring_ptr spell = clang_getTokenSpelling(translation_unit, token);
             auto const location = clang_getTokenLocation(translation_unit, token);
