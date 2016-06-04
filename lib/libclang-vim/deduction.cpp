@@ -531,13 +531,15 @@ const char* libclang_vim::get_completion_at(const location_tuple& location_info)
 
     std::string file_name = location_info.file;
     std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(location_info);
+    unsigned options = CXTranslationUnit_Incomplete;
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(), unsaved_files.data(), unsaved_files.size(), options));
     if (!translation_unit)
         return "[]";
 
     unsigned line = location_info.line;
     unsigned column = location_info.col;
-    CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, nullptr, 0, clang_defaultCodeCompleteOptions());
+    CXCodeCompleteResults* results = clang_codeCompleteAt(translation_unit, file_name.c_str(), line, column, unsaved_files.data(), unsaved_files.size(), clang_defaultCodeCompleteOptions());
     std::set<std::string> matches;
     if (results)
     {

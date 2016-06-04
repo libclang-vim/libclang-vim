@@ -115,6 +115,8 @@ Get the name of the qualified name of the current function at specific location.
 
 Get the list of completion strings at specific location.
 
+Supports unsaved files.
+
 ### `libclang#deduction#comment_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get brief comment for the entity referenced at a specific location.

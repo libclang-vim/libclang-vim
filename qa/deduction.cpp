@@ -11,6 +11,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_current_function_at_ctor_dtor);
     CPPUNIT_TEST(test_current_function_at_incomplete_type);
     CPPUNIT_TEST(test_completion_at);
+    CPPUNIT_TEST(test_unsaved_completion_at);
     CPPUNIT_TEST(test_comment_at);
     CPPUNIT_TEST(test_declaration_at);
     CPPUNIT_TEST(test_unsaved_declaration_at);
@@ -25,6 +26,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     void test_current_function_at_ctor_dtor();
     void test_current_function_at_incomplete_type();
     void test_completion_at();
+    void test_unsaved_completion_at();
     void test_comment_at();
     void test_declaration_at();
     void test_unsaved_declaration_at();
@@ -109,6 +111,18 @@ void deduction_test::test_completion_at()
 
     std::string expected("['C', 'bar', 'foo', 'operator=', '~C']");
     std::string actual(vim_clang_get_completion_at("qa/data/completion.cpp:-std=c++1y:25:7"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_unsaved_completion_at()
+{
+    auto vim_clang_get_completion_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_completion_at"));
+    assert(vim_clang_get_completion_at);
+
+    std::string expected("['C', 'bar', 'foo', 'operator=', '~C']");
+    chdir("qa/data/unsaved");
+    std::string actual(vim_clang_get_completion_at("completion.cpp#completion-unsaved.cpp:-std=c++1y:25:7"));
+    chdir("../../..");
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

@@ -127,9 +127,10 @@ function! ClangInspectCompletion(findstart, base)
 
     let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
 
-    let file_name = ClangTempFile()
-    let l:matches = libclang#deduction#completion_at(file_name, line('.'), col('.'), compiler_args.commands)
-    call delete(file_name)
+    let l:temp_file = ClangTempFile()
+    let l:file_name = expand('%:p') . '#' . l:temp_file
+    let l:matches = libclang#deduction#completion_at(l:file_name, line('.'), col('.'), compiler_args.commands)
+    call delete(l:temp_file)
 
     " Filter out matches that do not match the prefix we got.
     let l:ret = l:matches
