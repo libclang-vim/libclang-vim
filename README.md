@@ -121,6 +121,8 @@ Supports unsaved files.
 
 Get brief comment for the entity referenced at a specific location.
 
+Supports unsaved files.
+
 ### `libclang#deduction#declaration_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get location (file name, line, col) of the declaration referenced at a specific
