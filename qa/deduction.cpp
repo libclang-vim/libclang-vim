@@ -10,6 +10,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(test_current_function_at);
     CPPUNIT_TEST(test_current_function_at_ctor_dtor);
     CPPUNIT_TEST(test_current_function_at_incomplete_type);
+    CPPUNIT_TEST(test_unsaved_current_function_at);
     CPPUNIT_TEST(test_completion_at);
     CPPUNIT_TEST(test_unsaved_completion_at);
     CPPUNIT_TEST(test_comment_at);
@@ -26,6 +27,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture
     void test_current_function_at();
     void test_current_function_at_ctor_dtor();
     void test_current_function_at_incomplete_type();
+    void test_unsaved_current_function_at();
     void test_completion_at();
     void test_unsaved_completion_at();
     void test_comment_at();
@@ -79,6 +81,18 @@ void deduction_test::test_current_function_at()
 
     std::string expected("{'name':'ns::C::foo'}");
     std::string actual(vim_clang_get_current_function_at("qa/data/current-function.cpp:-std=c++1y:13:1"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_unsaved_current_function_at()
+{
+    auto vim_clang_get_current_function_at = reinterpret_cast<char const* (*)(char const*)>(dlsym(m_handle, "vim_clang_get_current_function_at"));
+    assert(vim_clang_get_current_function_at);
+
+    std::string expected("{'name':'ns::C::foo'}");
+    chdir("qa/data/unsaved");
+    std::string actual(vim_clang_get_current_function_at("current-function.cpp#../current-function.cpp:-std=c++1y:13:1"));
+    chdir("../../..");
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

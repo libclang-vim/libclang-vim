@@ -28,11 +28,12 @@ endfunction
 
 " Example for libclang#deduction#current_function_at().
 function! ClangInspectFunction()
-    let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
-    let file_name = ClangTempFile()
-    let info = libclang#deduction#current_function_at(file_name, line('.'), col('.'), compiler_args.commands)
-    call delete(file_name)
-    echo info.name
+    let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let l:temp_file = ClangTempFile()
+    let l:file_name = expand('%:p') . '#' . l:temp_file
+    let l:info = libclang#deduction#current_function_at(l:file_name, line('.'), col('.'), l:compiler_args.commands)
+    call delete(l:temp_file)
+    echo l:info.name
 endfunction
 
 " Example for libclang#deduction#comment_at().

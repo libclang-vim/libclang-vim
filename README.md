@@ -111,6 +111,8 @@ Get type at specific location with auto-deduction described above.
 
 Get the name of the qualified name of the current function at specific location.
 
+Supports unsaved files.
+
 ### `libclang#deduction#completion_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get the list of completion strings at specific location.
