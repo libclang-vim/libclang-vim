@@ -12,7 +12,11 @@ lib_objects = lib/libclang-vim/clang_vim.o lib/libclang-vim/deduction.o lib/libc
 lib/libclang-vim.so: $(lib_objects)
 	$(LINK.cpp) $^ $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $@
 
-qa_objects = qa/test.o qa/deduction.o
+qa_objects = \
+	qa/deduction.o \
+	qa/test.o \
+	qa/tokenizer.o \
+
 qa/test: $(qa_objects)
 	$(LINK.cpp) $^ $(CPPUNIT_LIBS) -ldl -o $@
 

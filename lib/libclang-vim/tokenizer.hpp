@@ -13,17 +13,15 @@ namespace libclang_vim {
 
 class tokenizer {
 private:
-    cxtranslation_unit_ptr translation_unit;
     std::string file_name;
 
 public:
     tokenizer(std::string file_name)
-        : translation_unit(nullptr)
-        , file_name(std::move(file_name))
+        : file_name(std::move(file_name))
     {}
 
 private:
-    CXSourceRange get_range_whole_file() const
+    CXSourceRange get_range_whole_file(const cxtranslation_unit_ptr& translation_unit) const
     {
         size_t const file_size = get_file_size(file_name.c_str());
         CXFile const file = clang_getFile(translation_unit, file_name.c_str());
@@ -54,7 +52,7 @@ private:
         }
     }
 
-    inline std::string make_vimson_from_tokens(std::vector<CXToken> tokens) const
+    inline std::string make_vimson_from_tokens(const cxtranslation_unit_ptr& translation_unit, std::vector<CXToken> tokens) const
     {
         return "[" + std::accumulate(std::begin(tokens), std::end(tokens), std::string{}, [&](std::string const& acc, CXToken const& token){
             auto const kind = clang_getTokenKind(token);
@@ -82,11 +80,11 @@ public:
     {
         cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-        translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, nullptr, 0, CXTranslationUnit_Incomplete);
+        cxtranslation_unit_ptr translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, nullptr, 0, CXTranslationUnit_Incomplete);
         if (!translation_unit)
             return "{}";
 
-        auto file_range = get_range_whole_file();
+        auto file_range = get_range_whole_file(translation_unit);
         if (clang_Range_isNull(file_range))
             return "{}";
 
@@ -95,7 +93,7 @@ public:
         clang_tokenize(translation_unit, file_range, &tokens_, &num_tokens);
         std::vector<CXToken> tokens(tokens_, tokens_ + num_tokens);
 
-        auto result = make_vimson_from_tokens(tokens);
+        auto result = make_vimson_from_tokens(translation_unit, tokens);
 
         clang_disposeTokens(translation_unit, tokens_, num_tokens);
 
