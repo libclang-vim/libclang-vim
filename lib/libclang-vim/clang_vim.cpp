@@ -40,9 +40,8 @@ char const* vim_clang_version()
 char const* vim_clang_tokens(char const* arguments)
 {
     auto const parsed = libclang_vim::parse_default_args(arguments);
-    auto const args_ptrs = libclang_vim::get_args_ptrs(parsed.args);
-    libclang_vim::tokenizer tokenizer{parsed.file};
-    static auto const vimson = tokenizer.tokenize_as_vimson(args_ptrs.data(), args_ptrs.size());
+    libclang_vim::tokenizer tokenizer{};
+    static auto const vimson = tokenizer.tokenize_as_vimson(parsed);
     return vimson.c_str();
 }
 

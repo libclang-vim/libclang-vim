@@ -1,14 +1,9 @@
 #include "tokenizer.hpp"
 
-libclang_vim::tokenizer::tokenizer(std::string file_name)
-    : file_name(std::move(file_name))
+CXSourceRange libclang_vim::tokenizer::get_range_whole_file(const location_tuple& tuple, const libclang_vim::cxtranslation_unit_ptr& translation_unit) const
 {
-}
-
-CXSourceRange libclang_vim::tokenizer::get_range_whole_file(const libclang_vim::cxtranslation_unit_ptr& translation_unit) const
-{
-    size_t const file_size = get_file_size(file_name.c_str());
-    CXFile const file = clang_getFile(translation_unit, file_name.c_str());
+    size_t const file_size = tuple.unsaved_file.empty() ? get_file_size(tuple.file.c_str()) : tuple.unsaved_file.size();
+    CXFile const file = clang_getFile(translation_unit, tuple.file.c_str());
 
     auto const file_begin = clang_getLocationForOffset(translation_unit, file, 0);
     auto const file_end = clang_getLocationForOffset(translation_unit, file, file_size);
@@ -62,15 +57,18 @@ std::string libclang_vim::tokenizer::make_vimson_from_tokens(const libclang_vim:
     }) + "]";
 }
 
-std::string libclang_vim::tokenizer::tokenize_as_vimson(char const* const* args, size_t const argc)
+std::string libclang_vim::tokenizer::tokenize_as_vimson(const location_tuple& tuple)
 {
     cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
 
-    cxtranslation_unit_ptr translation_unit = clang_parseTranslationUnit(index, file_name.c_str(), args, argc, nullptr, 0, CXTranslationUnit_Incomplete);
+    std::vector<const char*> args_ptrs = get_args_ptrs(tuple.args);
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(tuple);
+    unsigned options = CXTranslationUnit_Incomplete;
+    cxtranslation_unit_ptr translation_unit = clang_parseTranslationUnit(index, tuple.file.c_str(), args_ptrs.data(), args_ptrs.size(), unsaved_files.data(), unsaved_files.size(), options);
     if (!translation_unit)
         return "{}";
 
-    auto file_range = get_range_whole_file(translation_unit);
+    auto file_range = get_range_whole_file(tuple, translation_unit);
     if (clang_Range_isNull(file_range))
         return "{}";
 

@@ -13,15 +13,12 @@ namespace libclang_vim
 
 class tokenizer
 {
-    std::string file_name;
-
-    CXSourceRange get_range_whole_file(const cxtranslation_unit_ptr& translation_unit) const;
+    CXSourceRange get_range_whole_file(const location_tuple& tuple, const cxtranslation_unit_ptr& translation_unit) const;
     const char* get_kind_spelling(const CXTokenKind kind) const;
     std::string make_vimson_from_tokens(const cxtranslation_unit_ptr& translation_unit, std::vector<CXToken> tokens) const;
 
 public:
-    tokenizer(std::string file_name);
-    std::string tokenize_as_vimson(char const* const* args, size_t const argc);
+    std::string tokenize_as_vimson(const location_tuple& tuple);
 };
 
 } // namespace libclang_vim

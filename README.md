@@ -40,6 +40,8 @@ Get version of libclang as a string.
 
 Get tokens in `{filename}`.  It includes all tokens in included header files.
 
+Supports unsaved files.
+
 ### `libclang#AST#{extent}#{kind of node}({filename} [, {compiler args}])`
 
 Get information of a specific kind of node in AST as a dictionary.
