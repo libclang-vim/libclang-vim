@@ -14,8 +14,7 @@ namespace libclang_vim {
 
 namespace detail {
 
-    template<class Predicate>
-    CXCursor search_AST_upward(CXCursor cursor, Predicate const& predicate)
+    CXCursor search_AST_upward(CXCursor cursor, const std::function<unsigned(CXCursor)>& predicate)
     {
         while (!clang_isInvalid(clang_getCursorKind(cursor))) {
             if (predicate(cursor)){
@@ -28,9 +27,7 @@ namespace detail {
 
 } // namespace detail
 
-template<class Predicate>
-char const* get_extent(const location_tuple& location_info,
-        Predicate const& predicate)
+char const* get_extent(const location_tuple& location_info, const std::function<unsigned(CXCursor)>& predicate)
 {
     return at_specific_location(
                 location_info,
@@ -44,8 +41,7 @@ char const* get_extent(const location_tuple& location_info,
                 });
 };
 
-template<class JumpFunc>
-const char* get_related_node_of(const location_tuple& location_info, JumpFunc const& predicate)
+const char* get_related_node_of(const location_tuple& location_info, const std::function<CXCursor(CXCursor)>& predicate)
 {
     return at_specific_location(
                 location_info,
@@ -59,8 +55,7 @@ const char* get_related_node_of(const location_tuple& location_info, JumpFunc co
                 });
 }
 
-template<class JumpFunc>
-const char* get_type_related_to(const location_tuple& location_info, JumpFunc const& predicate)
+const char* get_type_related_to(const location_tuple& location_info, const std::function<CXType(CXType)>& predicate)
 {
     return at_specific_location(
             location_info,
