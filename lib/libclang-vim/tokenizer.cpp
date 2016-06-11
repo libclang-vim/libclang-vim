@@ -3,7 +3,7 @@
 CXSourceRange libclang_vim::tokenizer::get_range_whole_file(const location_tuple& tuple, const libclang_vim::cxtranslation_unit_ptr& translation_unit) const
 {
     size_t const file_size = tuple.unsaved_file.empty() ? get_file_size(tuple.file.c_str()) : tuple.unsaved_file.size();
-    CXFile const file = clang_getFile(translation_unit, tuple.file.c_str());
+    CXFile file = clang_getFile(translation_unit, tuple.file.c_str());
 
     auto const file_begin = clang_getLocationForOffset(translation_unit, file, 0);
     auto const file_end = clang_getLocationForOffset(translation_unit, file, file_size);

@@ -332,7 +332,7 @@ const char* libclang_vim::get_current_function_at(const location_tuple& location
     if (!translation_unit)
         return "{}";
 
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    CXFile file = clang_getFile(translation_unit, file_name.c_str());
     unsigned line = location_info.line;
     unsigned column = location_info.col;
 
@@ -408,7 +408,7 @@ const char* libclang_vim::get_comment_at(const location_tuple& location_info)
     if (!translation_unit)
         return "{}";
 
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    CXFile file = clang_getFile(translation_unit, file_name.c_str());
     int line = location_info.line;
     int column = location_info.col;
     CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
@@ -453,7 +453,7 @@ const char* libclang_vim::get_deduced_declaration_at(const location_tuple& locat
     if (!translation_unit)
         return "{}";
 
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    CXFile file = clang_getFile(translation_unit, file_name.c_str());
     int line = location_info.line;
     int column = location_info.col;
     CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);
@@ -504,7 +504,7 @@ const char* libclang_vim::get_include_at(const location_tuple& location_info)
     if (!translation_unit)
         return "{}";
 
-    const CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    CXFile file = clang_getFile(translation_unit, file_name.c_str());
     int line = location_info.line;
     int column = location_info.col;
     CXSourceLocation source_location = clang_getLocation(translation_unit, file, line, column);

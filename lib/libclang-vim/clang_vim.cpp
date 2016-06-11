@@ -420,7 +420,7 @@ char const* vim_clang_get_location_information(char const* location_string)
     if (!translation_unit)
         return "{}";
 
-    CXFile const file = clang_getFile(translation_unit, file_name);
+    CXFile file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
     static std::string result;
@@ -441,7 +441,7 @@ char const* vim_clang_get_extent_of_node_at_specific_location(char const* locati
     if (!translation_unit)
         return "{}";
 
-    CXFile const file = clang_getFile(translation_unit, file_name);
+    CXFile file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
     static std::string result;

@@ -14,7 +14,7 @@ namespace libclang_vim {
 
 namespace detail {
 
-    CXCursor search_AST_upward(CXCursor cursor, const std::function<unsigned(CXCursor)>& predicate)
+    inline CXCursor search_AST_upward(CXCursor cursor, const std::function<unsigned(CXCursor)>& predicate)
     {
         while (!clang_isInvalid(clang_getCursorKind(cursor))) {
             if (predicate(cursor)){
@@ -27,7 +27,7 @@ namespace detail {
 
 } // namespace detail
 
-char const* get_extent(const location_tuple& location_info, const std::function<unsigned(CXCursor)>& predicate)
+inline char const* get_extent(const location_tuple& location_info, const std::function<unsigned(CXCursor)>& predicate)
 {
     return at_specific_location(
                 location_info,
@@ -41,7 +41,7 @@ char const* get_extent(const location_tuple& location_info, const std::function<
                 });
 };
 
-const char* get_related_node_of(const location_tuple& location_info, const std::function<CXCursor(CXCursor)>& predicate)
+inline const char* get_related_node_of(const location_tuple& location_info, const std::function<CXCursor(CXCursor)>& predicate)
 {
     return at_specific_location(
                 location_info,
@@ -55,7 +55,7 @@ const char* get_related_node_of(const location_tuple& location_info, const std::
                 });
 }
 
-const char* get_type_related_to(const location_tuple& location_info, const std::function<CXType(CXType)>& predicate)
+inline const char* get_type_related_to(const location_tuple& location_info, const std::function<CXType(CXType)>& predicate)
 {
     return at_specific_location(
             location_info,
@@ -81,7 +81,7 @@ inline const char* get_all_extents(const location_tuple& location_info)
     if (!translation_unit)
         return "[]";
 
-    CXFile const file = clang_getFile(translation_unit, file_name);
+    CXFile file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_info.line, location_info.col);
     CXCursor cursor = clang_getCursor(translation_unit, location);
     vimson += "{" + stringize_extent(cursor) + "},";

@@ -289,7 +289,7 @@ const char* libclang_vim::at_specific_location(const location_tuple& location_tu
     if (!translation_unit)
         return "{}";
 
-    CXFile const file = clang_getFile(translation_unit, file_name);
+    CXFile file = clang_getFile(translation_unit, file_name);
     auto const location = clang_getLocation(translation_unit, file, location_tuple.line, location_tuple.col);
     CXCursor const cursor = clang_getCursor(translation_unit, location);
 
