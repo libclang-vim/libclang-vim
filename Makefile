@@ -12,6 +12,7 @@ lib_objects = \
 	lib/libclang-vim/clang_vim.o \
 	lib/libclang-vim/deduction.o \
 	lib/libclang-vim/helpers.o \
+	lib/libclang-vim/location.o \
 	lib/libclang-vim/tokenizer.o \
 
 lib/libclang-vim.so: $(lib_objects)
