@@ -20,6 +20,7 @@ lib/libclang-vim.so: $(lib_objects)
 
 qa_objects = \
 	qa/deduction.o \
+	qa/location.o \
 	qa/test.o \
 	qa/tokenizer.o \
 
