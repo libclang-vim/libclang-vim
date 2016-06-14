@@ -80,7 +80,9 @@ const char* libclang_vim::get_all_extents(const libclang_vim::location_tuple& lo
 
     cxindex_ptr index = clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/0);
     auto const args_ptrs = get_args_ptrs(location_info.args);
-    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), nullptr, 0, CXTranslationUnit_Incomplete));
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(location_info);
+    unsigned options = CXTranslationUnit_Incomplete;
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(index, file_name, args_ptrs.data(), args_ptrs.size(), unsaved_files.data(), unsaved_files.size(), options));
     if (!translation_unit)
         return "[]";
 
