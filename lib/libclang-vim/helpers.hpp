@@ -1,5 +1,5 @@
 #if !defined LIBCLANG_VIM_HELPERS_HPP_INCLUDED
-#define      LIBCLANG_VIM_HELPERS_HPP_INCLUDED
+#define LIBCLANG_VIM_HELPERS_HPP_INCLUDED
 
 #include <cstring>
 #include <cstddef>
@@ -23,11 +23,10 @@ size_t get_file_size(const char* filename);
 bool is_null_location(const CXSourceLocation& location);
 
 /// Class to avoid the need to call clang_disposeIndex() manually.
-class cxindex_ptr
-{
+class cxindex_ptr {
     CXIndex _index;
 
-public:
+  public:
     cxindex_ptr(CXIndex index);
 
     operator const CXIndex&() const;
@@ -38,11 +37,10 @@ public:
 };
 
 /// Class to avoid the need to call clang_disposeTranslationUnit() manually.
-class cxtranslation_unit_ptr
-{
+class cxtranslation_unit_ptr {
     CXTranslationUnit _unit;
 
-public:
+  public:
     cxtranslation_unit_ptr(CXTranslationUnit unit);
 
     operator const CXTranslationUnit&() const;
@@ -53,11 +51,10 @@ public:
 };
 
 /// Class to avoid the need to call clang_disposeString() manually.
-class cxstring_ptr
-{
+class cxstring_ptr {
     CXString _string;
 
-public:
+  public:
     cxstring_ptr(CXString string);
 
     operator const CXString&() const;
@@ -86,9 +83,8 @@ bool is_parameter(const CXCursor& cursor);
 using args_type = std::vector<std::string>;
 
 /// Stores compiler arguments with location.
-class location_tuple
-{
-public:
+class location_tuple {
+  public:
     std::string file;
     /// Contents of the unsaved buffer of file.
     std::vector<char> unsaved_file;
@@ -103,7 +99,8 @@ public:
 location_tuple parse_default_args(const std::string& args_string);
 
 /// Creates a CXUnsavedFile array, suitable for clang_parseTranslationUnit().
-std::vector<CXUnsavedFile> create_unsaved_files(const location_tuple& location_info);
+std::vector<CXUnsavedFile>
+create_unsaved_files(const location_tuple& location_info);
 
 /// Set info.unsaved_file if info.file is in "real filename#temp file" syntax.
 void extract_unsaved_file(libclang_vim::location_tuple& info);
@@ -113,12 +110,15 @@ location_tuple parse_args_with_location(const std::string& args_string);
 
 std::vector<const char*> get_args_ptrs(const args_type& args);
 
-const char* at_specific_location(const location_tuple& location_tuple, const std::function<std::string(CXCursor const&)>& predicate);
+const char* at_specific_location(
+    const location_tuple& location_tuple,
+    const std::function<std::string(CXCursor const&)>& predicate);
 
-CXCursor search_kind(const CXCursor& cursor, const std::function<bool(const CXCursorKind&)>& predicate);
+CXCursor search_kind(const CXCursor& cursor,
+                     const std::function<bool(const CXCursorKind&)>& predicate);
 
 } // namespace libclang_vim
 
-#endif    // LIBCLANG_VIM_HELPERS_HPP_INCLUDED
+#endif // LIBCLANG_VIM_HELPERS_HPP_INCLUDED
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

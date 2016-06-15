@@ -1,5 +1,5 @@
 #if !defined LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
-#define      LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
+#define LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
 
 #include <cctype>
 #include <string>
@@ -8,8 +8,7 @@
 
 #include "stringizers.hpp"
 
-namespace libclang_vim
-{
+namespace libclang_vim {
 
 const char* deduce_var_decl_type(const location_tuple& location_info);
 
@@ -43,6 +42,6 @@ const char* get_diagnostics(const location_tuple& location_info);
 
 } // namespace libclang_vim
 
-#endif    // LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
+#endif // LIBCLANG_VIM_DEDUCTION_HPP_INCLUDED
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

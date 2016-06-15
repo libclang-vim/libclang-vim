@@ -6,8 +6,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/CompilerOutputter.h>
 
-int main()
-{
+int main() {
     CPPUNIT_NS::TestResult controller;
     CPPUNIT_NS::TestResultCollector result;
     controller.addListener(&result);
