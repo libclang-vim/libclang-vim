@@ -1,18 +1,13 @@
-namespace ns
-{
+namespace ns {
 
-class C
-{
-public:
+class C {
+  public:
     void foo(const char*);
     void foo(int);
 };
-
-
 }
 
-int main()
-{
+int main() {
     ns::C c;
     c.foo("foo");
     c.foo(1);

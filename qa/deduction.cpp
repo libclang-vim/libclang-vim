@@ -75,7 +75,7 @@ void deduction_test::test_current_function_at() {
 
     std::string expected("{'name':'ns::C::foo'}");
     std::string actual(vim_clang_get_current_function_at(
-        "qa/data/current-function.cpp:-std=c++1y:13:1"));
+        "qa/data/current-function.cpp:-std=c++1y:10:1"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -88,7 +88,7 @@ void deduction_test::test_unsaved_current_function_at() {
     std::string expected("{'name':'ns::C::foo'}");
     chdir("qa/data/unsaved");
     std::string actual(vim_clang_get_current_function_at(
-        "current-function.cpp#../current-function.cpp:-std=c++1y:13:1"));
+        "current-function.cpp#../current-function.cpp:-std=c++1y:10:1"));
     chdir("../../..");
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
@@ -101,12 +101,12 @@ void deduction_test::test_current_function_at_ctor_dtor() {
 
     std::string expected("{'name':'D::D'}");
     std::string actual(vim_clang_get_current_function_at(
-        "qa/data/current-function.cpp:-std=c++1y:26:1"));
+        "qa/data/current-function.cpp:-std=c++1y:20:9"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 
     expected = ("{'name':'D::~D'}");
     actual = vim_clang_get_current_function_at(
-        "qa/data/current-function.cpp:-std=c++1y:31:1");
+        "qa/data/current-function.cpp:-std=c++1y:22:11");
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -118,7 +118,7 @@ void deduction_test::test_current_function_at_incomplete_type() {
 
     std::string expected("{'name':'func'}");
     std::string actual(vim_clang_get_current_function_at(
-        "qa/data/current-function.cpp:-std=c++1y:38:7"));
+        "qa/data/current-function.cpp:-std=c++1y:26:24"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -130,7 +130,7 @@ void deduction_test::test_completion_at() {
 
     std::string expected("['C', 'bar', 'foo', 'operator=', '~C']");
     std::string actual(
-        vim_clang_get_completion_at("qa/data/completion.cpp:-std=c++1y:25:7"));
+        vim_clang_get_completion_at("qa/data/completion.cpp:-std=c++1y:16:7"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -143,7 +143,7 @@ void deduction_test::test_unsaved_completion_at() {
     std::string expected("['C', 'bar', 'foo', 'operator=', '~C']");
     chdir("qa/data/unsaved");
     std::string actual(vim_clang_get_completion_at(
-        "completion.cpp#completion-unsaved.cpp:-std=c++1y:25:7"));
+        "completion.cpp#completion-unsaved.cpp:-std=c++1y:16:7"));
     chdir("../../..");
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
@@ -156,7 +156,7 @@ void deduction_test::test_comment_at() {
 
     std::string expected("{'brief':'This is foo.'}");
     std::string actual(vim_clang_get_completion_at(
-        "qa/data/current-function.cpp:-std=c++1y:54:8"));
+        "qa/data/current-function.cpp:-std=c++1y:37:8"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -169,7 +169,7 @@ void deduction_test::test_unsaved_comment_at() {
     std::string expected("{'brief':'This is foo.'}");
     chdir("qa/data/unsaved");
     std::string actual(vim_clang_get_comment_at(
-        "current-function.cpp#../current-function.cpp:-std=c++1y:54:8"));
+        "current-function.cpp#../current-function.cpp:-std=c++1y:37:8"));
     chdir("../../..");
     // This was "{}", unsaved file support was missing.
     CPPUNIT_ASSERT_EQUAL(expected, actual);
@@ -182,9 +182,9 @@ void deduction_test::test_declaration_at() {
     assert(vim_clang_get_deduced_declaration_at);
 
     std::string expected(
-        "{'file':'qa/data/declaration.cpp','line':'7','col':'10',}");
+        "{'file':'qa/data/declaration.cpp','line':'3','col':'7',}");
     std::string actual(vim_clang_get_deduced_declaration_at(
-        "qa/data/declaration.cpp:-std=c++1y:17:8"));
+        "qa/data/declaration.cpp:-std=c++1y:3:15"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
@@ -197,7 +197,7 @@ void deduction_test::test_unsaved_declaration_at() {
     std::string expected("{'file':'./declaration.hpp','line':'1','col':'5',}");
     chdir("qa/data/unsaved");
     std::string actual(vim_clang_get_deduced_declaration_at(
-        "declaration.cpp#declaration-unsaved.cpp:-std=c++1y:5:4"));
+        "declaration.cpp#declaration-unsaved.cpp:-std=c++1y:3:15"));
     chdir("../../..");
     // This was "{}", relative include broke without unsaved file support.
     CPPUNIT_ASSERT_EQUAL(expected, actual);
@@ -252,7 +252,7 @@ void deduction_test::test_diagnostics() {
     assert(vim_clang_get_diagnostics);
 
     std::string expected("[{'severity': 'warning', "
-                         "'line':3,'column':9,'offset':21,'file':'qa/data/"
+                         "'line':1,'column':18,'offset':17,'file':'qa/data/"
                          "diagnostics.cpp',}, ]");
     std::string actual(
         vim_clang_get_diagnostics("qa/data/diagnostics.cpp:-Wunused-variable"));
@@ -266,7 +266,7 @@ void deduction_test::test_unsaved_diagnostics() {
     assert(vim_clang_get_diagnostics);
 
     std::string expected("[{'severity': 'warning', "
-                         "'line':3,'column':9,'offset':21,'file':'diagnostics."
+                         "'line':1,'column':18,'offset':17,'file':'diagnostics."
                          "cpp',}, ]");
     chdir("qa/data/unsaved");
     std::string actual(vim_clang_get_diagnostics(

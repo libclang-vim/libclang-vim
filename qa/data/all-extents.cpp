@@ -1,5 +1,4 @@
-void func()
-{
+void func() {
     int x;
     int y;
 }

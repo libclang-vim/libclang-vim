@@ -1,55 +1,38 @@
 #include <iostream>
 
-namespace ns
-{
+namespace ns {
 
-class C
-{
+class C {
     int foo(int x);
 };
 
-int C::foo(int x)
-{
-    int y = 0; return y;
+int C::foo(int x) {
+    int y = 0;
+    return y;
+}
 }
 
-}
-
-class D
-{
+class D {
     D();
     ~D();
 };
 
-D::D()
-{
-    int x;
-}
+D::D() { int x; }
 
-D::~D()
-{
-    int x;
-}
+D::~D() { int x; }
 
 class Buffer;
 
-static void func()
-{
-    Buffer* buf;
-}
+static void func() { Buffer* buf; }
 
-struct E
-{
+struct E {
     /// This is foo.
     void foo();
 };
 
-void E::foo()
-{
-}
+void E::foo() {}
 
-static void func2()
-{
+static void func2() {
     E e;
     e.foo();
 }

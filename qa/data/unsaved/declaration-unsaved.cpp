@@ -1,6 +1,3 @@
 #include "declaration.hpp"
 
-void bar()
-{
-	foo();
-}
+void bar() { foo(); }

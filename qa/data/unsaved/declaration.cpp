@@ -1,5 +1,3 @@
 #include "declaration.hpp"
 
-void bar()
-{
-}
+void bar() {}
