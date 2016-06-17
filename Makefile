@@ -6,7 +6,7 @@ LDFLAGS+=-rpath $(LLVM_LIBDIR)
 DEPDIR := .d
 COMPILE.cc = $(CXX) $(CXXFLAGS) -c
 
-all: lib/libclang-vim.so qa/test qa/tool
+all: lib/libclang-vim.so qa/test qa/tool git-hooks
 
 lib_objects = \
 	lib/libclang-vim/clang_vim.o \
@@ -63,3 +63,13 @@ tags:
 
 clang-tidy:
 	clang-tidy -header-filter=.* $(SRCS)
+
+# Auto-enable git hooks.
+ifneq ($(wildcard .git/hooks/*),)
+git-hooks: .git/hooks/pre-commit
+
+.git/hooks/pre-commit: git/hooks/pre-commit
+	cd .git/hooks && ln -s ../../git/hooks/pre-commit
+else
+git-hooks:
+endif
