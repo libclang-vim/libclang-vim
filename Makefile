@@ -64,6 +64,9 @@ tags:
 clang-tidy:
 	clang-tidy -header-filter=.* $(SRCS)
 
+clang-format:
+	clang-format -i $(shell git ls-files|egrep '(hpp|cpp)$$')
+
 # Auto-enable git hooks.
 ifneq ($(wildcard .git/hooks/*),)
 git-hooks: .git/hooks/pre-commit

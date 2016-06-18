@@ -21,10 +21,13 @@ namespace detail {
 
 enum { result = 0, visit_policy, predicate };
 
-template <class CallbackData>
+typedef std::tuple<std::string&, extraction_policy const,
+                   const std::function<bool(const CXCursor&)>&>
+    callback_data_type;
+
 CXChildVisitResult AST_extracter(CXCursor cursor, CXCursor parent,
                                  CXClientData data) {
-    auto& callback_data = *reinterpret_cast<CallbackData*>(data);
+    auto& callback_data = *reinterpret_cast<callback_data_type*>(data);
     auto& vimson = std::get<result>(callback_data);
     auto& policy = std::get<visit_policy>(callback_data);
 
@@ -48,7 +51,7 @@ CXChildVisitResult AST_extracter(CXCursor cursor, CXCursor parent,
     }
 
     // visit children recursively
-    clang_visitChildren(cursor, AST_extracter<CallbackData>, data);
+    clang_visitChildren(cursor, AST_extracter, data);
 
     if (is_target_node) {
         vimson += "]},";
@@ -59,18 +62,16 @@ CXChildVisitResult AST_extracter(CXCursor cursor, CXCursor parent,
 
 } // namespace detail
 
-template <class Predicate>
-auto extract_AST_nodes(char const* arguments, extraction_policy const policy,
-                       Predicate const& predicate) -> char const * {
+const char*
+extract_AST_nodes(char const* arguments, extraction_policy const policy,
+                  const std::function<bool(const CXCursor&)>& predicate) {
     static std::string vimson;
     vimson = "";
 
     auto const parsed = parse_default_args(arguments);
     auto const args_ptrs = get_args_ptrs(parsed.args);
 
-    typedef std::tuple<std::string&, extraction_policy const, Predicate const&>
-        callback_data_type;
-    callback_data_type callback_data{vimson, policy, predicate};
+    detail::callback_data_type callback_data{vimson, policy, predicate};
 
     cxindex_ptr index =
         clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/ 0);
@@ -81,8 +82,7 @@ auto extract_AST_nodes(char const* arguments, extraction_policy const policy,
         return "{}";
 
     CXCursor cursor = clang_getTranslationUnitCursor(translation_unit);
-    clang_visitChildren(cursor, detail::AST_extracter<callback_data_type>,
-                        &callback_data);
+    clang_visitChildren(cursor, detail::AST_extracter, &callback_data);
 
     vimson = "{'root':[" + vimson + "]}";
 
