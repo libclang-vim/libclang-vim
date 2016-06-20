@@ -6,6 +6,7 @@
 
 class deduction_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(deduction_test);
+    CPPUNIT_TEST(test_get_type_with_deduction_at);
     CPPUNIT_TEST(test_current_function_at);
     CPPUNIT_TEST(test_current_function_at_ctor_dtor);
     CPPUNIT_TEST(test_current_function_at_incomplete_type);
@@ -23,6 +24,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_unsaved_diagnostics);
     CPPUNIT_TEST_SUITE_END();
 
+    void test_get_type_with_deduction_at();
     void test_current_function_at();
     void test_current_function_at_ctor_dtor();
     void test_current_function_at_incomplete_type();
@@ -65,6 +67,19 @@ void deduction_test::setUp() {
 void deduction_test::tearDown() {
     if (m_handle)
         dlclose(m_handle);
+}
+
+void deduction_test::test_get_type_with_deduction_at() {
+    auto vim_clang_get_type_with_deduction_at =
+        reinterpret_cast<char const* (*)(char const*)>(
+            dlsym(m_handle, "vim_clang_get_type_with_deduction_at"));
+    assert(vim_clang_get_type_with_deduction_at);
+
+    std::string expected_prefix("{'type':'const std::basic_string<char>'");
+    std::string actual(vim_clang_get_type_with_deduction_at(
+        "qa/data/auto.cpp:-std=c++1y:5:19"));
+    CPPUNIT_ASSERT_EQUAL(
+        0, actual.compare(0, expected_prefix.size(), expected_prefix));
 }
 
 void deduction_test::test_current_function_at() {
