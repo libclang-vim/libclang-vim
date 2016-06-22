@@ -30,7 +30,8 @@ In all below usages, `{compiler args}` means arguments passed to a compiler. (e.
 Unsaved file support means `{filename}` can be in the form of `{real
 filename}#{temp filename}`, where the previous is compiler should take the path
 of the first, and the contents of the later file. This can be useful when the
-temp file is a dump of the editor buffer.
+temp file is a dump of the editor buffer, and passing the temp file directly to
+the compiler would not be possible due to relative include paths.
 
 ### `libclang#version()`
 
@@ -108,6 +109,8 @@ This manual detection will be obsolete when `clang_getCanonicalType()` API will 
 ### `libclang#deduction#type_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get type at specific location with auto-deduction described above.
+
+Supports unsaved files.
 
 ### `libclang#deduction#current_function_at({filename}, {line}, {col} [, {compiler args}])`
 

@@ -14,10 +14,11 @@ endfunction
 
 " Example for libclang#deduction#type_at().
 function! ClangInspectType()
-    let compiler_args = libclang#deduction#compile_commands(expand('%:p'))
-    let file_name = ClangTempFile()
-    let type_info = libclang#deduction#type_at(file_name, line('.'), col('.'), compiler_args.commands)
-    call delete(file_name)
+    let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let l:temp_file = ClangTempFile()
+    let l:file_name = expand('%:p') . '#' . l:temp_file
+    let type_info = libclang#deduction#type_at(l:file_name, line('.'), col('.'), l:compiler_args.commands)
+    call delete(l:temp_file)
     if type_info.type ==# type_info.canonical.type
         echo type_info.type
     else
