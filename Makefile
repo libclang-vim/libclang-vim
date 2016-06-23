@@ -9,6 +9,7 @@ COMPILE.cc = $(CXX) $(CXXFLAGS) -c
 all: lib/libclang-vim.so qa/test qa/tool git-hooks
 
 lib_objects = \
+	lib/libclang-vim/AST_extracter.o \
 	lib/libclang-vim/clang_vim.o \
 	lib/libclang-vim/deduction.o \
 	lib/libclang-vim/helpers.o \
