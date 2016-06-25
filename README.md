@@ -57,6 +57,8 @@ If you want to get information about definitions and not to get AST information 
 
 Get the AST node information at specific location.
 
+Supports unsaved files.
+
 ### `libclang#location#extent({filename}, {line}, {col} [, {compiler args}])`
 
 Get the extent of the most inner syntax element at specific location.

@@ -323,9 +323,12 @@ char const* vim_clang_get_location_information(char const* location_string) {
     auto const args_ptrs = libclang_vim::get_args_ptrs(location_info.args);
     libclang_vim::cxindex_ptr index =
         clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/ 0);
+    std::vector<CXUnsavedFile> unsaved_files =
+        create_unsaved_files(location_info);
     libclang_vim::cxtranslation_unit_ptr translation_unit(
         clang_parseTranslationUnit(index, file_name, args_ptrs.data(),
-                                   args_ptrs.size(), nullptr, 0,
+                                   args_ptrs.size(), unsaved_files.data(),
+                                   unsaved_files.size(),
                                    CXTranslationUnit_Incomplete));
     if (!translation_unit)
         return "{}";

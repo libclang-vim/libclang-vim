@@ -9,11 +9,13 @@ class location_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_all_extents);
     CPPUNIT_TEST(test_unsaved_all_extents);
     CPPUNIT_TEST(test_ast_node);
+    CPPUNIT_TEST(test_unsaved_ast_node);
     CPPUNIT_TEST_SUITE_END();
 
     void test_all_extents();
     void test_unsaved_all_extents();
     void test_ast_node();
+    void test_unsaved_ast_node();
 
     void* m_handle;
 
@@ -85,6 +87,21 @@ void location_test::test_ast_node() {
     std::string expected_prefix = "{'spell':'y','type':'int',";
     std::string actual(vim_clang_get_location_information(
         "qa/data/current-function.cpp:std=c++1y:10:9"));
+    CPPUNIT_ASSERT_EQUAL(
+        0, actual.compare(0, expected_prefix.size(), expected_prefix));
+}
+
+void location_test::test_unsaved_ast_node() {
+    auto vim_clang_get_location_information =
+        reinterpret_cast<char const* (*)(char const*)>(
+            dlsym(m_handle, "vim_clang_get_location_information"));
+    assert(vim_clang_get_location_information);
+
+    std::string expected_prefix = "{'spell':'y','type':'int',";
+    chdir("qa/data/unsaved");
+    std::string actual(vim_clang_get_location_information(
+        "current-function.cpp#../current-function.cpp:-std=c++1y:10:9"));
+    chdir("../../..");
     CPPUNIT_ASSERT_EQUAL(
         0, actual.compare(0, expected_prefix.size(), expected_prefix));
 }
