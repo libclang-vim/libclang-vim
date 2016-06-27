@@ -4,9 +4,9 @@ namespace {
 
 enum { result = 0, visit_policy, predicate };
 
-typedef std::tuple<std::string&, libclang_vim::extraction_policy const,
-                   const std::function<bool(const CXCursor&)>&>
-    callback_data_type;
+using callback_data_type =
+    std::tuple<std::string&, libclang_vim::extraction_policy const,
+               const std::function<bool(const CXCursor&)>&>;
 
 CXChildVisitResult AST_extracter(CXCursor cursor, CXCursor parent,
                                  CXClientData data) {

@@ -64,7 +64,7 @@ tags:
 	ctags --c++-kinds=+p --fields=+iaS --extra=+q -R --totals=yes *
 
 clang-tidy:
-	clang-tidy -header-filter=.* $(SRCS)
+	clang-tidy $(SRCS)
 
 clang-format:
 	clang-format -i $(shell git ls-files|egrep '(hpp|cpp)$$')
