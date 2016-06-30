@@ -10,12 +10,14 @@ class location_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_unsaved_all_extents);
     CPPUNIT_TEST(test_ast_node);
     CPPUNIT_TEST(test_unsaved_ast_node);
+    CPPUNIT_TEST(test_extent);
     CPPUNIT_TEST_SUITE_END();
 
     void test_all_extents();
     void test_unsaved_all_extents();
     void test_ast_node();
     void test_unsaved_ast_node();
+    void test_extent();
 
     void* m_handle;
 
@@ -104,6 +106,21 @@ void location_test::test_unsaved_ast_node() {
     chdir("../../..");
     CPPUNIT_ASSERT_EQUAL(
         0, actual.compare(0, expected_prefix.size(), expected_prefix));
+}
+
+void location_test::test_extent() {
+    auto vim_clang_get_extent_of_node_at_specific_location =
+        reinterpret_cast<char const* (*)(char const*)>(dlsym(
+            m_handle, "vim_clang_get_extent_of_node_at_specific_location"));
+    assert(vim_clang_get_extent_of_node_at_specific_location);
+
+    std::string expected = "{'start':{'line':11,'column':5,'offset':110,"
+                           "'file':'qa/data/current-function.cpp',},"
+                           "'end':{'line':11,'column':13,'offset':118,'"
+                           "file':'qa/data/current-function.cpp',}}";
+    std::string actual(vim_clang_get_extent_of_node_at_specific_location(
+        "qa/data/current-function.cpp:-std=c++11:11:7"));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(location_test);
