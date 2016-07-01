@@ -63,6 +63,8 @@ Supports unsaved files.
 
 Get the extent of the most inner syntax element at specific location.
 
+Supports unsaved files.
+
 ### `libclang#location#{syntax element}_extent({filename}, {line}, {col} [, {compiler args}])`
 
 Get the extent of `{syntax element}` at specific location.
