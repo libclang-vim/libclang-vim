@@ -1,3 +1,3 @@
-Checks: 'clang-diagnostic-*,performance-*,unused-*,modernize-*,-modernize-raw-string-literal,misc-*'
+Checks: 'clang-diagnostic-*,performance-*,unused-*,modernize-*,-modernize-raw-string-literal,-modernize-use-using,misc-*'
 WarningsAsErrors: '*'
 

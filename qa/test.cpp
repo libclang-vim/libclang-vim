@@ -14,7 +14,26 @@ int main() {
     controller.addListener(&progress);
 
     CPPUNIT_NS::TestRunner runner;
-    runner.addTest(CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest());
+
+    const char* test_name = getenv("CPPUNIT_TEST_NAME");
+    if (test_name) {
+        // E.g. 'make check CPPUNIT_TEST_NAME="tokenizer_test::test_tokens"',
+        // single test.
+        CppUnit::Test* test_registry =
+            CppUnit::TestFactoryRegistry::getRegistry().makeTest();
+        for (int i = 0; i < test_registry->getChildTestCount(); ++i) {
+            CppUnit::Test* test_suite = test_registry->getChildTestAt(i);
+            for (int j = 0; j < test_suite->getChildTestCount(); ++j) {
+                CppUnit::Test* test_case = test_suite->getChildTestAt(j);
+                if (test_case->getName() == test_name)
+                    runner.addTest(test_case);
+            }
+        }
+    } else
+        // 'make check', all tests.
+        runner.addTest(
+            CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest());
+
     runner.run(controller);
 
     CPPUNIT_NS::CompilerOutputter outputter(&result, std::cerr);
