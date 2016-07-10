@@ -21,6 +21,7 @@ lib/libclang-vim.so: $(lib_objects)
 	$(LINK.cpp) $^ $(LDFLAGS) $(LLVM_LDFLAGS) -lclang -shared -o $@
 
 qa_objects = \
+	qa/ast.o \
 	qa/deduction.o \
 	qa/location.o \
 	qa/test.o \
