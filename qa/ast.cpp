@@ -7,9 +7,11 @@
 class ast_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(ast_test);
     CPPUNIT_TEST(test_extract_declarations_current_file);
+    CPPUNIT_TEST(test_unsaved_extract_declarations_current_file);
     CPPUNIT_TEST_SUITE_END();
 
     void test_extract_declarations_current_file();
+    void test_unsaved_extract_declarations_current_file();
 
     void* m_handle;
 
@@ -46,8 +48,19 @@ void ast_test::test_extract_declarations_current_file() {
     assert(vim_clang_extract_declarations_current_file);
 
     std::string actual(vim_clang_extract_declarations_current_file(
-        "qa/data/declaration.cpp:std=c++1y"));
+        "qa/data/declaration.cpp#:std=c++1y"));
     CPPUNIT_ASSERT(actual != "{}");
+}
+
+void ast_test::test_unsaved_extract_declarations_current_file() {
+    auto vim_clang_extract_declarations_current_file =
+        reinterpret_cast<char const* (*)(char const*)>(
+            dlsym(m_handle, "vim_clang_extract_declarations_current_file"));
+    assert(vim_clang_extract_declarations_current_file);
+
+    std::string actual(vim_clang_extract_declarations_current_file(
+        "qa/data/unsaved/auto.cpp#qa/data/declaration.cpp:std=c++1y"));
+    CPPUNIT_ASSERT(actual != "{'root':[]}");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ast_test);

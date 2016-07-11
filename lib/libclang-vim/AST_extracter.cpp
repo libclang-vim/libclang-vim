@@ -58,9 +58,11 @@ const char* libclang_vim::extract_AST_nodes(
 
     cxindex_ptr index =
         clang_createIndex(/*excludeDeclsFromPCH*/ 1, /*displayDiagnostics*/ 0);
+    std::vector<CXUnsavedFile> unsaved_files = create_unsaved_files(parsed);
     cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(
-        index, parsed.file.c_str(), args_ptrs.data(), args_ptrs.size(), nullptr,
-        0, CXTranslationUnit_Incomplete));
+        index, parsed.file.c_str(), args_ptrs.data(), args_ptrs.size(),
+        unsaved_files.data(), unsaved_files.size(),
+        CXTranslationUnit_Incomplete));
     if (!translation_unit)
         return "{}";
 

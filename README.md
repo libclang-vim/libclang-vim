@@ -27,11 +27,12 @@ You can
 
 In all below usages, `{compiler args}` means arguments passed to a compiler. (e.g. `"-std=c++1y"`)
 
-Unsaved file support means `{filename}` can be in the form of `{real
+Also, in all below usages, `{filename}` can be in the form of `{real
 filename}#{temp filename}`, where the previous is compiler should take the path
-of the first, and the contents of the later file. This can be useful when the
-temp file is a dump of the editor buffer, and passing the temp file directly to
-the compiler would not be possible due to relative include paths.
+of the first, and the contents of the later file (also known as unsaved file
+support). This can be useful when the temp file is a dump of the editor buffer,
+and passing the temp file directly to the compiler would not be possible due to
+relative include paths.
 
 ### `libclang#version()`
 
@@ -40,8 +41,6 @@ Get version of libclang as a string.
 ### `libclang#tokens#all({filename} [, {compiler args}])`
 
 Get tokens in `{filename}`.  It includes all tokens in included header files.
-
-Supports unsaved files.
 
 ### `libclang#AST#{extent}#{kind of node}({filename} [, {compiler args}])`
 
@@ -57,13 +56,9 @@ If you want to get information about definitions and not to get AST information 
 
 Get the AST node information at specific location.
 
-Supports unsaved files.
-
 ### `libclang#location#extent({filename}, {line}, {col} [, {compiler args}])`
 
 Get the extent of the most inner syntax element at specific location.
-
-Supports unsaved files.
 
 ### `libclang#location#{syntax element}_extent({filename}, {line}, {col} [, {compiler args}])`
 
@@ -114,25 +109,17 @@ This manual detection will be obsolete when `clang_getCanonicalType()` API will 
 
 Get type at specific location with auto-deduction described above.
 
-Supports unsaved files.
-
 ### `libclang#deduction#current_function_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get the name of the qualified name of the current function at specific location.
-
-Supports unsaved files.
 
 ### `libclang#deduction#completion_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get the list of completion strings at specific location.
 
-Supports unsaved files.
-
 ### `libclang#deduction#comment_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get brief comment for the entity referenced at a specific location.
-
-Supports unsaved files.
 
 ### `libclang#deduction#declaration_at({filename}, {line}, {col} [, {compiler args}])`
 
@@ -140,19 +127,13 @@ Get location (file name, line, col) of the declaration referenced at a specific
 location. This works not only for member functions, but for other entities like
 local variables as well.
 
-Supports unsaved files.
-
 ### `libclang#deduction#include_at({filename}, {line}, {col} [, {compiler args}])`
 
 Get file name of the include referenced at a specific location.
 
-Supports unsaved files.
-
 ### `libclang#deduction#diagnostics({filename}, [, {compiler args}])`
 
 Get diagnostics (errors, warnings, etc) for a specific file.
-
-Supports unsaved files.
 
 ### `libclang#deduction#compile_commands({filename})`
 
@@ -436,10 +417,6 @@ Include a path to `bits/c++config.h` in `CXXFLAGS`.  Below is an example in Ubun
 ```
 CXXFLAGS=-I/usr/include/i386-linux-gnu/c++/4.8 make
 ```
-
-## TODO
-
-- Support unsaved files everywhere. (git grep clang_parseTranslationUnit.*nullptr)
 
 ## License
 
