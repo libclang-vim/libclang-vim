@@ -324,8 +324,8 @@ libclang_vim::get_current_function_at(const location_tuple& location_info) {
             clang_getLocation(translation_unit, file, line, column);
         cursor = clang_getCursor(translation_unit, location);
         kind = clang_getCursorKind(cursor);
-        if (clang_getCursorKind(clang_getCursorSemanticParent(cursor)) !=
-                CXCursor_InvalidFile ||
+        if (!clang_isInvalid(
+                clang_getCursorKind(clang_getCursorSemanticParent(cursor))) ||
             column <= 1)
             break;
 
@@ -345,7 +345,10 @@ libclang_vim::get_current_function_at(const location_tuple& location_info) {
         std::stack<std::string> stack;
         while (true) {
             cxstring_ptr aString = clang_getCursorSpelling(cursor);
-            stack.push(clang_getCString(aString));
+            if (!strlen(clang_getCString(aString)))
+                stack.push("(anonymous namespace)");
+            else
+                stack.push(clang_getCString(aString));
 
             cursor = clang_getCursorSemanticParent(cursor);
             if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
