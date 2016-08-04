@@ -27,7 +27,7 @@ libclang_vim::args_type parse_compilation_database(const std::string& file) {
 
     if (directory.empty()) {
         // Our default when no JSON was found.
-        ret.push_back("-std=c++1y");
+        ret.emplace_back("-std=c++1y");
 
         return ret;
     }
@@ -48,7 +48,7 @@ libclang_vim::args_type parse_compilation_database(const std::string& file) {
                 libclang_vim::cxstring_ptr arg =
                     clang_CompileCommand_getArg(command, i);
                 if (file != clang_getCString(arg))
-                    ret.push_back(clang_getCString(arg));
+                    ret.emplace_back(clang_getCString(arg));
             }
         }
         clang_CompileCommands_dispose(commands);
