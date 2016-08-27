@@ -6,7 +6,7 @@ std::string libclang_vim::stringize_spell(CXCursor const& cursor) {
 }
 
 std::string libclang_vim::stringize_extra_type_info(CXType const& type) {
-    std::string result = "";
+    std::string result;
 
     if (clang_isConstQualifiedType(type)) {
         result += "'is_const_qualified':1,";
@@ -128,7 +128,7 @@ std::string libclang_vim::stringize_cursor_kind_type(CXCursorKind const& kind) {
 }
 
 std::string libclang_vim::stringize_cursor_extra_info(CXCursor const& cursor) {
-    std::string result = "";
+    std::string result;
 
     if (clang_isCursorDefinition(cursor)) {
         result += "'is_definition':1,";
