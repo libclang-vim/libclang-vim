@@ -37,6 +37,16 @@ function! ClangInspectFunction()
     echo l:info.name
 endfunction
 
+" Example for libclang#deduction#full_name_at().
+function! ClangInspectName()
+    let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))
+    let l:temp_file = ClangTempFile()
+    let l:file_name = expand('%:p') . '#' . l:temp_file
+    let l:info = libclang#deduction#full_name_at(l:file_name, line('.'), col('.'), l:compiler_args.commands)
+    call delete(l:temp_file)
+    echo l:info.name
+endfunction
+
 " Example for libclang#deduction#comment_at().
 function! ClangInspectComment()
     let l:compiler_args = libclang#deduction#compile_commands(expand('%:p'))

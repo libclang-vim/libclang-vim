@@ -371,6 +371,74 @@ libclang_vim::get_current_function_at(const location_tuple& location_info) {
     return vimson.c_str();
 }
 
+const char*
+libclang_vim::get_full_name_at(const location_tuple& location_info) {
+    static std::string vimson;
+
+    // Write the header.
+    std::stringstream ss;
+    ss << "{'name':'";
+
+    // Write the actual name.
+    cxindex_ptr index = clang_createIndex(/*excludeDeclarationsFromPCH=*/1,
+                                          /*displayDiagnostics=*/0);
+
+    std::string file_name = location_info.file;
+    std::vector<const char*> args_ptrs = get_args_ptrs(location_info.args);
+    std::vector<CXUnsavedFile> unsaved_files =
+        create_unsaved_files(location_info);
+    unsigned options = CXTranslationUnit_Incomplete;
+    cxtranslation_unit_ptr translation_unit(clang_parseTranslationUnit(
+        index, file_name.c_str(), args_ptrs.data(), args_ptrs.size(),
+        unsaved_files.data(), unsaved_files.size(), options));
+    if (!translation_unit)
+        return "{}";
+
+    CXFile file = clang_getFile(translation_unit, file_name.c_str());
+    unsigned line = location_info.line;
+    unsigned column = location_info.col;
+
+    CXSourceLocation location =
+        clang_getLocation(translation_unit, file, line, column);
+    CXCursor cursor = clang_getCursor(translation_unit, location);
+    if (clang_Cursor_isNull(cursor) ||
+        clang_isInvalid(clang_getCursorKind(cursor)))
+        return "{}";
+
+    cursor = clang_getCursorReferenced(cursor);
+    if (clang_Cursor_isNull(cursor) ||
+        clang_isInvalid(clang_getCursorKind(cursor)))
+        return "{}";
+
+    CXCursorKind kind = clang_getCursorKind(cursor);
+    if (kind != CXCursor_TranslationUnit) {
+        std::stack<std::string> stack;
+        while (true) {
+            cxstring_ptr spelling = clang_getCursorSpelling(cursor);
+            stack.push(clang_getCString(spelling));
+
+            cursor = clang_getCursorSemanticParent(cursor);
+            if (clang_getCursorKind(cursor) == CXCursor_TranslationUnit)
+                break;
+        }
+
+        bool first = true;
+        while (!stack.empty()) {
+            if (first)
+                first = false;
+            else
+                ss << "::";
+            ss << stack.top();
+            stack.pop();
+        }
+    }
+
+    // Write the footer.
+    ss << "'}";
+    vimson = ss.str();
+    return vimson.c_str();
+}
+
 const char* libclang_vim::get_comment_at(const location_tuple& location_info) {
     static std::string vimson;
 

@@ -19,8 +19,12 @@ const char* deduce_func_or_var_decl(const location_tuple& location_info);
 /// Get type at specific location with auto-deduction described above.
 const char* deduce_type_at(const location_tuple& location_info);
 
-/// Wrapper around clang_getCursorSpelling().
+/// Wrapper around clang_getCursorSpelling() for the current function.
 const char* get_current_function_at(const location_tuple& location_info);
+
+/// Wrapper around clang_getCursorSpelling() for the referenced (member)
+/// function.
+const char* get_full_name_at(const location_tuple& location_info);
 
 /// Wrapper around clang_Cursor_getBriefCommentText().
 const char* get_comment_at(const location_tuple& location_info);

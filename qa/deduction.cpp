@@ -23,6 +23,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST(test_unsaved_include_at);
     CPPUNIT_TEST(test_diagnostics);
     CPPUNIT_TEST(test_unsaved_diagnostics);
+    CPPUNIT_TEST(test_full_name_at);
     CPPUNIT_TEST_SUITE_END();
 
     void test_get_type_with_deduction_at();
@@ -42,6 +43,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture {
     void test_unsaved_include_at();
     void test_diagnostics();
     void test_unsaved_diagnostics();
+    void test_full_name_at();
 
     void* m_handle;
 
@@ -98,6 +100,7 @@ void deduction_test::test_unsaved_get_type_with_deduction_at() {
     CPPUNIT_ASSERT_EQUAL(
         0, actual.compare(0, expected_prefix.size(), expected_prefix));
 }
+
 void deduction_test::test_current_function_at() {
     auto vim_clang_get_current_function_at =
         reinterpret_cast<char const* (*)(char const*)>(
@@ -304,6 +307,18 @@ void deduction_test::test_unsaved_diagnostics() {
         "diagnostics.cpp#diagnostics-unsaved.cpp:-Wunused-variable"));
     chdir("../../..");
     // This was "[]", unsaved file support was missing.
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+void deduction_test::test_full_name_at() {
+    auto vim_clang_get_full_name_at =
+        reinterpret_cast<char const* (*)(char const*)>(
+            dlsym(m_handle, "vim_clang_get_full_name_at"));
+    assert(vim_clang_get_full_name_at);
+
+    std::string expected("{'name':'E::foo'}");
+    std::string actual(vim_clang_get_full_name_at(
+        "qa/data/current-function.cpp:-std=c++1y:37:8"));
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

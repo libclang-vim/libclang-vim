@@ -521,6 +521,14 @@ char const* vim_clang_get_current_function_at(char const* location_string) {
     return ret;
 }
 
+char const* vim_clang_get_full_name_at(char const* location_string) {
+    stderr_guard g;
+
+    const char* ret = libclang_vim::get_full_name_at(
+        libclang_vim::parse_args_with_location(location_string));
+    return ret;
+}
+
 char const* vim_clang_get_completion_at(char const* location_string) {
     stderr_guard g;
 
