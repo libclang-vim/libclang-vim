@@ -169,7 +169,7 @@ std::vector<CXUnsavedFile>
 libclang_vim::create_unsaved_files(const location_tuple& location_info) {
     std::vector<CXUnsavedFile> unsaved_files;
     if (!location_info.unsaved_file.empty()) {
-        CXUnsavedFile unsaved_file;
+        CXUnsavedFile unsaved_file{};
         unsaved_file.Filename = location_info.file.c_str();
         unsaved_file.Contents = location_info.unsaved_file.data();
         unsaved_file.Length = location_info.unsaved_file.size();

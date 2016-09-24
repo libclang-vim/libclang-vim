@@ -132,7 +132,7 @@ CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor) {
             return clang_getCursorType(return_stmt_cursor);
         }
 
-        CXType deduced_type;
+        CXType deduced_type{};
         deduced_type.kind = CXType_Invalid;
         clang_visitChildren(return_stmt_cursor, unexposed_type_deducer,
                             &deduced_type);
@@ -147,7 +147,7 @@ CXType deduce_type_at_cursor(const CXCursor& cursor) {
     auto const type = clang_getCursorType(cursor);
     libclang_vim::cxstring_ptr type_name = clang_getTypeSpelling(type);
     if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
-        CXType deduced_type;
+        CXType deduced_type{};
         deduced_type.kind = CXType_Invalid;
         clang_visitChildren(cursor, unexposed_type_deducer, &deduced_type);
         return deduced_type;
@@ -317,7 +317,7 @@ libclang_vim::get_current_function_at(const location_tuple& location_info) {
     unsigned line = location_info.line;
     unsigned column = location_info.col;
 
-    CXCursor cursor;
+    CXCursor cursor{};
     CXCursorKind kind;
     while (true) {
         CXSourceLocation location =

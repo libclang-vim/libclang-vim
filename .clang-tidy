@@ -1,3 +1,3 @@
-Checks: 'clang-diagnostic-*,performance-*,unused-*,modernize-*,-modernize-raw-string-literal,-modernize-use-using,misc-*,readability-redundant-*'
+Checks: 'clang-diagnostic-*,performance-*,unused-*,modernize-*,-modernize-raw-string-literal,-modernize-use-using,misc-*,readability-redundant-*,cppcoreguidelines-pro-type-member-init'
 WarningsAsErrors: '*'
 
