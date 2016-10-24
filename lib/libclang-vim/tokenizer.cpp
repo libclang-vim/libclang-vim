@@ -1,4 +1,5 @@
 #include "tokenizer.hpp"
+#include <numeric>
 
 CXSourceRange libclang_vim::tokenizer::get_range_whole_file(
     const location_tuple& tuple,
