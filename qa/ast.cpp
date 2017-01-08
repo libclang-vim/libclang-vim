@@ -1,8 +1,8 @@
-#include <iostream>
-#include <dlfcn.h>
-#include <unistd.h>
 #include <cassert>
 #include <cppunit/extensions/HelperMacros.h>
+#include <dlfcn.h>
+#include <iostream>
+#include <unistd.h>
 
 class ast_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(ast_test);
@@ -13,7 +13,7 @@ class ast_test : public CPPUNIT_NS::TestFixture {
     void test_extract_declarations_current_file();
     void test_unsaved_extract_declarations_current_file();
 
-    void* m_handle;
+    void* m_handle = nullptr;
 
   public:
     ast_test();
@@ -24,7 +24,7 @@ class ast_test : public CPPUNIT_NS::TestFixture {
     void tearDown() override;
 };
 
-ast_test::ast_test() : m_handle(nullptr) {}
+ast_test::ast_test() = default;
 
 void ast_test::setUp() {
     m_handle = dlopen("lib/libclang-vim.so", RTLD_NOW);

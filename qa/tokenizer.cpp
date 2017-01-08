@@ -1,8 +1,8 @@
-#include <iostream>
-#include <dlfcn.h>
-#include <unistd.h>
 #include <cassert>
 #include <cppunit/extensions/HelperMacros.h>
+#include <dlfcn.h>
+#include <iostream>
+#include <unistd.h>
 
 class tokenizer_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(tokenizer_test);
@@ -13,7 +13,7 @@ class tokenizer_test : public CPPUNIT_NS::TestFixture {
     void test_tokens();
     void test_unsaved_tokens();
 
-    void* m_handle;
+    void* m_handle = nullptr;
 
   public:
     tokenizer_test();
@@ -24,7 +24,7 @@ class tokenizer_test : public CPPUNIT_NS::TestFixture {
     void tearDown() override;
 };
 
-tokenizer_test::tokenizer_test() : m_handle(nullptr) {}
+tokenizer_test::tokenizer_test() = default;
 
 void tokenizer_test::setUp() {
     m_handle = dlopen("lib/libclang-vim.so", RTLD_NOW);

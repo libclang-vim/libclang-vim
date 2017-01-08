@@ -1,8 +1,8 @@
-#include <iostream>
-#include <dlfcn.h>
-#include <unistd.h>
 #include <cassert>
 #include <cppunit/extensions/HelperMacros.h>
+#include <dlfcn.h>
+#include <iostream>
+#include <unistd.h>
 
 class deduction_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(deduction_test);
@@ -45,7 +45,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture {
     void test_unsaved_diagnostics();
     void test_full_name_at();
 
-    void* m_handle;
+    void* m_handle = nullptr;
 
   public:
     deduction_test();
@@ -56,7 +56,7 @@ class deduction_test : public CPPUNIT_NS::TestFixture {
     void tearDown() override;
 };
 
-deduction_test::deduction_test() : m_handle(nullptr) {}
+deduction_test::deduction_test() = default;
 
 void deduction_test::setUp() {
     m_handle = dlopen("lib/libclang-vim.so", RTLD_NOW);

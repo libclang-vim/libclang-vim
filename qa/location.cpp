@@ -1,8 +1,8 @@
-#include <iostream>
-#include <dlfcn.h>
-#include <unistd.h>
 #include <cassert>
 #include <cppunit/extensions/HelperMacros.h>
+#include <dlfcn.h>
+#include <iostream>
+#include <unistd.h>
 
 class location_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(location_test);
@@ -21,7 +21,7 @@ class location_test : public CPPUNIT_NS::TestFixture {
     void test_extent();
     void test_unsaved_extent();
 
-    void* m_handle;
+    void* m_handle = nullptr;
 
   public:
     location_test();
@@ -32,7 +32,7 @@ class location_test : public CPPUNIT_NS::TestFixture {
     void tearDown() override;
 };
 
-location_test::location_test() : m_handle(nullptr) {}
+location_test::location_test() = default;
 
 void location_test::setUp() {
     m_handle = dlopen("lib/libclang-vim.so", RTLD_NOW);
