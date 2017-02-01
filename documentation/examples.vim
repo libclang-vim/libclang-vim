@@ -34,7 +34,7 @@ function! ClangInspectFunction()
     let l:file_name = expand('%:p') . '#' . l:temp_file
     let l:info = libclang#deduction#current_function_at(l:file_name, line('.'), col('.'), l:compiler_args.commands)
     call delete(l:temp_file)
-    echo l:info.name
+    echo l:info.name . '()'
 endfunction
 
 " Example for libclang#deduction#full_name_at().
