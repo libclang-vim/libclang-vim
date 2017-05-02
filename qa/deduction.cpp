@@ -79,7 +79,11 @@ void deduction_test::test_get_type_with_deduction_at() {
             dlsym(m_handle, "vim_clang_get_type_with_deduction_at"));
     assert(vim_clang_get_type_with_deduction_at);
 
+#if (__clang_major__ == 3 && __clang_minor__ > 7) || __clang_major__ > 3
+    std::string expected_prefix("{'type':'const std::basic_string<char> &'");
+#else
     std::string expected_prefix("{'type':'const std::basic_string<char>'");
+#endif
     std::string actual(vim_clang_get_type_with_deduction_at(
         "qa/data/auto.cpp:-std=c++1y:5:19"));
     CPPUNIT_ASSERT_EQUAL(
@@ -92,7 +96,11 @@ void deduction_test::test_unsaved_get_type_with_deduction_at() {
             dlsym(m_handle, "vim_clang_get_type_with_deduction_at"));
     assert(vim_clang_get_type_with_deduction_at);
 
+#if (__clang_major__ == 3 && __clang_minor__ > 7) || __clang_major__ > 3
+    std::string expected_prefix("{'type':'const std::basic_string<char> &'");
+#else
     std::string expected_prefix("{'type':'const std::basic_string<char>'");
+#endif
     chdir("qa/data/unsaved");
     std::string actual(vim_clang_get_type_with_deduction_at(
         "auto.cpp#../auto.cpp:-std=c++1y:5:19"));
