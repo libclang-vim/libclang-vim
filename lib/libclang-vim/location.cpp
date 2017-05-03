@@ -22,9 +22,8 @@ libclang_vim::get_extent(const libclang_vim::location_tuple& location_info,
             const CXCursor rc = search_AST_upward(c, predicate);
             if (clang_Cursor_isNull(rc)) {
                 return "{}";
-            } else {
-                return "{" + stringize_extent(rc) + "}";
             }
+            return "{" + stringize_extent(rc) + "}";
         });
 };
 
@@ -36,11 +35,10 @@ const char* libclang_vim::get_related_node_of(
             CXCursor const rc = predicate(c);
             if (clang_isInvalid(clang_getCursorKind(rc))) {
                 return "{}";
-            } else {
-                return "{" +
-                       stringize_cursor(rc, clang_getCursorSemanticParent(rc)) +
-                       "}";
             }
+            return "{" +
+                   stringize_cursor(rc, clang_getCursorSemanticParent(rc)) +
+                   "}";
         });
 }
 
@@ -52,9 +50,8 @@ const char* libclang_vim::get_type_related_to(
             CXType const type = predicate(clang_getCursorType(c));
             if (type.kind == CXType_Invalid) {
                 return "{}";
-            } else {
-                return "{" + stringize_type(type) + "}";
             }
+            return "{" + stringize_type(type) + "}";
         });
 }
 

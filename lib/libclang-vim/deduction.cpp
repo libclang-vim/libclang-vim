@@ -102,10 +102,10 @@ CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor,
     if (type.kind == CXType_Invalid || is_auto_type(to_c_str(type_name))) {
         clang_visitChildren(cursor, unexposed_type_deducer, data);
         return CXChildVisit_Continue;
-    } else {
-        *(reinterpret_cast<CXType*>(data)) = type;
-        return CXChildVisit_Break;
     }
+
+    *(reinterpret_cast<CXType*>(data)) = type;
+    return CXChildVisit_Break;
 }
 
 CXType deduce_func_decl_type_at_cursor(CXCursor const& cursor) {
@@ -151,9 +151,8 @@ CXType deduce_type_at_cursor(const CXCursor& cursor) {
         deduced_type.kind = CXType_Invalid;
         clang_visitChildren(cursor, unexposed_type_deducer, &deduced_type);
         return deduced_type;
-    } else {
-        return type;
     }
+    return type;
 }
 }
 

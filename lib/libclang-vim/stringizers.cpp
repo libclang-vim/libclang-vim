@@ -104,27 +104,25 @@ std::string libclang_vim::stringize_cursor_location(CXCursor const& cursor) {
 }
 
 std::string libclang_vim::stringize_cursor_kind_type(CXCursorKind const& kind) {
-    if (clang_isAttribute(kind)) {
+    if (clang_isAttribute(kind))
         return "Attribute";
-    } else if (clang_isDeclaration(kind)) {
+    if (clang_isDeclaration(kind))
         return "Declaration";
-    } else if (clang_isExpression(kind)) {
+    if (clang_isExpression(kind))
         return "Expression";
-    } else if (clang_isPreprocessing(kind)) {
+    if (clang_isPreprocessing(kind))
         return "Preprocessing";
-    } else if (clang_isReference(kind)) {
+    if (clang_isReference(kind))
         return "Reference";
-    } else if (clang_isStatement(kind)) {
+    if (clang_isStatement(kind))
         return "Statement";
-    } else if (clang_isTranslationUnit(kind)) {
+    if (clang_isTranslationUnit(kind))
         return "TranslationUnit";
-    } else if (clang_isUnexposed(kind)) {
+    if (clang_isUnexposed(kind))
         return "Unexposed";
-    } else if (clang_isInvalid(kind)) {
+    if (clang_isInvalid(kind))
         return "";
-    } else {
-        return "Unknown";
-    }
+    return "Unknown";
 }
 
 std::string libclang_vim::stringize_cursor_extra_info(CXCursor const& cursor) {
@@ -209,12 +207,10 @@ std::string libclang_vim::stringize_range(CXSourceRange const& range) {
 
 std::string libclang_vim::stringize_extent(CXCursor const& cursor) {
     auto const r = clang_getCursorExtent(cursor);
-    if (clang_Range_isNull(r)) {
+    if (clang_Range_isNull(r))
         return "";
-    } else {
-        return "'start':{" + stringize_location(clang_getRangeStart(r)) +
-               "},'end':{" + stringize_location(clang_getRangeEnd(r)) + "}";
-    }
+    return "'start':{" + stringize_location(clang_getRangeStart(r)) +
+           "},'end':{" + stringize_location(clang_getRangeEnd(r)) + "}";
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

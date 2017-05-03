@@ -79,16 +79,14 @@ std::string libclang_vim::stringize_key_value(const char* key_name,
     const auto* cstring = clang_getCString(p);
     if (!cstring || std::strcmp(cstring, "") == 0)
         return "";
-    else
-        return "'" + std::string{key_name} + "':'" + cstring + "',";
+    return "'" + std::string{key_name} + "':'" + cstring + "',";
 }
 
 std::string libclang_vim::stringize_key_value(const char* key_name,
                                               const std::string& s) {
     if (s.empty())
         return "";
-    else
-        return "'" + (key_name + ("':'" + s + "',"));
+    return "'" + (key_name + ("':'" + s + "',"));
 }
 
 bool libclang_vim::is_class_decl_kind(const CXCursorKind& kind) {
@@ -157,10 +155,8 @@ libclang_vim::parse_default_args(const std::string& args_string) {
     extract_unsaved_file(info);
     if (path_end + 1 == end)
         return info;
-    else {
-        info.args = parse_compiler_args({path_end + 1, end});
-        return info;
-    }
+    info.args = parse_compiler_args({path_end + 1, end});
+    return info;
 }
 
 libclang_vim::location_tuple::location_tuple() : line(0), col(0) {}
