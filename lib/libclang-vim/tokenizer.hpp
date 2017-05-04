@@ -14,7 +14,7 @@ class tokenizer {
     CXSourceRange
     get_range_whole_file(const location_tuple& tuple,
                          const cxtranslation_unit_ptr& translation_unit) const;
-    const char* get_kind_spelling(const CXTokenKind kind) const;
+    const char* get_kind_spelling(CXTokenKind kind) const;
     std::string
     make_vimson_from_tokens(const cxtranslation_unit_ptr& translation_unit,
                             std::vector<CXToken> tokens) const;

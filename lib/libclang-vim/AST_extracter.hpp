@@ -1,8 +1,8 @@
 #if !defined LIBCLANG_VIM_AST_EXTRACTER_HPP_INCLUDED
 #define LIBCLANG_VIM_AST_EXTRACTER_HPP_INCLUDED
 
-#include <tuple>
 #include <string>
+#include <tuple>
 
 #include <clang-c/Index.h>
 
@@ -18,7 +18,7 @@ enum struct extraction_policy {
 };
 
 const char*
-extract_AST_nodes(char const* arguments, extraction_policy const policy,
+extract_AST_nodes(char const* arguments, extraction_policy policy,
                   const std::function<bool(const CXCursor&)>& predicate);
 
 } // namespace libclang_vim

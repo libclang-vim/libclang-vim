@@ -58,7 +58,8 @@ libclang_vim::args_type parse_compilation_database(const std::string& file) {
     return ret;
 }
 
-CXChildVisitResult valid_type_cursor_getter(CXCursor cursor, CXCursor,
+CXChildVisitResult valid_type_cursor_getter(CXCursor cursor,
+                                            CXCursor /*unused*/,
                                             CXClientData data) {
     auto const type = clang_getCursorType(cursor);
     if (type.kind != CXType_Invalid) {
@@ -95,7 +96,7 @@ bool is_auto_type(const std::string& type_name) {
     return false;
 }
 
-CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor,
+CXChildVisitResult unexposed_type_deducer(CXCursor cursor, CXCursor /*unused*/,
                                           CXClientData data) {
     const auto type = clang_getCursorType(cursor);
     libclang_vim::cxstring_ptr type_name = clang_getTypeSpelling(type);

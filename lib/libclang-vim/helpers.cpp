@@ -5,7 +5,7 @@ namespace {
 using DataType =
     std::pair<CXCursor, const std::function<bool(const CXCursorKind&)>&>;
 
-CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor,
+CXChildVisitResult search_kind_visitor(CXCursor cursor, CXCursor /*unused*/,
                                        CXClientData data) {
     auto const kind = clang_getCursorKind(cursor);
     if ((reinterpret_cast<DataType*>(data)->second(kind))) {
