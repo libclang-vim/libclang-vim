@@ -204,7 +204,7 @@ libclang_vim::parse_args_with_location(const std::string& args_string) {
 
     auto const default_args =
         parse_default_args({std::begin(args_string), second_colon});
-    if (default_args.file == "") {
+    if (default_args.file.empty()) {
         return location_tuple();
     }
 
