@@ -159,7 +159,7 @@ libclang_vim::parse_default_args(const std::string& args_string) {
     return info;
 }
 
-libclang_vim::location_tuple::location_tuple() : line(0), col(0) {}
+libclang_vim::location_tuple::location_tuple() = default;
 
 std::vector<CXUnsavedFile>
 libclang_vim::create_unsaved_files(const location_tuple& location_info) {

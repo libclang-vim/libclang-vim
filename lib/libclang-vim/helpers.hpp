@@ -1,16 +1,16 @@
 #if !defined LIBCLANG_VIM_HELPERS_HPP_INCLUDED
 #define LIBCLANG_VIM_HELPERS_HPP_INCLUDED
 
-#include <cstring>
-#include <cstddef>
-#include <string>
-#include <memory>
-#include <fstream>
 #include <algorithm>
-#include <vector>
-#include <sstream>
+#include <cstddef>
+#include <cstring>
+#include <fstream>
 #include <iterator>
+#include <memory>
+#include <sstream>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include <clang-c/Index.h>
 
@@ -89,8 +89,8 @@ class location_tuple {
     /// Contents of the unsaved buffer of file.
     std::vector<char> unsaved_file;
     args_type args;
-    size_t line;
-    size_t col;
+    size_t line = 0;
+    size_t col = 0;
 
     location_tuple();
 };
