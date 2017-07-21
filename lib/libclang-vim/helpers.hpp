@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstring>
 #include <fstream>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <sstream>
