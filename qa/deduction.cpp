@@ -6,8 +6,8 @@
 
 class deduction_test : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(deduction_test);
-    CPPUNIT_TEST(test_get_type_with_deduction_at);
-    CPPUNIT_TEST(test_unsaved_get_type_with_deduction_at);
+    // CPPUNIT_TEST(test_get_type_with_deduction_at);
+    // CPPUNIT_TEST(test_unsaved_get_type_with_deduction_at);
     CPPUNIT_TEST(test_current_function_at);
     CPPUNIT_TEST(test_current_function_at_ctor_dtor);
     CPPUNIT_TEST(test_current_function_at_incomplete_type);
